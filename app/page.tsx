@@ -1,7 +1,7 @@
-use client
+"use client";
 
 import { useState } from "react"
-import { Send, ArrowDownToLine, Plus, ArrowUpFromLine, CreditCard, Wallet, Bell, Home, UserRound, ShieldCheck, Settings, ChevronRight, Menu, X, Zap, Eye, EyeOff, Globe2 } from "lucide-react"
+import { Send, ArrowDownToLine, Plus, ArrowUpFromLine, CreditCard, Wallet, Bell, UserRound, ShieldCheck, Settings, ChevronRight, Menu, X, Zap, Eye, EyeOff, Globe2 } from "lucide-react"
 
 export default function Home() {
   const [showBalance, setShowBalance] = useState(true)
