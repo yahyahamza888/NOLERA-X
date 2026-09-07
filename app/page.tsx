@@ -33,19 +33,19 @@ export default function Home() {
   const [page, setPage] = useState<Page>("Overview");
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white">
-      <header className="sticky top-0 z-20 border-b border-white/10 bg-slate-950/95 backdrop-blur">
+    <main className="min-h-screen bg-[#071417] text-white">
+      <header className="sticky top-0 z-20 border-b border-cyan-100/10 bg-[#071417]/95 backdrop-blur">
         <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-4">
           <button
             onClick={() => setPage("Overview")}
             className="text-2xl font-black"
           >
-            NOLERA <span className="text-blue-500">X</span>
+            NOLERA <span className="text-cyan-300">X</span>
           </button>
 
           <button
             onClick={() => setPage("Notifications")}
-            className="rounded-xl border border-white/10 px-4 py-2 hover:bg-white/5"
+            className="rounded-xl border border-cyan-100/10 px-4 py-2 hover:bg-white/5"
           >
             🔔 Notifications
           </button>
@@ -53,14 +53,14 @@ export default function Home() {
       </header>
 
       <div className="mx-auto flex max-w-7xl flex-col md:flex-row">
-        <aside className="border-b border-white/10 p-3 md:min-h-[calc(100vh-73px)] md:w-64 md:border-b-0 md:border-r">
+        <aside className="border-b border-cyan-100/10 p-3 md:min-h-[calc(100vh-73px)] md:w-64 md:border-b-0 md:border-r">
           {menu.map((item) => (
             <button
               key={item}
               onClick={() => setPage(item)}
               className={`mb-1 w-full rounded-xl px-4 py-3 text-left text-sm ${
                 page === item
-                  ? "bg-blue-600"
+                  ? "bg-cyan-500"
                   : "text-slate-300 hover:bg-white/5"
               }`}
             >
@@ -97,7 +97,7 @@ export default function Home() {
         </section>
       </div>
 
-      <footer className="border-t border-white/10 p-6 text-center text-sm text-slate-500">
+      <footer className="border-t border-cyan-100/10 p-6 text-center text-sm text-slate-500">
         NOLERA X © 2026 • Investor Prototype • Services subject to applicable
         licensing, regulation and compliance requirements.
       </footer>
@@ -121,8 +121,8 @@ function Overview({ go }: { go: (p: Page) => void }) {
         <Card title="Pending" value="$2,630.00" />
       </div>
 
-      <div className="mt-7 rounded-3xl border border-white/10 bg-white/5 p-6">
-        <p className="text-sm uppercase tracking-widest text-blue-400">
+      <div className="mt-7 rounded-3xl border border-cyan-100/10 bg-white/5 p-6">
+        <p className="text-sm uppercase tracking-widest text-cyan-300">
           NOLERA ID
         </p>
         <h2 className="mt-2 text-2xl font-bold">NX-DEMO-2048</h2>
@@ -136,7 +136,7 @@ function Overview({ go }: { go: (p: Page) => void }) {
           <button
             key={a}
             onClick={() => go(a)}
-            className="rounded-2xl border border-white/10 bg-white/5 p-5 text-left hover:bg-white/10"
+            className="rounded-2xl border border-cyan-100/10 bg-white/5 p-5 text-left hover:bg-white/10"
           >
             <b>{a}</b>
             <p className="mt-2 text-sm text-slate-400">
@@ -149,7 +149,7 @@ function Overview({ go }: { go: (p: Page) => void }) {
       <div className="mt-7 grid gap-4 md:grid-cols-2">
         <button
           onClick={() => go("KYC & Verification")}
-          className="rounded-3xl border border-white/10 bg-white/5 p-6 text-left hover:bg-white/10"
+          className="rounded-3xl border border-cyan-100/10 bg-white/5 p-6 text-left hover:bg-white/10"
         >
           <h2 className="text-xl font-bold">Identity & KYC</h2>
           <p className="mt-2 text-slate-400">
@@ -159,7 +159,7 @@ function Overview({ go }: { go: (p: Page) => void }) {
 
         <button
           onClick={() => go("Security")}
-          className="rounded-3xl border border-white/10 bg-white/5 p-6 text-left hover:bg-white/10"
+          className="rounded-3xl border border-cyan-100/10 bg-white/5 p-6 text-left hover:bg-white/10"
         >
           <h2 className="text-xl font-bold">Security Center</h2>
           <p className="mt-2 text-slate-400">
@@ -173,7 +173,7 @@ function Overview({ go }: { go: (p: Page) => void }) {
 
 function Card({ title, value }: { title: string; value: string }) {
   return (
-    <div className="rounded-3xl border border-white/10 bg-white/5 p-6">
+    <div className="rounded-3xl border border-cyan-100/10 bg-white/5 p-6">
       <p className="text-sm text-slate-400">{title}</p>
       <p className="mt-3 text-2xl font-bold">{value}</p>
     </div>
@@ -182,8 +182,8 @@ function Card({ title, value }: { title: string; value: string }) {
 
 function Form({ title, fields }: { title: string; fields: string[] }) {
   return (
-    <div className="mt-7 max-w-2xl rounded-3xl border border-white/10 bg-white/5 p-6">
-      <div className="mb-6 rounded-2xl border border-yellow-500/20 bg-yellow-500/5 p-4 text-sm text-yellow-300">
+    <div className="mt-7 max-w-2xl rounded-3xl border border-cyan-100/10 bg-white/5 p-6">
+      <div className="mb-6 rounded-2xl border border-lime-300/20 bg-lime-300/5 p-4 text-sm text-lime-200">
         Demo workflow — no real financial transaction is executed.
       </div>
 
@@ -194,7 +194,7 @@ function Form({ title, fields }: { title: string; fields: string[] }) {
           </span>
           <input
             placeholder={field}
-            className="w-full rounded-xl border border-white/10 bg-slate-900 px-4 py-3 outline-none focus:border-blue-500"
+            className="w-full rounded-xl border border-cyan-100/10 bg-slate-900 px-4 py-3 outline-none focus:border-cyan-400"
           />
         </label>
       ))}
@@ -203,7 +203,7 @@ function Form({ title, fields }: { title: string; fields: string[] }) {
         onClick={() =>
           alert("Demo only — no real financial transaction is executed.")
         }
-        className="rounded-xl bg-blue-600 px-6 py-3 font-semibold hover:bg-blue-500"
+        className="rounded-xl bg-cyan-500 px-6 py-3 font-semibold hover:bg-cyan-400"
       >
         Continue
       </button>
@@ -214,7 +214,7 @@ function Form({ title, fields }: { title: string; fields: string[] }) {
 function Cards() {
   return (
     <Box title="Cards">
-      <div className="rounded-3xl bg-gradient-to-br from-blue-700 to-slate-900 p-7">
+      <div className="rounded-3xl bg-gradient-to-br from-cyan-600 to-slate-900 p-7">
         <p className="text-sm">NOLERA X</p>
         <p className="mt-12 text-2xl tracking-[5px]">
           •••• •••• •••• 4821
@@ -227,7 +227,7 @@ function Cards() {
 
       <button
         onClick={() => alert("Card management demo")}
-        className="mt-5 rounded-xl bg-blue-600 px-5 py-3"
+        className="mt-5 rounded-xl bg-cyan-500 px-5 py-3"
       >
         Manage Card
       </button>
@@ -246,7 +246,7 @@ function Transactions() {
       ].map((x) => (
         <div
           key={x}
-          className="flex justify-between border-b border-white/10 py-4"
+          className="flex justify-between border-b border-cyan-100/10 py-4"
         >
           <span>{x}</span>
           <span className="text-slate-500">Demo</span>
@@ -265,7 +265,7 @@ function Notifications() {
         "New security alert",
         "Transfer status updated",
       ].map((x) => (
-        <div key={x} className="border-b border-white/10 py-4">
+        <div key={x} className="border-b border-cyan-100/10 py-4">
           <b>{x}</b>
           <p className="text-sm text-slate-500">
             Today • Demo notification
@@ -292,16 +292,16 @@ function KYC() {
       ].map((x) => (
         <div
           key={x}
-          className="mt-4 rounded-xl border border-white/10 p-4"
+          className="mt-4 rounded-xl border border-cyan-100/10 p-4"
         >
           {x}
-          <span className="float-right text-yellow-400">Pending</span>
+          <span className="float-right text-lime-200">Pending</span>
         </div>
       ))}
 
       <button
         onClick={() => alert("KYC demo workflow")}
-        className="mt-6 rounded-xl bg-blue-600 px-6 py-3"
+        className="mt-6 rounded-xl bg-cyan-500 px-6 py-3"
       >
         Start Verification
       </button>
@@ -320,10 +320,10 @@ function Security() {
       ].map((x) => (
         <div
           key={x}
-          className="mb-3 flex justify-between rounded-xl border border-white/10 p-4"
+          className="mb-3 flex justify-between rounded-xl border border-cyan-100/10 p-4"
         >
           <span>{x}</span>
-          <span className="text-green-400">Enabled</span>
+          <span className="text-emerald-400">Enabled</span>
         </div>
       ))}
     </Box>
@@ -345,7 +345,7 @@ function Settings() {
         <button
           key={x}
           onClick={() => alert(`${x} — demo settings module`)}
-          className="mb-3 block w-full rounded-xl border border-white/10 p-4 text-left hover:bg-white/5"
+          className="mb-3 block w-full rounded-xl border border-cyan-100/10 p-4 text-left hover:bg-white/5"
         >
           {x}
         </button>
@@ -362,7 +362,7 @@ function Box({
   children: React.ReactNode;
 }) {
   return (
-    <div className="mt-7 max-w-3xl rounded-3xl border border-white/10 bg-white/5 p-6">
+    <div className="mt-7 max-w-3xl rounded-3xl border border-cyan-100/10 bg-white/5 p-6">
       <h2 className="mb-5 text-xl font-bold">{title}</h2>
       {children}
     </div>
