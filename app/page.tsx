@@ -398,6 +398,35 @@ export default function Home() {
           </div>
         </section>
       </div>
+      <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-purple-200/20 bg-white/95 px-2 py-2 backdrop-blur-xl dark:bg-[#17101d]/95 lg:hidden">
+        <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
+          <Link href="/" className="flex flex-col items-center gap-1 rounded-xl px-1 py-2 text-[11px] font-semibold text-purple-600">
+            <HomeIcon size={20} />
+            <span>الرئيسية</span>
+          </Link>
+
+          <Link href="/wallet" className="flex flex-col items-center gap-1 rounded-xl px-1 py-2 text-[11px] font-semibold text-slate-600 dark:text-white/70">
+            <Wallet size={20} />
+            <span>المحفظة</span>
+          </Link>
+
+          <Link href="/transfers" className="flex flex-col items-center gap-1 rounded-xl px-1 py-2 text-[11px] font-semibold text-slate-600 dark:text-white/70">
+            <Send size={20} />
+            <span>تحويل</span>
+          </Link>
+
+          <Link href="/bills" className="flex flex-col items-center gap-1 rounded-xl px-1 py-2 text-[11px] font-semibold text-slate-600 dark:text-white/70">
+            <Zap size={20} />
+            <span>خدمات</span>
+          </Link>
+
+          <Link href="/profile" className="flex flex-col items-center gap-1 rounded-xl px-1 py-2 text-[11px] font-semibold text-slate-600 dark:text-white/70">
+            <UserRound size={20} />
+            <span>حسابي</span>
+          </Link>
+        </div>
+      </nav>
+
     </main>
   )
 }
