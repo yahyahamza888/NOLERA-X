@@ -30,6 +30,9 @@ export default function Home() {
   }
 
   return (
+
+
+
     <main
       dir={language === "ar" ? "rtl" : "ltr"}
       lang={language}
@@ -138,7 +141,7 @@ export default function Home() {
 
         </aside>
 
-        <section className="min-w-0 flex-1">
+        <section className="min-w-0 flex-1 pb-24 lg:pb-0">
 
           <header className="border-b border-purple-100/10 bg-slate-50/90 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-10">
             <div className="mx-auto flex max-w-7xl items-center justify-between">
@@ -209,7 +212,24 @@ export default function Home() {
 
               </div>
 
-            </section>
+            
+          <section className="mb-5 flex items-center justify-between rounded-3xl border border-purple-200/20 bg-white/80 p-4 shadow-sm backdrop-blur dark:border-purple-300/10 dark:bg-[#211628]/80">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center overflow-hidden rounded-full bg-gradient-to-br from-purple-500 to-fuchsia-500 text-lg font-bold text-white">
+                Y
+              </div>
+              <div className="min-w-0">
+                <p className="text-xs text-slate-500 dark:text-white/50">مرحباً بك</p>
+                <p className="truncate text-base font-bold text-slate-900 dark:text-white">يحيى</p>
+                <p className="truncate text-[11px] text-slate-500 dark:text-white/40">حساب NOLERA X</p>
+              </div>
+            </div>
+            <Link href="/profile" className="rounded-xl px-3 py-2 text-xs font-semibold text-purple-600 hover:bg-purple-50 dark:hover:bg-white/5">
+              حسابي
+            </Link>
+          </section>
+
+</section>
 
             <section className="mt-8">
               <div className="mb-4">
@@ -295,7 +315,7 @@ export default function Home() {
                         {tx[0]}
                       </div>
 
-                      <div className="min-w-0 flex-1">
+                      <div className="min-w-0 flex-1 pb-24 lg:pb-0">
                         <div className="truncate text-sm font-medium">
                           {tx[1]}
                         </div>
@@ -321,7 +341,7 @@ export default function Home() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-xs uppercase tracking-[0.2em] text-white/30">
-                      Your Card
+                      بطاقتك
                     </p>
                     <h2 className="mt-1 text-xl font-semibold">
                       NOLERA X Card
