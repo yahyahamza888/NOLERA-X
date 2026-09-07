@@ -2,6 +2,7 @@
 
 import { financeState, getTransactions } from "../lib/finance"
 import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { translations, languages, type Language } from "../lib/translations"
 import { Home as HomeIcon, Send, ArrowDownToLine, Plus, ArrowUpFromLine, CreditCard, Wallet, Bell, UserRound, ShieldCheck, Settings, ChevronRight, Menu, X, Zap, Eye, EyeOff, Globe2 } from "lucide-react"
@@ -19,6 +20,8 @@ export default function Home() {
   const t = translations[language as keyof typeof translations] ?? translations.ar
   const languageNames = languages
   const [mobileOpen, setMobileOpen] = useState(false)
+  const [darkMode, setDarkMode] = useState(false)
+  const router = useRouter()
 
   const changeLanguage = (next: Language) => {
     setLanguage(next)
@@ -27,18 +30,24 @@ export default function Home() {
   }
 
   return (
-    <main dir={language === "ar" ? "rtl" : "ltr"} lang={language} className="min-h-screen bg-slate-50 text-slate-900">
+    <main
+      dir={language === "ar" ? "rtl" : "ltr"}
+      lang={language}
+      className={`min-h-screen transition-colors duration-300 ${
+        darkMode ? "bg-[#17101f] text-white" : "bg-[#faf7ff] text-[#30243b]"
+      }`}
+    >
       <div className="flex min-h-screen">
 
-        <div className="flex flex-col items-center justify-center py-2"><svg viewBox="0 0 120 45" className="h-10 w-28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 24C22 8 34 8 48 22C61 35 72 35 86 20C96 10 105 10 115 17" stroke="#22D3EE" strokeWidth="5" strokeLinecap="round"/><path d="M8 31C25 20 37 20 50 30C63 40 76 39 90 28C99 21 107 21 114 25" stroke="#84CC16" strokeWidth="3" strokeLinecap="round"/></svg><span className="text-lg font-black tracking-[0.22em] text-amber-500">NOLERA X</span></div>\n\n        <aside className={`${mobileOpen ? "translate-x-0" : "-translate-x-full"} fixed inset-y-0 left-0 z-50 w-72 border-r border-cyan-100/10 bg-[#081b1f] p-5 transition-transform lg:static lg:translate-x-0`}>
+        <div className="flex flex-col items-center justify-center py-2"><svg viewBox="0 0 120 45" className="h-10 w-28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 24C22 8 34 8 48 22C61 35 72 35 86 20C96 10 105 10 115 17" stroke="#22D3EE" strokeWidth="5" strokeLinecap="round"/><path d="M8 31C25 20 37 20 50 30C63 40 76 39 90 28C99 21 107 21 114 25" stroke="#84CC16" strokeWidth="3" strokeLinecap="round"/></svg><span className="text-lg font-black tracking-[0.22em] text-amber-500">NOLERA X</span></div>\n\n        <aside className={`${mobileOpen ? "translate-x-0" : "translate-x-full"} fixed inset-y-0 right-0 z-50 w-72 border-l border-purple-100/10 bg-[#321d45] p-5 transition-transform lg:static lg:translate-x-0`}>
 
           <div className="flex items-center gap-3">
-            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-600">
+            <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-400/10 text-purple-600">
               <Zap size={23} />
             </div>
             <div>
               <div className="text-lg font-bold">NOLERA X</div>
-              <div className="text-[10px] uppercase tracking-[0.25em] text-cyan-600/60">
+              <div className="text-[10px] uppercase tracking-[0.25em] text-purple-600/60">
                 Digital Finance
               </div>
             </div>
@@ -49,7 +58,7 @@ export default function Home() {
           </p>
 
           <nav className="mt-3 space-y-2">
-            <Link href="/" className="flex w-full items-center gap-3 rounded-2xl bg-cyan-400/10 px-4 py-3 text-sm text-cyan-200">
+            <Link href="/" className="flex w-full items-center gap-3 rounded-2xl bg-purple-400/10 px-4 py-3 text-sm text-purple-200">
               <HomeIcon size={18} />
               Overview
             </Link>
@@ -131,11 +140,11 @@ export default function Home() {
 
         <section className="min-w-0 flex-1">
 
-          <header className="border-b border-cyan-100/10 bg-slate-50/90 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-10">
+          <header className="border-b border-purple-100/10 bg-slate-50/90 px-4 py-4 backdrop-blur-xl sm:px-6 lg:px-10">
             <div className="mx-auto flex max-w-7xl items-center justify-between">
 
               <div className="flex items-center gap-3">
-                <button onClick={() => setMobileOpen(true)} className="rounded-xl border border-white/10 p-2 lg:hidden">
+                <button onClick={() => setMobileOpen(true)} className="order-first rounded-xl border border-purple-200 bg-white p-2 text-purple-700 shadow-sm lg:hidden">
                   <Menu size={20} />
                 </button>
 
@@ -149,12 +158,12 @@ export default function Home() {
                   <Link href="/login" className="rounded-xl border border-white/10 px-4 py-2 text-sm font-medium text-white/80 hover:bg-white/5">
                     Login
                   </Link>
-                  <Link href="/register" className="rounded-xl bg-cyan-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-cyan-300">
+                  <Link href="/register" className="rounded-xl bg-purple-400 px-4 py-2 text-sm font-bold text-slate-950 hover:bg-purple-300">
                     Register
                   </Link>
                   <button className="relative rounded-2xl border border-white/10 p-3 text-white/60">
                     <Bell size={19} />
-                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-lime-300" />
+                    <span className="absolute right-2 top-2 h-2 w-2 rounded-full bg-fuchsia-300" />
                   </button>
                 </div>
 
@@ -163,7 +172,7 @@ export default function Home() {
 
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-10">
 
-            <section className="rounded-[30px] border border-cyan-300/15 bg-gradient-to-br from-cyan-600/20 via-[#0b2529] to-emerald-500/10 p-6 sm:p-8">
+            <section className="rounded-[30px] border border-purple-300/15 bg-gradient-to-br from-purple-600/20 via-[#4b2861] to-violet-500/10 p-6 sm:p-8">
 
               <div className="flex flex-wrap items-center justify-between gap-5">
 
@@ -183,7 +192,7 @@ export default function Home() {
                     </button>
                   </div>
 
-                  <div className="mt-3 text-sm text-emerald-300">
+                  <div className="mt-3 text-sm text-violet-300">
                     +8.4% this month
                   </div>
                 </div>
@@ -204,7 +213,7 @@ export default function Home() {
 
             <section className="mt-8">
               <div className="mb-4">
-                <p className="text-xs uppercase tracking-[0.2em] text-cyan-600/60">
+                <p className="text-xs uppercase tracking-[0.2em] text-purple-600/60">
                   Quick Actions
                 </p>
                 <h2 className="mt-1 text-xl font-semibold">
@@ -214,40 +223,40 @@ export default function Home() {
 
               <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
 
-                <Link href="/add-money" className="group rounded-3xl border border-cyan-300/15 bg-white/[0.025] p-5 text-left transition hover:-translate-y-1 hover:border-cyan-300/30 hover:bg-cyan-300/[0.05]">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-600">
+                <Link href="/add-money" className="group rounded-3xl border border-purple-300/15 bg-white/[0.025] p-5 text-left transition hover:-translate-y-1 hover:border-purple-300/30 hover:bg-purple-300/[0.05]">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-400/10 text-purple-600">
                     <Send size={25} />
                   </div>
                   <h3 className="mt-5 font-semibold">Send Money</h3>
                   <p className="mt-1 text-xs text-white/35">Transfer instantly</p>
-                  <ChevronRight className="mt-4 text-white/20 group-hover:text-cyan-600" size={18} />
+                  <ChevronRight className="mt-4 text-white/20 group-hover:text-purple-600" size={18} />
                 </Link>
 
-                <Link href="/transfers" className="group rounded-3xl border border-emerald-300/15 bg-white/[0.025] p-5 text-left transition hover:-translate-y-1 hover:border-emerald-300/30 hover:bg-emerald-300/[0.05]">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-300">
+                <Link href="/transfers" className="group rounded-3xl border border-violet-300/15 bg-white/[0.025] p-5 text-left transition hover:-translate-y-1 hover:border-violet-300/30 hover:bg-violet-300/[0.05]">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-violet-400/10 text-violet-300">
                     <ArrowDownToLine size={25} />
                   </div>
                   <h3 className="mt-5 font-semibold">Receive Money</h3>
                   <p className="mt-1 text-xs text-white/35">Get paid securely</p>
-                  <ChevronRight className="mt-4 text-white/20 group-hover:text-emerald-300" size={18} />
+                  <ChevronRight className="mt-4 text-white/20 group-hover:text-violet-300" size={18} />
                 </Link>
 
-                <Link href="/transfers" className="group rounded-3xl border border-cyan-300/15 bg-white/[0.025] p-5 text-left transition hover:-translate-y-1 hover:border-cyan-300/30 hover:bg-cyan-300/[0.05]">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-200">
+                <Link href="/transfers" className="group rounded-3xl border border-purple-300/15 bg-white/[0.025] p-5 text-left transition hover:-translate-y-1 hover:border-purple-300/30 hover:bg-purple-300/[0.05]">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-purple-400/10 text-purple-200">
                     <Plus size={25} />
                   </div>
                   <h3 className="mt-5 font-semibold">Add Money</h3>
                   <p className="mt-1 text-xs text-white/35">Fund your account</p>
-                  <ChevronRight className="mt-4 text-white/20 group-hover:text-cyan-200" size={18} />
+                  <ChevronRight className="mt-4 text-white/20 group-hover:text-purple-200" size={18} />
                 </Link>
 
-                <Link href="/withdraw" className="group rounded-3xl border border-lime-300/15 bg-white/[0.025] p-5 text-left transition hover:-translate-y-1 hover:border-lime-300/30 hover:bg-lime-300/[0.05]">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-lime-300/10 text-lime-600">
+                <Link href="/withdraw" className="group rounded-3xl border border-fuchsia-300/15 bg-white/[0.025] p-5 text-left transition hover:-translate-y-1 hover:border-fuchsia-300/30 hover:bg-fuchsia-300/[0.05]">
+                  <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-fuchsia-300/10 text-fuchsia-600">
                     <ArrowUpFromLine size={25} />
                   </div>
                   <h3 className="mt-5 font-semibold">Withdraw</h3>
                   <p className="mt-1 text-xs text-white/35">Move funds out</p>
-                  <ChevronRight className="mt-4 text-white/20 group-hover:text-lime-600" size={18} />
+                  <ChevronRight className="mt-4 text-white/20 group-hover:text-fuchsia-600" size={18} />
                 </Link>
 
               </div>
@@ -267,7 +276,7 @@ export default function Home() {
                     </h2>
                   </div>
 
-                  <button className="text-xs font-semibold text-cyan-600">
+                  <button className="text-xs font-semibold text-purple-600">
                     View all
                   </button>
                 </div>
@@ -295,7 +304,7 @@ export default function Home() {
                         </div>
                       </div>
 
-                      <div className={tx[4] ? "text-sm font-semibold text-emerald-300" : "text-sm font-semibold text-white/80"}>
+                      <div className={tx[4] ? "text-sm font-semibold text-violet-300" : "text-sm font-semibold text-white/80"}>
                         {tx[3]}
                       </div>
 
@@ -318,16 +327,16 @@ export default function Home() {
                       NOLERA X Card
                     </h2>
                   </div>
-                  <CreditCard className="text-cyan-600" size={21} />
+                  <CreditCard className="text-purple-600" size={21} />
                 </div>
 
-                <div className="mt-5 rounded-3xl border border-cyan-300/15 bg-gradient-to-br from-[#0c3035] to-[#102523] p-5">
+                <div className="mt-5 rounded-3xl border border-purple-300/15 bg-gradient-to-br from-[#512d68] to-[#3c2549] p-5">
 
                   <div className="flex items-center justify-between">
                     <span className="font-bold tracking-[0.2em]">
                       NOLERA X
                     </span>
-                    <div className="h-7 w-10 rounded-lg border border-lime-200/40 bg-lime-200/10" />
+                    <div className="h-7 w-10 rounded-lg border border-fuchsia-200/40 bg-fuchsia-200/10" />
                   </div>
 
                   <div className="mt-12 text-sm tracking-[0.25em] text-white/60">
@@ -352,8 +361,8 @@ export default function Home() {
 
             <section className="mt-6 grid gap-4 md:grid-cols-2">
 
-              <button className="flex items-center gap-4 rounded-3xl border border-cyan-300/10 bg-cyan-300/[0.03] p-5 text-left hover:bg-cyan-300/[0.06]">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-600">
+              <button className="flex items-center gap-4 rounded-3xl border border-purple-300/10 bg-purple-300/[0.03] p-5 text-left hover:bg-purple-300/[0.06]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-400/10 text-purple-600">
                   <UserRound size={21} />
                 </div>
                 <div className="flex-1">
@@ -365,8 +374,8 @@ export default function Home() {
                 <ChevronRight size={18} className="text-white/25" />
               </button>
 
-              <button className="flex items-center gap-4 rounded-3xl border border-emerald-300/10 bg-emerald-300/[0.03] p-5 text-left hover:bg-emerald-300/[0.06]">
-                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-400/10 text-emerald-300">
+              <button className="flex items-center gap-4 rounded-3xl border border-violet-300/10 bg-violet-300/[0.03] p-5 text-left hover:bg-violet-300/[0.06]">
+                <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-400/10 text-violet-300">
                   <ShieldCheck size={21} />
                 </div>
                 <div className="flex-1">
