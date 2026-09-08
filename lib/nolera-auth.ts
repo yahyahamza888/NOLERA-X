@@ -1,34 +1,39 @@
 "use client"
 
+import { createSupabaseBrowserClient } from "./supabase-browser"
+
 export type NoleraUser = {
   id: string
   name: string
   email: string
   phone: string
-  password: string
   createdAt: string
 }
 
-const USERS_KEY = "nolera_x_users"
-const SESSION_KEY = "nolera_x_session"
+const supabase = createSupabaseBrowserClient()
 
-function users(): NoleraUser[] {
-  if (typeof window === "undefined") return []
-  try {
-    return JSON.parse(localStorage.getItem(USERS_KEY) || "[]")
-  } catch {
-    return []
+function mapUser(user: any, profile?: any): NoleraUser | null {
+  if (!user) return null
+
+  return {
+    id: user.id,
+    name:
+      profile?.full_name ||
+      user.user_metadata?.full_name ||
+      user.email?.split("@")[0] ||
+      "مستخدم NOLERA X",
+    email: user.email || "",
+    phone: profile?.phone || user.user_metadata?.phone || "",
+    createdAt: user.created_at || new Date().toISOString(),
   }
 }
 
-export function registerUser(
+export async function registerUser(
   name: string,
   email: string,
   phone: string,
   password: string
 ) {
-  const list = users()
-
   if (!name.trim() || !email.trim() || !password.trim()) {
     throw new Error("أكمل بيانات الحساب.")
   }
@@ -37,102 +42,168 @@ export function registerUser(
     throw new Error("كلمة المرور يجب أن تكون 6 أحرف على الأقل.")
   }
 
-  if (list.some((u) => u.email.toLowerCase() === email.toLowerCase())) {
-    throw new Error("هذا البريد مستخدم بالفعل.")
-  }
+  const cleanEmail = email.trim().toLowerCase()
+  const cleanName = name.trim()
+  const cleanPhone = phone.trim()
 
-  const user: NoleraUser = {
-    id: crypto.randomUUID(),
-    name: name.trim(),
-    email: email.trim().toLowerCase(),
-    phone: phone.trim(),
+  const { data, error } = await supabase.auth.signUp({
+    email: cleanEmail,
     password,
-    createdAt: new Date().toLocaleString("ar-SD"),
+    options: {
+      data: {
+        full_name: cleanName,
+        phone: cleanPhone,
+      },
+    },
+  })
+
+  if (error) {
+    if (error.message.toLowerCase().includes("already registered")) {
+      throw new Error("هذا البريد مستخدم بالفعل.")
+    }
+
+    throw new Error(error.message)
   }
 
-  localStorage.setItem(USERS_KEY, JSON.stringify([user, ...list]))
-  localStorage.setItem(SESSION_KEY, user.id)
+  if (!data.user) {
+    throw new Error("تعذر إنشاء الحساب.")
+  }
 
   window.dispatchEvent(new Event("nolera-auth-updated"))
 
-  return user
+  return mapUser(data.user)
 }
 
-export function loginUser(email: string, password: string) {
-  const user = users().find(
-    (u) =>
-      u.email.toLowerCase() === email.trim().toLowerCase() &&
-      u.password === password
-  )
+export async function loginUser(email: string, password: string) {
+  if (!email.trim() || !password) {
+    throw new Error("أدخل البريد الإلكتروني وكلمة المرور.")
+  }
 
-  if (!user) {
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email.trim().toLowerCase(),
+    password,
+  })
+
+  if (error || !data.user) {
     throw new Error("البريد الإلكتروني أو كلمة المرور غير صحيحة.")
   }
 
-  localStorage.setItem(SESSION_KEY, user.id)
   window.dispatchEvent(new Event("nolera-auth-updated"))
 
-  return user
+  return await getCurrentUser()
 }
 
-export function logoutUser() {
-  if (typeof window === "undefined") return
-  localStorage.removeItem(SESSION_KEY)
+export async function logoutUser() {
+  const { error } = await supabase.auth.signOut()
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
   window.dispatchEvent(new Event("nolera-auth-updated"))
 }
 
-export function getCurrentUser(): NoleraUser | null {
-  if (typeof window === "undefined") return null
+export async function getCurrentUser(): Promise<NoleraUser | null> {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  const id = localStorage.getItem(SESSION_KEY)
-  if (!id) return null
+  if (!user) return null
 
-  return users().find((u) => u.id === id) || null
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("full_name, phone, created_at")
+    .eq("id", user.id)
+    .maybeSingle()
+
+  return mapUser(user, profile)
 }
 
-export function updateCurrentUser(data: {
+export async function updateCurrentUser(data: {
   name?: string
   phone?: string
 }) {
-  const current = getCurrentUser()
-  if (!current) throw new Error("يجب تسجيل الدخول.")
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  const updated = {
-    ...current,
-    ...data,
-    name: data.name?.trim() || current.name,
-    phone: data.phone?.trim() || current.phone,
+  if (!user) {
+    throw new Error("يجب تسجيل الدخول.")
   }
 
-  const list = users().map((u) =>
-    u.id === current.id ? updated : u
-  )
+  const name = data.name?.trim()
+  const phone = data.phone?.trim()
 
-  localStorage.setItem(USERS_KEY, JSON.stringify(list))
+  const { data: profile, error } = await supabase
+    .from("profiles")
+    .update({
+      ...(name !== undefined ? { full_name: name } : {}),
+      ...(phone !== undefined ? { phone } : {}),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", user.id)
+    .select("full_name, phone, created_at")
+    .single()
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  if (name !== undefined || phone !== undefined) {
+    await supabase.auth.updateUser({
+      data: {
+        ...(name !== undefined ? { full_name: name } : {}),
+        ...(phone !== undefined ? { phone } : {}),
+      },
+    })
+  }
+
   window.dispatchEvent(new Event("nolera-auth-updated"))
 
-  return updated
+  return mapUser(user, profile)
 }
 
-export function changePassword(oldPassword: string, newPassword: string) {
-  const current = getCurrentUser()
-  if (!current) throw new Error("يجب تسجيل الدخول.")
-
-  if (current.password !== oldPassword) {
-    throw new Error("كلمة المرور الحالية غير صحيحة.")
+export async function changePassword(
+  oldPassword: string,
+  newPassword: string
+) {
+  if (!oldPassword || !newPassword) {
+    throw new Error("أدخل كلمة المرور الحالية والجديدة.")
   }
 
   if (newPassword.length < 6) {
-    throw new Error("كلمة المرور الجديدة قصيرة جدًا.")
+    throw new Error("كلمة المرور الجديدة يجب أن تكون 6 أحرف على الأقل.")
   }
 
-  const list = users().map((u) =>
-    u.id === current.id
-      ? { ...u, password: newPassword }
-      : u
-  )
+  const {
+    data: { user },
+  } = await supabase.auth.getUser()
 
-  localStorage.setItem(USERS_KEY, JSON.stringify(list))
+  if (!user?.email) {
+    throw new Error("يجب تسجيل الدخول.")
+  }
+
+  const { error: verifyError } =
+    await supabase.auth.signInWithPassword({
+      email: user.email,
+      password: oldPassword,
+    })
+
+  if (verifyError) {
+    throw new Error("كلمة المرور الحالية غير صحيحة.")
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
 
   return true
+}
+
+export function getSupabaseClient() {
+  return supabase
 }

@@ -1,30 +1,46 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { getCurrentUser, type NoleraUser } from "./nolera-auth"
+import {
+  getCurrentUser,
+  getSupabaseClient,
+  type NoleraUser,
+} from "./nolera-auth"
 
 export function useNoleraAuth() {
   const [user, setUser] = useState<NoleraUser | null>(null)
+  const [loading, setLoading] = useState(true)
 
-  function refresh() {
-    setUser(getCurrentUser())
+  async function refresh() {
+    try {
+      const current = await getCurrentUser()
+      setUser(current)
+    } finally {
+      setLoading(false)
+    }
   }
 
   useEffect(() => {
     refresh()
 
-    const handler = () => refresh()
+    const supabase = getSupabaseClient()
 
-    window.addEventListener("nolera-auth-updated", handler)
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange(() => {
+      refresh()
+      window.dispatchEvent(new Event("nolera-auth-updated"))
+    })
 
     return () => {
-      window.removeEventListener("nolera-auth-updated", handler)
+      subscription.unsubscribe()
     }
   }, [])
 
   return {
     user,
     isLoggedIn: Boolean(user),
+    loading,
     refresh,
   }
 }

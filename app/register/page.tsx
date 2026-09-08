@@ -12,13 +12,28 @@ export default function RegisterPage() {
   const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")
   const [message, setMessage] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  function submit() {
+  async function submit() {
+    setMessage("")
+    setLoading(true)
+
     try {
-      registerUser(name, email, phone, password)
-      router.push("/account")
+      const user = await registerUser(
+        name,
+        email,
+        phone,
+        password
+      )
+
+      if (user) {
+        router.push("/account")
+        router.refresh()
+      }
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "حدث خطأ.")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -31,6 +46,7 @@ export default function RegisterPage() {
         <input
           className="mt-7 w-full rounded-2xl bg-slate-100 p-4 outline-none"
           placeholder="الاسم الكامل"
+          autoComplete="name"
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
@@ -38,6 +54,8 @@ export default function RegisterPage() {
         <input
           className="mt-3 w-full rounded-2xl bg-slate-100 p-4 outline-none"
           placeholder="البريد الإلكتروني"
+          type="email"
+          autoComplete="email"
           value={email}
           onChange={(e) => setEmail(e.target.value)}
         />
@@ -45,6 +63,8 @@ export default function RegisterPage() {
         <input
           className="mt-3 w-full rounded-2xl bg-slate-100 p-4 outline-none"
           placeholder="رقم الهاتف"
+          type="tel"
+          autoComplete="tel"
           value={phone}
           onChange={(e) => setPhone(e.target.value)}
         />
@@ -53,15 +73,17 @@ export default function RegisterPage() {
           className="mt-3 w-full rounded-2xl bg-slate-100 p-4 outline-none"
           placeholder="كلمة المرور"
           type="password"
+          autoComplete="new-password"
           value={password}
           onChange={(e) => setPassword(e.target.value)}
         />
 
         <button
           onClick={submit}
-          className="mt-5 w-full rounded-2xl bg-slate-950 py-4 font-black text-white"
+          disabled={loading}
+          className="mt-5 w-full rounded-2xl bg-slate-950 py-4 font-black text-white disabled:opacity-50"
         >
-          إنشاء الحساب
+          {loading ? "جارٍ إنشاء الحساب..." : "إنشاء الحساب"}
         </button>
 
         {message && (
@@ -72,7 +94,10 @@ export default function RegisterPage() {
 
         <p className="mt-6 text-center text-sm text-slate-500">
           لديك حساب؟
-          <Link href="/login" className="mr-2 font-black text-slate-950">
+          <Link
+            href="/login"
+            className="mr-2 font-black text-slate-950"
+          >
             تسجيل الدخول
           </Link>
         </p>
