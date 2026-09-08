@@ -34,12 +34,12 @@ export default function Home() {
       dir={language === "ar" ? "rtl" : "ltr"}
       lang={language}
       className={`min-h-screen transition-colors duration-300 ${
-        darkMode ? "bg-[#17101f] text-white" : "bg-[#faf7ff] text-[#30243b]"
+        darkMode ? "bg-[#17101f] text-white" : "bg-[#fffaff] text-[#f7efff]"
       }`}
     >
       <div className="flex min-h-screen">
 
-        <div className="flex flex-col items-center justify-center py-2"><svg viewBox="0 0 120 45" className="h-10 w-28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 24C22 8 34 8 48 22C61 35 72 35 86 20C96 10 105 10 115 17" stroke="#22D3EE" strokeWidth="5" strokeLinecap="round"/><path d="M8 31C25 20 37 20 50 30C63 40 76 39 90 28C99 21 107 21 114 25" stroke="#84CC16" strokeWidth="3" strokeLinecap="round"/></svg><span className="text-lg font-black tracking-[0.22em] text-amber-500">NOLERA X</span></div>\n\n        <aside className={`${mobileOpen ? "translate-x-0" : "translate-x-full"} fixed inset-y-0 right-0 z-50 w-72 border-l border-purple-100/10 bg-[#321d45] p-5 transition-transform lg:static lg:translate-x-0`}>
+        <div className="flex flex-col items-center justify-center py-2"><svg viewBox="0 0 120 45" className="h-10 w-28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 24C22 8 34 8 48 22C61 35 72 35 86 20C96 10 105 10 115 17" stroke="#22D3EE" strokeWidth="5" strokeLinecap="round"/><path d="M8 31C25 20 37 20 50 30C63 40 76 39 90 28C99 21 107 21 114 25" stroke="#84CC16" strokeWidth="3" strokeLinecap="round"/></svg><span className="text-lg font-black tracking-[0.22em] text-amber-500">NOLERA X</span></div>\n\n        <aside className={`${mobileOpen ? "translate-x-0" : "translate-x-full"} fixed inset-y-0 right-0 z-50 w-72 border-l border-purple-100/10 bg-[#f3e7ff] p-5 transition-transform lg:static lg:translate-x-0`}>
 
           <div className="flex items-center gap-3">
             <div className="flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-400/10 text-purple-600">
@@ -172,7 +172,7 @@ export default function Home() {
 
           <div className="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-10">
 
-            <section className="rounded-[30px] border border-purple-300/15 bg-gradient-to-br from-purple-600/20 via-[#4b2861] to-violet-500/10 p-6 sm:p-8">
+            <section className="rounded-[30px] border border-purple-300/15 bg-gradient-to-br from-purple-600/20 via-[#ead8ff] to-violet-500/10 p-6 sm:p-8">
 
               <div className="flex flex-wrap items-center justify-between gap-5">
 
