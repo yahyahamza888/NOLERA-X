@@ -51,12 +51,6 @@ export async function getTransactions(limit = 50) {
   return data || []
 }
 
-/*
- * =========================================================
- * ADD MONEY / DEPOSIT
- * التنفيذ يتم بالكامل داخل Supabase RPC
- * =========================================================
- */
 export async function changeWallet(
   currency: string,
   amount: number,
@@ -64,21 +58,21 @@ export async function changeWallet(
 ) {
   await currentUser()
 
-  if (!currency.trim()) {
+  const cleanCurrency = currency.trim().toUpperCase()
+
+  if (!cleanCurrency) {
     throw new Error("العملة غير صحيحة.")
   }
 
-  if (!amount || amount <= 0) {
+  if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error("المبلغ غير صحيح.")
   }
 
   const functionName =
-    type === "deposit"
-      ? "nolera_deposit"
-      : "nolera_withdraw"
+    type === "deposit" ? "nolera_deposit" : "nolera_withdraw"
 
   const { data, error } = await supabase.rpc(functionName, {
-    p_currency: currency.trim(),
+    p_currency: cleanCurrency,
     p_amount: amount,
   })
 
@@ -91,12 +85,6 @@ export async function changeWallet(
   return data
 }
 
-/*
- * =========================================================
- * TRANSFER
- * التنفيذ بالكامل داخل Supabase RPC
- * =========================================================
- */
 export async function transferMoney(
   currency: string,
   recipient: string,
@@ -104,41 +92,87 @@ export async function transferMoney(
 ) {
   const user = await currentUser()
 
-  if (!currency.trim()) {
+  const cleanCurrency = currency.trim().toUpperCase()
+  const cleanRecipient = recipient.trim()
+
+  if (!cleanCurrency) {
     throw new Error("العملة غير صحيحة.")
   }
 
-  if (!recipient.trim()) {
+  if (!cleanRecipient) {
     throw new Error("أدخل معرف المستلم.")
   }
 
-  if (!amount || amount <= 0) {
+  if (!Number.isFinite(amount) || amount <= 0) {
     throw new Error("المبلغ غير صحيح.")
   }
 
-  if (recipient.trim() === user.id) {
+  if (cleanRecipient === user.id) {
     throw new Error("لا يمكنك التحويل لنفس الحساب.")
   }
 
-  /*
-   * نتحقق من أن النص المرسل هو UUID صالح
-   * حتى لا يصل طلب غير صحيح إلى RPC.
-   */
   const uuid =
     /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
-  if (!uuid.test(recipient.trim())) {
+  if (!uuid.test(cleanRecipient)) {
     throw new Error(
       "معرف المستلم غير صحيح. استخدم معرف حساب NOLERA X."
     )
   }
 
+  const { data, error } = await supabase.rpc("nolera_transfer", {
+    p_currency: cleanCurrency,
+    p_recipient_id: cleanRecipient,
+    p_amount: amount,
+  })
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  window.dispatchEvent(new Event("nolera-data-updated"))
+
+  return data
+}
+
+export async function getExchangeRates() {
+  await currentUser()
+
   const { data, error } = await supabase.rpc(
-    "nolera_transfer",
+    "nolera_get_exchange_rates"
+  )
+
+  if (error) {
+    throw new Error(error.message)
+  }
+
+  return data || []
+}
+
+export async function exchangeMoney(
+  fromCurrency: string,
+  toCurrency: string,
+  amount: number
+) {
+  await currentUser()
+
+  const from = fromCurrency.trim().toUpperCase()
+  const to = toCurrency.trim().toUpperCase()
+
+  if (!from || !to || from === to) {
+    throw new Error("اختر عملتين مختلفتين.")
+  }
+
+  if (!Number.isFinite(amount) || amount <= 0) {
+    throw new Error("المبلغ غير صحيح.")
+  }
+
+  const { data, error } = await supabase.rpc(
+    "nolera_exchange",
     {
-      p_currency: currency.trim(),
-      p_recipient_id: recipient.trim(),
-      p_amount: amount,
+      p_from_currency: from,
+      p_to_currency: to,
+      p_from_amount: amount,
     }
   )
 

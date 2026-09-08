@@ -18,13 +18,13 @@ function mapUser(user: any, profile?: any): NoleraUser | null {
   return {
     id: user.id,
     name:
-      profile?.full_name ||
+      profile?.name ||
       user.user_metadata?.full_name ||
       user.email?.split("@")[0] ||
       "مستخدم NOLERA X",
     email: user.email || "",
     phone: profile?.phone || user.user_metadata?.phone || "",
-    createdAt: user.created_at || new Date().toISOString(),
+    createdAt: profile?.created_at || user.created_at || new Date().toISOString(),
   }
 }
 
@@ -61,7 +61,6 @@ export async function registerUser(
     if (error.message.toLowerCase().includes("already registered")) {
       throw new Error("هذا البريد مستخدم بالفعل.")
     }
-
     throw new Error(error.message)
   }
 
@@ -112,7 +111,7 @@ export async function getCurrentUser(): Promise<NoleraUser | null> {
 
   const { data: profile } = await supabase
     .from("profiles")
-    .select("full_name, phone, created_at")
+    .select("name, phone, created_at")
     .eq("id", user.id)
     .maybeSingle()
 
@@ -134,15 +133,22 @@ export async function updateCurrentUser(data: {
   const name = data.name?.trim()
   const phone = data.phone?.trim()
 
+  if (name !== undefined && !name) {
+    throw new Error("الاسم لا يمكن أن يكون فارغًا.")
+  }
+
+  const profileUpdate: Record<string, string> = {
+    updated_at: new Date().toISOString(),
+  }
+
+  if (name !== undefined) profileUpdate.name = name
+  if (phone !== undefined) profileUpdate.phone = phone
+
   const { data: profile, error } = await supabase
     .from("profiles")
-    .update({
-      ...(name !== undefined ? { full_name: name } : {}),
-      ...(phone !== undefined ? { phone } : {}),
-      updated_at: new Date().toISOString(),
-    })
+    .update(profileUpdate)
     .eq("id", user.id)
-    .select("full_name, phone, created_at")
+    .select("name, phone, created_at")
     .single()
 
   if (error) {
@@ -150,12 +156,16 @@ export async function updateCurrentUser(data: {
   }
 
   if (name !== undefined || phone !== undefined) {
-    await supabase.auth.updateUser({
+    const { error: authError } = await supabase.auth.updateUser({
       data: {
         ...(name !== undefined ? { full_name: name } : {}),
         ...(phone !== undefined ? { phone } : {}),
       },
     })
+
+    if (authError) {
+      throw new Error(authError.message)
+    }
   }
 
   window.dispatchEvent(new Event("nolera-auth-updated"))

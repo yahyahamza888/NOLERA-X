@@ -39,11 +39,11 @@ export async function createStoreProduct(input: {
   const { data, error } = await supabase.rpc(
     "nolera_create_product",
     {
-      p_name: input.name,
-      p_description: input.description,
+      p_name: input.name.trim(),
+      p_description: input.description.trim(),
       p_price: input.price,
-      p_currency: input.currency,
-      p_category: input.category,
+      p_currency: input.currency.trim().toUpperCase(),
+      p_category: input.category.trim(),
       p_icon: input.icon,
     }
   )
@@ -59,6 +59,14 @@ export async function purchaseStoreProduct(
   productId: string,
   quantity = 1
 ) {
+  if (!productId) {
+    throw new Error("المنتج غير صحيح.")
+  }
+
+  if (!Number.isInteger(quantity) || quantity <= 0) {
+    throw new Error("الكمية غير صحيحة.")
+  }
+
   const { data, error } = await supabase.rpc(
     "nolera_purchase_product",
     {
