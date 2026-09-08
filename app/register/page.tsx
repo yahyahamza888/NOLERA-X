@@ -38,13 +38,13 @@ export default function RegisterPage() {
   }
 
   return (
-    <main dir="rtl" className="min-h-screen bg-slate-100 p-5">
-      <div className="mx-auto mt-8 max-w-md rounded-[28px] bg-white p-7 shadow-xl">
+    <main dir="rtl" className="min-h-screen bg-[#fffaff] p-5">
+      <div className="mx-auto mt-8 w-full max-w-md rounded-[28px] bg-white p-7 shadow-xl">
         <p className="text-sm font-bold text-slate-400">NOLERA X</p>
         <h1 className="mt-2 text-3xl font-black">إنشاء حساب 👤</h1>
 
         <input
-          className="mt-7 w-full rounded-2xl bg-slate-100 p-4 outline-none"
+          className="mt-7 w-full rounded-2xl bg-[#fffaff] p-4 outline-none"
           placeholder="الاسم الكامل"
           autoComplete="name"
           value={name}
@@ -52,7 +52,7 @@ export default function RegisterPage() {
         />
 
         <input
-          className="mt-3 w-full rounded-2xl bg-slate-100 p-4 outline-none"
+          className="mt-3 w-full rounded-2xl bg-[#fffaff] p-4 outline-none"
           placeholder="البريد الإلكتروني"
           type="email"
           autoComplete="email"
@@ -61,7 +61,7 @@ export default function RegisterPage() {
         />
 
         <input
-          className="mt-3 w-full rounded-2xl bg-slate-100 p-4 outline-none"
+          className="mt-3 w-full rounded-2xl bg-[#fffaff] p-4 outline-none"
           placeholder="رقم الهاتف"
           type="tel"
           autoComplete="tel"
@@ -70,7 +70,7 @@ export default function RegisterPage() {
         />
 
         <input
-          className="mt-3 w-full rounded-2xl bg-slate-100 p-4 outline-none"
+          className="mt-3 w-full rounded-2xl bg-[#fffaff] p-4 outline-none"
           placeholder="كلمة المرور"
           type="password"
           autoComplete="new-password"
@@ -81,7 +81,7 @@ export default function RegisterPage() {
         <button
           onClick={submit}
           disabled={loading}
-          className="mt-5 w-full rounded-2xl bg-slate-950 py-4 font-black text-white disabled:opacity-50"
+          className="mt-5 w-full rounded-2xl bg-[#9b6bd3] py-4 font-black text-white disabled:opacity-50"
         >
           {loading ? "جارٍ إنشاء الحساب..." : "إنشاء الحساب"}
         </button>
@@ -96,7 +96,7 @@ export default function RegisterPage() {
           لديك حساب؟
           <Link
             href="/login"
-            className="mr-2 font-black text-slate-950"
+            className="mr-2 font-black text-[#4b2861]"
           >
             تسجيل الدخول
           </Link>
