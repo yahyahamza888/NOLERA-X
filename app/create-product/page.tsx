@@ -1,11 +1,11 @@
 "use client"
 
 import { useEffect, useState } from "react"
+import Link from "next/link"
 import {
-  getDigitalProducts,
-  saveDigitalProduct,
-  type DigitalProduct,
-} from "../../lib/nolera-products"
+  createStoreProduct,
+  getMyProducts,
+} from "../../lib/nolera-store"
 
 const types = [
   { name: "كتاب إلكتروني", icon: "📚" },
@@ -22,16 +22,24 @@ export default function CreateProductPage() {
   const [price, setPrice] = useState("")
   const [type, setType] = useState(types[0].name)
   const [icon, setIcon] = useState(types[0].icon)
+  const [products, setProducts] = useState<any[]>([])
   const [message, setMessage] = useState("")
-  const [products, setProducts] = useState<DigitalProduct[]>([])
+  const [loading, setLoading] = useState(false)
+
+  async function refresh() {
+    try {
+      setProducts(await getMyProducts())
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "تعذر تحميل المنتجات."
+      )
+    }
+  }
 
   useEffect(() => {
-    const refresh = () => setProducts(getDigitalProducts())
     refresh()
-
-    window.addEventListener("nolera-products-updated", refresh)
-    return () =>
-      window.removeEventListener("nolera-products-updated", refresh)
   }, [])
 
   function generateWithAI() {
@@ -46,60 +54,94 @@ export default function CreateProductPage() {
       )
     }
 
-    setMessage("تم تجهيز وصف أولي للمنتج. يمكنك تعديله قبل النشر.")
+    setMessage(
+      "تم تجهيز وصف أولي للمنتج. يمكنك تعديله قبل النشر."
+    )
   }
 
-  function createProduct() {
+  async function createProduct() {
     const value = Number(price)
 
-    if (!name.trim() || !description.trim() || !value || value <= 0) {
-      setMessage("أدخل اسم المنتج والوصف والسعر بشكل صحيح.")
+    if (
+      !name.trim() ||
+      !description.trim() ||
+      !value ||
+      value <= 0
+    ) {
+      setMessage(
+        "أدخل اسم المنتج والوصف والسعر بشكل صحيح."
+      )
       return
     }
 
-    const product = saveDigitalProduct({
-      name: name.trim(),
-      description: description.trim(),
-      price: value,
-      category: type,
-      icon,
-      owner: "حساب NOLERA X",
-    })
+    try {
+      setLoading(true)
 
-    if (product) {
-      setProducts(getDigitalProducts())
+      await createStoreProduct({
+        name: name.trim(),
+        description: description.trim(),
+        price: value,
+        currency: "SDG",
+        category: type,
+        icon,
+      })
+
       setName("")
       setDescription("")
       setPrice("")
-      setMessage("تم إنشاء المنتج ونشره في متجر NOLERA X بنجاح.")
+
+      setMessage(
+        "تم إنشاء المنتج ونشره في متجر NOLERA X بنجاح 🎉"
+      )
+
+      await refresh()
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "تعذر إنشاء المنتج."
+      )
+    } finally {
+      setLoading(false)
     }
   }
 
   return (
-    <main dir="rtl" className="min-h-screen bg-[#f5f7fb] p-4 sm:p-6">
+    <main
+      dir="rtl"
+      className="min-h-screen bg-[#f5f7fb] p-4 sm:p-6"
+    >
       <div className="mx-auto max-w-6xl">
+
         <div className="mb-7 flex flex-col justify-between gap-4 sm:flex-row sm:items-end">
           <div>
-            <p className="text-sm font-bold text-slate-500">NOLERA X</p>
+            <p className="text-sm font-bold text-slate-500">
+              NOLERA X
+            </p>
+
             <h1 className="mt-1 text-3xl font-black sm:text-4xl">
               صناعة المنتجات الرقمية 🤖
             </h1>
+
             <p className="mt-2 text-sm text-slate-500">
-              أنشئ منتجك الرقمي، جهزه بالذكاء الاصطناعي وانشره في المتجر.
+              أنشئ منتجك الرقمي وانشره مباشرة في متجر NOLERA X.
             </p>
           </div>
 
-          <a
+          <Link
             href="/store"
             className="rounded-2xl bg-slate-950 px-5 py-3 text-center text-sm font-black text-white"
           >
             🛍️ العودة للمتجر
-          </a>
+          </Link>
         </div>
 
         <div className="grid gap-6 lg:grid-cols-[1.3fr_.7fr]">
+
           <section className="rounded-[28px] border bg-white p-6 shadow-sm">
-            <h2 className="text-xl font-black">إنشاء منتج جديد</h2>
+            <h2 className="text-xl font-black">
+              إنشاء منتج جديد
+            </h2>
 
             <label className="mt-6 block text-sm font-bold">
               اسم المنتج
@@ -109,7 +151,7 @@ export default function CreateProductPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="مثال: دليل التجارة الإلكترونية"
-              className="mt-2 w-full rounded-2xl bg-slate-100 px-5 py-4 outline-none focus:ring-2 focus:ring-slate-300"
+              className="mt-2 w-full rounded-2xl bg-slate-100 px-5 py-4 outline-none"
             />
 
             <label className="mt-5 block text-sm font-bold">
@@ -130,7 +172,10 @@ export default function CreateProductPage() {
                       : "bg-white"
                   }`}
                 >
-                  <div className="text-2xl">{item.icon}</div>
+                  <div className="text-2xl">
+                    {item.icon}
+                  </div>
+
                   {item.name}
                 </button>
               ))}
@@ -142,15 +187,17 @@ export default function CreateProductPage() {
 
             <textarea
               value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              onChange={(e) =>
+                setDescription(e.target.value)
+              }
               placeholder="اكتب وصف المنتج وماذا سيحصل عليه المشتري..."
               rows={6}
-              className="mt-2 w-full rounded-2xl bg-slate-100 px-5 py-4 outline-none focus:ring-2 focus:ring-slate-300"
+              className="mt-2 w-full rounded-2xl bg-slate-100 px-5 py-4 outline-none"
             />
 
             <button
               onClick={generateWithAI}
-              className="mt-3 w-full rounded-2xl border border-slate-900 py-4 text-sm font-black transition hover:bg-slate-100"
+              className="mt-3 w-full rounded-2xl border border-slate-900 py-4 text-sm font-black"
             >
               ✨ تجهيز المحتوى بالذكاء الاصطناعي
             </button>
@@ -165,14 +212,17 @@ export default function CreateProductPage() {
               value={price}
               onChange={(e) => setPrice(e.target.value)}
               placeholder="مثال: 15000"
-              className="mt-2 w-full rounded-2xl bg-slate-100 px-5 py-4 outline-none focus:ring-2 focus:ring-slate-300"
+              className="mt-2 w-full rounded-2xl bg-slate-100 px-5 py-4 outline-none"
             />
 
             <button
+              disabled={loading}
               onClick={createProduct}
-              className="mt-5 w-full rounded-2xl bg-slate-950 py-4 text-sm font-black text-white shadow-lg"
+              className="mt-5 w-full rounded-2xl bg-slate-950 py-4 text-sm font-black text-white disabled:opacity-50"
             >
-              🚀 إنشاء ونشر المنتج
+              {loading
+                ? "جارٍ النشر..."
+                : "🚀 إنشاء ونشر المنتج"}
             </button>
           </section>
 
@@ -186,8 +236,8 @@ export default function CreateProductPage() {
             </h2>
 
             <p className="mt-3 text-sm leading-7 text-white/70">
-              اكتب فكرتك، اختر نوع المنتج، استخدم مساعد الذكاء الاصطناعي
-              لتجهيز المحتوى ثم انشر المنتج مباشرة في المتجر.
+              أنشئ منتجًا رقميًا ثم انشره في المتجر.
+              المنتج يصبح محفوظًا في قاعدة بيانات NOLERA X.
             </p>
 
             <div className="mt-6 space-y-3">
@@ -210,7 +260,9 @@ export default function CreateProductPage() {
         </div>
 
         <section className="mt-6 rounded-[28px] border bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-black">منتجاتي 📦</h2>
+          <h2 className="text-xl font-black">
+            منتجاتي 📦
+          </h2>
 
           {products.length === 0 ? (
             <div className="mt-5 rounded-2xl bg-slate-50 p-8 text-center text-sm text-slate-500">
@@ -223,7 +275,9 @@ export default function CreateProductPage() {
                   key={product.id}
                   className="rounded-2xl border p-4"
                 >
-                  <div className="text-4xl">{product.icon}</div>
+                  <div className="text-4xl">
+                    {product.icon || "📦"}
+                  </div>
 
                   <h3 className="mt-3 font-black">
                     {product.name}
@@ -234,11 +288,14 @@ export default function CreateProductPage() {
                   </p>
 
                   <p className="mt-3 font-black">
-                    {product.price.toLocaleString()} SDG
+                    {Number(product.price).toLocaleString()}{" "}
+                    {product.currency}
                   </p>
 
                   <p className="mt-1 text-xs text-green-600">
-                    منشور في المتجر
+                    {product.status === "published"
+                      ? "منشور في المتجر"
+                      : product.status}
                   </p>
                 </div>
               ))}

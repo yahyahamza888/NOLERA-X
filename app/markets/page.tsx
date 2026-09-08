@@ -1,52 +1,43 @@
 "use client"
 
-import { useState } from "react"
+import Link from "next/link"
+import { ArrowLeft, ArrowDownUp } from "lucide-react"
 
-const markets = [
-  ["Pi Network", "PI", "0.25"],
-  ["Bitcoin", "BTC", "111500"],
-  ["Ethereum", "ETH", "4300"],
-  ["USD", "USD", "3500"],
+const assets = [
+  ["Pi","Pi Network","Digital Asset"],
+  ["BTC","Bitcoin","Digital Asset"],
+  ["ETH","Ethereum","Digital Asset"],
+  ["USDT","Tether","Stablecoin"],
 ]
 
 export default function MarketsPage() {
-  const [search, setSearch] = useState("")
-
-  const filtered = markets.filter((m) =>
-    `${m[0]} ${m[1]}`.toLowerCase().includes(search.toLowerCase())
-  )
-
   return (
-    <main dir="rtl" className="min-h-screen bg-slate-50 p-6">
-      <div className="mx-auto max-w-5xl">
-        <h1 className="text-3xl font-bold">الأسواق</h1>
-        <p className="mt-2 text-slate-500">متابعة الأصول والأسعار</p>
+    <main className="min-h-screen bg-slate-950 px-4 py-8 text-white">
+      <div className="mx-auto max-w-4xl">
+        <Link href="/account" className="flex items-center gap-2 text-slate-300">
+          <ArrowLeft size={18}/> الحساب
+        </Link>
 
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="ابحث عن أصل..."
-          className="mt-6 w-full rounded-xl border bg-white p-4"
-        />
+        <h1 className="mt-8 text-3xl font-bold">Markets</h1>
+        <p className="mt-2 text-slate-400">الأصول الرقمية المتاحة داخل NOLERA X</p>
 
-        <div className="mt-6 overflow-hidden rounded-2xl bg-white shadow-sm">
-          {filtered.map((m) => (
-            <div
-              key={m[1]}
-              className="flex items-center justify-between border-b p-5 last:border-0"
-            >
-              <div>
-                <div className="font-bold">{m[0]}</div>
-                <div className="text-sm text-slate-500">{m[1]}</div>
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          {assets.map(([symbol,name,type]) => (
+            <div key={symbol} className="rounded-3xl border border-white/10 bg-white/5 p-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <div className="text-xl font-bold">{symbol}</div>
+                  <div className="text-sm text-slate-400">{name}</div>
+                </div>
+                <ArrowDownUp className="text-emerald-400"/>
               </div>
-              <div className="font-bold">{Number(m[2]).toLocaleString()}</div>
+              <div className="mt-5 text-xs text-slate-500">{type}</div>
+              <Link href="/exchange" className="mt-4 block rounded-xl bg-white/10 p-3 text-center">
+                Exchange
+              </Link>
             </div>
           ))}
         </div>
-
-        <p className="mt-4 text-xs text-slate-400">
-          الأسعار الحالية هنا تجريبية، وسيتم ربط البيانات الحقيقية لاحقًا.
-        </p>
       </div>
     </main>
   )

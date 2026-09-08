@@ -1,100 +1,57 @@
 "use client"
 
+import Link from "next/link"
+import { ArrowLeft, Bell } from "lucide-react"
 import { useEffect, useState } from "react"
-import {
-  getNotifications,
-  markAllNotificationsRead,
-  markNotificationRead,
-  type NoleraNotification,
-} from "@/lib/nolera-notifications"
+import { getSupabaseClient } from "../../lib/nolera-auth"
 
 export default function NotificationsPage() {
-  const [items, setItems] = useState<NoleraNotification[]>([])
+  const supabase = getSupabaseClient()
+  const [items, setItems] = useState<any[]>([])
+  const [error, setError] = useState("")
 
-  function refresh() {
-    setItems(getNotifications())
+  async function load() {
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) {
+      setError("يجب تسجيل الدخول.")
+      return
+    }
+
+    const { data, error } = await supabase
+      .from("notifications")
+      .select("*")
+      .eq("user_id", user.id)
+      .order("created_at", { ascending: false })
+
+    if (error) setError(error.message)
+    else setItems(data || [])
   }
 
-  useEffect(() => {
-    refresh()
-
-    const handler = () => refresh()
-    window.addEventListener("nolera-notifications-updated", handler)
-
-    return () =>
-      window.removeEventListener("nolera-notifications-updated", handler)
-  }, [])
-
-  const unread = items.filter((item) => !item.read).length
+  useEffect(() => { load() }, [])
 
   return (
-    <main dir="rtl" className="min-h-screen bg-slate-50 p-6">
+    <main className="min-h-screen bg-slate-950 px-4 py-8 text-white">
       <div className="mx-auto max-w-3xl">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-900">
-              🔔 الإشعارات
-            </h1>
-            <p className="mt-2 text-slate-500">
-              لديك {unread} إشعار غير مقروء
-            </p>
-          </div>
-
-          {items.length > 0 && (
-            <button
-              onClick={() => {
-                markAllNotificationsRead()
-                refresh()
-              }}
-              className="rounded-xl bg-slate-900 px-4 py-3 text-sm font-bold text-white"
-            >
-              قراءة الكل
-            </button>
-          )}
+        <Link href="/account" className="flex items-center gap-2 text-slate-300">
+          <ArrowLeft size={18}/> الحساب
+        </Link>
+        <div className="mt-8 flex items-center gap-3">
+          <Bell className="text-emerald-400"/>
+          <h1 className="text-3xl font-bold">Notifications</h1>
         </div>
 
-        <div className="mt-8 space-y-3">
-          {items.map((item) => (
-            <button
-              key={item.id}
-              onClick={() => {
-                markNotificationRead(item.id)
-                refresh()
-              }}
-              className={`w-full rounded-2xl border p-5 text-right shadow-sm ${
-                item.read
-                  ? "border-slate-200 bg-white"
-                  : "border-slate-900 bg-white"
-              }`}
-            >
-              <div className="flex justify-between gap-4">
-                <div>
-                  <h2 className="font-bold">{item.title}</h2>
-                  <p className="mt-2 text-slate-600">{item.message}</p>
-                </div>
+        {error && <div className="mt-5 rounded-2xl bg-red-500/10 p-4 text-red-300">{error}</div>}
 
-                <span className="text-xl">
-                  {item.type === "success"
-                    ? "✅"
-                    : item.type === "warning"
-                    ? "⚠️"
-                    : "ℹ️"}
-                </span>
+        <div className="mt-6 space-y-3">
+          {items.length === 0
+            ? <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center text-slate-500">لا توجد إشعارات.</div>
+            : items.map(n => (
+              <div key={n.id} className="rounded-2xl border border-white/10 bg-white/5 p-5">
+                <div className="font-semibold">{n.title || n.type || "NOLERA X"}</div>
+                <div className="mt-2 text-sm text-slate-400">{n.message || n.body || ""}</div>
               </div>
-
-              <p className="mt-3 text-xs text-slate-400">{item.date}</p>
-            </button>
-          ))}
-
-          {!items.length && (
-            <div className="rounded-2xl bg-white p-10 text-center shadow-sm">
-              <div className="text-5xl">🔔</div>
-              <h2 className="mt-4 font-bold">لا توجد إشعارات</h2>
-              <p className="mt-2 text-slate-500">
-                ستظهر هنا تنبيهات الحساب والعمليات.
-              </p>
-            </div>
-          )}
+            ))
+          }
         </div>
       </div>
     </main>

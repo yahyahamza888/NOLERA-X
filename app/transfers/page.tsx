@@ -1,128 +1,84 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, Send, Wallet } from "lucide-react"
-import { transfer } from "../../lib/nolera-actions"
-import { useNoleraState } from "../../lib/use-nolera-state"
+import { ArrowLeft, Send } from "lucide-react"
+import { useState } from "react"
+import { transferMoney } from "../../lib/nolera-finance"
 
 export default function TransfersPage() {
+  const [currency, setCurrency] = useState("USD")
   const [recipient, setRecipient] = useState("")
   const [amount, setAmount] = useState("")
   const [message, setMessage] = useState("")
-  const { balance } = useNoleraState()
+  const [error, setError] = useState("")
+  const [loading, setLoading] = useState(false)
 
-  function handleTransfer(e: React.FormEvent) {
-    e.preventDefault()
-
-    const value = Number(amount)
-
-    if (!recipient.trim()) {
-      setMessage("أدخل اسم المستلم أو حسابه")
-      return
-    }
-
-    if (!value || value <= 0) {
-      setMessage("أدخل مبلغًا صحيحًا")
-      return
-    }
+  async function submit() {
+    setError("")
+    setMessage("")
+    setLoading(true)
 
     try {
-      transfer(value, recipient.trim(), "تحويل مالي")
+      const ref = await transferMoney(currency, recipient, Number(amount))
+      setMessage(`تم تنفيذ التحويل. المرجع: ${ref}`)
       setRecipient("")
       setAmount("")
-      setMessage(`تم تحويل $${value.toLocaleString()} بنجاح`)
-    } catch (error) {
-      setMessage(
-        error instanceof Error ? error.message : "تعذر تنفيذ التحويل"
-      )
+    } catch (e: any) {
+      setError(e.message)
     }
+
+    setLoading(false)
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 p-6 text-white">
+    <main className="min-h-screen bg-slate-950 px-4 py-8 text-white">
       <div className="mx-auto max-w-xl">
-        <Link
-          href="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-white/60 hover:text-white"
-        >
-          <ArrowLeft size={18} />
-          العودة إلى NOLERA X
+        <Link href="/account" className="flex items-center gap-2 text-slate-300">
+          <ArrowLeft size={18} /> الحساب
         </Link>
 
-        <div className="rounded-3xl border border-white/10 bg-white/5 p-7">
-          <div className="mb-8 flex items-center gap-4">
-            <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-lime-400/10 text-lime-300">
-              <Send size={26} />
-            </div>
-
-            <div>
-              <h1 className="text-2xl font-bold">Transfers</h1>
-              <p className="text-sm text-white/40">
-                تحويل الأموال من حساب NOLERA X
-              </p>
-            </div>
+        <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-6">
+          <div className="mb-6 flex items-center gap-3">
+            <Send className="text-blue-400" />
+            <h1 className="text-2xl font-bold">Transfer</h1>
           </div>
 
-          <div className="mb-6 rounded-2xl bg-black/20 p-5">
-            <div className="flex items-center gap-2 text-sm text-white/40">
-              <Wallet size={16} />
-              الرصيد المتاح
-            </div>
+          <select
+            value={currency}
+            onChange={(e) => setCurrency(e.target.value)}
+            className="mb-4 w-full rounded-2xl bg-slate-900 p-4"
+          >
+            {["SDG","USD","Pi","BTC","ETH","USDT"].map(c => (
+              <option key={c}>{c}</option>
+            ))}
+          </select>
 
-            <p className="mt-2 text-3xl font-bold">
-              ${balance.toLocaleString()}
-            </p>
-          </div>
+          <input
+            value={recipient}
+            onChange={(e) => setRecipient(e.target.value)}
+            placeholder="ID المستخدم المستلم"
+            className="mb-4 w-full rounded-2xl bg-slate-900 p-4"
+          />
 
-          <form onSubmit={handleTransfer} className="space-y-5">
-            <div>
-              <label className="mb-2 block text-sm text-white/60">
-                المستلم
-              </label>
+          <input
+            type="number"
+            min="0"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="المبلغ"
+            className="mb-4 w-full rounded-2xl bg-slate-900 p-4"
+          />
 
-              <input
-                type="text"
-                value={recipient}
-                onChange={(e) => setRecipient(e.target.value)}
-                placeholder="اسم المستلم أو رقم الحساب"
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-4 outline-none focus:border-lime-400/40"
-              />
-            </div>
+          {error && <div className="mb-4 rounded-2xl bg-red-500/10 p-4 text-red-300">{error}</div>}
+          {message && <div className="mb-4 rounded-2xl bg-emerald-500/10 p-4 text-emerald-300">{message}</div>}
 
-            <div>
-              <label className="mb-2 block text-sm text-white/60">
-                المبلغ بالدولار
-              </label>
-
-              <input
-                type="number"
-                min="1"
-                step="0.01"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="100.00"
-                className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-4 text-lg outline-none focus:border-lime-400/40"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="w-full rounded-xl bg-lime-300 py-4 font-bold text-slate-950 hover:bg-lime-200"
-            >
-              إرسال التحويل
-            </button>
-          </form>
-
-          {message && (
-            <div className="mt-5 rounded-xl border border-white/10 bg-white/5 p-4 text-center text-sm text-white/70">
-              {message}
-            </div>
-          )}
-
-          <p className="mt-6 text-center text-xs text-white/30">
-            نظام NOLERA X — سيتم ربطه بقاعدة البيانات وخدمة التحويل لاحقًا.
-          </p>
+          <button
+            onClick={submit}
+            disabled={loading}
+            className="w-full rounded-2xl bg-blue-500 p-4 font-bold text-white disabled:opacity-50"
+          >
+            {loading ? "جاري التحويل..." : "إرسال"}
+          </button>
         </div>
       </div>
     </main>

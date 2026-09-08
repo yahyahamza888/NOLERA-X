@@ -1,151 +1,163 @@
 "use client"
 
-import { useState } from "react"
-import { useNoleraState } from "../../lib/use-nolera-state"
 import Link from "next/link"
-import { demoAccount, connectWallet, disconnectWallet } from "../../lib/account"
-import { Wallet, Copy, CheckCircle2, ArrowLeft, Link2, ShieldCheck } from "lucide-react"
+import { ArrowLeft, RefreshCw, WalletCards } from "lucide-react"
+import { useEffect, useState } from "react"
+import { getSupabaseClient } from "../../lib/nolera-auth"
+
+type Wallet = {
+  id: string
+  currency: string
+  balance: number
+}
+
+const currencies = ["SDG", "USD", "Pi", "BTC", "ETH", "USDT"]
 
 export default function WalletPage() {
-  const [connected, setConnected] = useState(demoAccount.walletConnected)
-  const [copied, setCopied] = useState("")
-  const { balance } = useNoleraState()
+  const supabase = getSupabaseClient()
+  const [wallets, setWallets] = useState<Wallet[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState("")
 
-  const copyAddress = (address: string) => {
-    navigator.clipboard.writeText(address)
-    setCopied(address)
-    setTimeout(() => setCopied(""), 1500)
-  }
+  async function loadWallets() {
+    setLoading(true)
+    setError("")
 
-  const handleWallet = () => {
-    if (connected) {
-      disconnectWallet()
-      setConnected(false)
-    } else {
-      connectWallet()
-      setConnected(true)
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
+
+    if (!user) {
+      setError("يجب تسجيل الدخول أولًا.")
+      setLoading(false)
+      return
     }
+
+    const { data, error } = await supabase
+      .from("wallets")
+      .select("id, currency, balance")
+      .eq("user_id", user.id)
+      .order("currency")
+
+    if (error) {
+      setError(error.message)
+      setLoading(false)
+      return
+    }
+
+    setWallets(data || [])
+    setLoading(false)
   }
+
+  useEffect(() => {
+    loadWallets()
+
+    const handler = () => loadWallets()
+    window.addEventListener("nolera-data-updated", handler)
+    window.addEventListener("nolera-auth-updated", handler)
+
+    return () => {
+      window.removeEventListener("nolera-data-updated", handler)
+      window.removeEventListener("nolera-auth-updated", handler)
+    }
+  }, [])
+
+  const balance = (currency: string) =>
+    Number(wallets.find((w) => w.currency === currency)?.balance || 0)
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white p-6">
+    <main className="min-h-screen bg-slate-950 px-4 py-8 text-white">
       <div className="mx-auto max-w-5xl">
-        <Link
-          href="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-white/60 hover:text-white"
-        >
-          <ArrowLeft size={18} />
-          العودة إلى NOLERA X
-        </Link>
-
-        <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-300">
-                <Wallet size={24} />
-              </div>
-              <div>
-                <h1 className="text-3xl font-bold">NOLERA Wallet</h1>
-                <p className="text-sm text-white/45">
-                  محفظتك الرقمية اللامركزية
-                </p>
-              </div>
-            </div>
-          </div>
+        <div className="mb-6 flex items-center justify-between">
+          <Link
+            href="/account"
+            className="flex items-center gap-2 text-sm text-slate-300"
+          >
+            <ArrowLeft size={18} />
+            الحساب
+          </Link>
 
           <button
-            onClick={handleWallet}
-            className={`rounded-xl px-5 py-3 font-semibold ${
-              connected
-                ? "border border-emerald-400/30 bg-emerald-400/10 text-emerald-300"
-                : "bg-cyan-400 text-slate-950"
-            }`}
+            onClick={loadWallets}
+            className="rounded-xl border border-white/10 bg-white/5 p-3"
           >
-            {connected ? "المحفظة متصلة ✓" : "ربط المحفظة"}
+            <RefreshCw size={18} />
           </button>
         </div>
 
-        <div className="mb-8 rounded-3xl border border-white/10 bg-white/5 p-6">
-          <div className="flex items-center gap-3">
-            <ShieldCheck className="text-emerald-300" size={22} />
-            <div>
-              <h2 className="font-semibold">الحساب المالي</h2>
-              <p className="text-sm text-white/45">
-                الحساب المركزي واللامركزي في واجهة واحدة
-              </p>
-            </div>
+        <div className="mb-8 flex items-center gap-4">
+          <div className="rounded-2xl bg-emerald-500/20 p-4">
+            <WalletCards className="text-emerald-400" size={30} />
           </div>
-
-          <div className="mt-6 grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl bg-black/20 p-5">
-              <p className="text-sm text-white/40">الرصيد المركزي</p>
-              <p className="mt-2 text-3xl font-bold">
-                ${balance.toLocaleString()}
-              </p>
-              <p className="mt-1 text-xs text-white/30">
-                {demoAccount.currency}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-black/20 p-5">
-              <p className="text-sm text-white/40">حالة Web3</p>
-              <p className="mt-2 text-xl font-bold">
-                {connected ? "Connected" : "Not Connected"}
-              </p>
-              <p className="mt-1 text-xs text-white/30">
-                الرصيد المحلي متصل بنظام NOLERA X
-              </p>
-            </div>
+          <div>
+            <h1 className="text-3xl font-bold">NOLERA X Wallet</h1>
+            <p className="text-slate-400">
+              أرصدتك الحقيقية المخزنة في قاعدة بيانات NOLERA X
+            </p>
           </div>
         </div>
 
-        <h2 className="mb-4 text-xl font-semibold">الأصول الرقمية</h2>
+        {loading && (
+          <div className="rounded-3xl border border-white/10 bg-white/5 p-8 text-center text-slate-400">
+            جاري تحميل الأرصدة...
+          </div>
+        )}
 
-        <div className="grid gap-4">
-          {demoAccount.assets.map((asset) => (
-            <div
-              key={asset.symbol}
-              className="rounded-3xl border border-white/10 bg-white/5 p-5"
-            >
-              <div className="flex flex-wrap items-center justify-between gap-4">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-white/10 font-bold">
-                      {asset.symbol.slice(0, 1)}
-                    </div>
+        {error && (
+          <div className="mb-5 rounded-2xl bg-red-500/10 p-4 text-red-300">
+            {error}
+          </div>
+        )}
 
-                    <div>
-                      <h3 className="font-semibold">{asset.name}</h3>
-                      <p className="text-xs text-white/40">
-                        {asset.symbol} • {asset.network}
-                      </p>
-                    </div>
-                  </div>
+        {!loading && !error && (
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {currencies.map((currency) => (
+              <div
+                key={currency}
+                className="rounded-3xl border border-white/10 bg-white/5 p-6"
+              >
+                <div className="mb-4 flex items-center justify-between">
+                  <span className="text-lg font-semibold">{currency}</span>
+                  <span className="rounded-full bg-emerald-500/10 px-3 py-1 text-xs text-emerald-300">
+                    Wallet
+                  </span>
                 </div>
 
-                <div className="text-right">
-                  <p className="text-xl font-bold">
-                    {asset.balance.toLocaleString()}
-                  </p>
-                  <p className="text-xs text-white/40">{asset.symbol}</p>
+                <div className="text-3xl font-bold">
+                  {balance(currency).toLocaleString(undefined, {
+                    maximumFractionDigits: 8,
+                  })}
+                </div>
+
+                <div className="mt-2 text-sm text-slate-500">
+                  {currency}
                 </div>
               </div>
+            ))}
+          </div>
+        )}
 
-              {asset.address && (
-                <div className="mt-4 flex items-center gap-2 rounded-xl bg-black/20 p-3 text-xs text-white/50">
-                  <Link2 size={15} />
-                  <span className="flex-1 truncate">{asset.address}</span>
-                  <button onClick={() => copyAddress(asset.address!)}>
-                    {copied === asset.address ? (
-                      <CheckCircle2 size={16} />
-                    ) : (
-                      <Copy size={16} />
-                    )}
-                  </button>
-                </div>
-              )}
-            </div>
-          ))}
+        <div className="mt-8 grid gap-3 sm:grid-cols-3">
+          <Link
+            href="/exchange"
+            className="rounded-2xl bg-emerald-500 p-4 text-center font-bold text-slate-950"
+          >
+            Exchange
+          </Link>
+
+          <Link
+            href="/transactions"
+            className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center font-semibold"
+          >
+            Transactions
+          </Link>
+
+          <Link
+            href="/transfers"
+            className="rounded-2xl border border-white/10 bg-white/5 p-4 text-center font-semibold"
+          >
+            Transfer
+          </Link>
         </div>
       </div>
     </main>
