@@ -1,120 +1,49 @@
-"use client";
+"use client"
 
-import { useState } from "react";
-
-type Message = {
-  role: "user" | "ai";
-  text: string;
-};
+import { useState } from "react"
 
 export default function AIPage() {
-  const [input, setInput] = useState("");
-  const [messages, setMessages] = useState<Message[]>([
-    {
-      role: "ai",
-      text: "مرحباً بك في NOLERA AI 👋 كيف يمكنني مساعدتك اليوم؟",
-    },
-  ]);
+  const [message, setMessage] = useState("")
+  const [answer, setAnswer] = useState("")
 
-  function sendMessage() {
-    const text = input.trim();
+  function ask() {
+    if (!message.trim()) return
 
-    if (!text) return;
-
-    setMessages((old) => [
-      ...old,
-      { role: "user", text },
-      {
-        role: "ai",
-        text: "تم استلام رسالتك. سيتم ربط NOLERA AI بمحرك ذكاء اصطناعي حقيقي في المرحلة القادمة.",
-      },
-    ]);
-
-    setInput("");
+    setAnswer(
+      "أنا NOLERA AI. هذه نسخة تجريبية حاليًا، وسنربطني بمحرك ذكاء اصطناعي حقيقي في المرحلة القادمة."
+    )
   }
 
   return (
-    <main dir="rtl" className="min-h-screen bg-[#f5f7fb] p-5">
-      <div className="mx-auto flex max-w-5xl flex-col">
+    <main dir="rtl" className="min-h-screen bg-slate-950 p-6 text-white">
+      <div className="mx-auto max-w-3xl">
+        <h1 className="text-4xl font-bold">🤖 NOLERA AI</h1>
+        <p className="mt-2 text-slate-400">
+          مساعدك الذكي داخل منظومة NOLERA X
+        </p>
 
-        <div className="mb-6">
-          <p className="text-sm text-slate-500">NOLERA X</p>
+        <div className="mt-8 rounded-3xl bg-slate-900 p-6">
+          <textarea
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            placeholder="اكتب سؤالك..."
+            className="min-h-40 w-full rounded-2xl border border-slate-700 bg-slate-950 p-4 text-white"
+          />
 
-          <h1 className="mt-1 text-3xl font-black">
-            NOLERA AI 🤖
-          </h1>
+          <button
+            onClick={ask}
+            className="mt-4 w-full rounded-xl bg-white p-4 font-bold text-slate-900"
+          >
+            اسأل NOLERA AI
+          </button>
 
-          <p className="mt-2 text-sm text-slate-500">
-            مساعدك الذكي داخل منظومة NOLERA X.
-          </p>
+          {answer && (
+            <div className="mt-6 rounded-2xl bg-slate-800 p-5 leading-8">
+              {answer}
+            </div>
+          )}
         </div>
-
-        <div className="flex min-h-[65vh] flex-col overflow-hidden rounded-[30px] border bg-white shadow-sm">
-
-          <div className="flex items-center gap-3 border-b p-5">
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-slate-950 text-xl text-white">
-              AI
-            </div>
-
-            <div>
-              <p className="font-black">NOLERA AI</p>
-              <p className="text-xs text-emerald-600">
-                ● متصل
-              </p>
-            </div>
-          </div>
-
-          <div className="flex-1 space-y-4 overflow-y-auto p-5">
-
-            {messages.map((message, index) => (
-              <div
-                key={index}
-                className={`flex ${
-                  message.role === "user"
-                    ? "justify-start"
-                    : "justify-end"
-                }`}
-              >
-                <div
-                  className={`max-w-[85%] rounded-3xl px-5 py-4 text-sm leading-7 ${
-                    message.role === "user"
-                      ? "bg-slate-950 text-white"
-                      : "bg-slate-100 text-slate-900"
-                  }`}
-                >
-                  {message.text}
-                </div>
-              </div>
-            ))}
-
-          </div>
-
-          <div className="border-t p-4">
-            <div className="flex gap-2">
-
-              <input
-                value={input}
-                onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") sendMessage();
-                }}
-                placeholder="اكتب رسالتك إلى NOLERA AI..."
-                className="min-w-0 flex-1 rounded-2xl bg-slate-100 px-5 py-4 text-sm outline-none focus:ring-2 focus:ring-slate-950"
-              />
-
-              <button
-                onClick={sendMessage}
-                className="rounded-2xl bg-slate-950 px-6 font-black text-white"
-              >
-                إرسال
-              </button>
-
-            </div>
-          </div>
-
-        </div>
-
       </div>
     </main>
-  );
+  )
 }

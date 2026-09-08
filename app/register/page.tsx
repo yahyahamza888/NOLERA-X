@@ -2,110 +2,80 @@
 
 import { useState } from "react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
+import { registerUser } from "../../lib/nolera-auth"
 
 export default function RegisterPage() {
+  const router = useRouter()
   const [name, setName] = useState("")
   const [email, setEmail] = useState("")
+  const [phone, setPhone] = useState("")
   const [password, setPassword] = useState("")
   const [message, setMessage] = useState("")
 
-  function handleRegister(e: React.FormEvent) {
-    e.preventDefault()
-
-    if (!name || !email || !password) {
-      setMessage("يرجى إكمال جميع البيانات")
-      return
+  function submit() {
+    try {
+      registerUser(name, email, phone, password)
+      router.push("/account")
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "حدث خطأ.")
     }
-
-    if (password.length < 6) {
-      setMessage("كلمة المرور يجب أن تكون 6 أحرف على الأقل")
-      return
-    }
-
-    setMessage("تم إنشاء الحساب بنجاح — وضع تجريبي")
   }
 
   return (
-    <main className="min-h-screen bg-slate-950 text-white flex items-center justify-center p-6">
-      <div className="w-full max-w-md rounded-3xl border border-white/10 bg-white/5 p-8 shadow-2xl">
-        <div className="mb-8 text-center">
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-white text-2xl font-black text-slate-950">
-            N
-          </div>
+    <main dir="rtl" className="min-h-screen bg-slate-100 p-5">
+      <div className="mx-auto mt-8 max-w-md rounded-[28px] bg-white p-7 shadow-xl">
+        <p className="text-sm font-bold text-slate-400">NOLERA X</p>
+        <h1 className="mt-2 text-3xl font-black">إنشاء حساب 👤</h1>
 
-          <h1 className="text-3xl font-bold">NOLERA X</h1>
-          <p className="mt-2 text-sm text-slate-400">
-            إنشاء حساب جديد
-          </p>
-        </div>
+        <input
+          className="mt-7 w-full rounded-2xl bg-slate-100 p-4 outline-none"
+          placeholder="الاسم الكامل"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-        <form onSubmit={handleRegister} className="space-y-5">
-          <div>
-            <label className="mb-2 block text-sm text-slate-300">
-              الاسم الكامل
-            </label>
-            <input
-              type="text"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="أدخل اسمك"
-              className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-white/30"
-            />
-          </div>
+        <input
+          className="mt-3 w-full rounded-2xl bg-slate-100 p-4 outline-none"
+          placeholder="البريد الإلكتروني"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+        />
 
-          <div>
-            <label className="mb-2 block text-sm text-slate-300">
-              البريد الإلكتروني
-            </label>
-            <input
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="name@example.com"
-              className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-white/30"
-            />
-          </div>
+        <input
+          className="mt-3 w-full rounded-2xl bg-slate-100 p-4 outline-none"
+          placeholder="رقم الهاتف"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
 
-          <div>
-            <label className="mb-2 block text-sm text-slate-300">
-              كلمة المرور
-            </label>
-            <input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="6 أحرف على الأقل"
-              className="w-full rounded-xl border border-white/10 bg-black/20 px-4 py-3 outline-none focus:border-white/30"
-            />
-          </div>
+        <input
+          className="mt-3 w-full rounded-2xl bg-slate-100 p-4 outline-none"
+          placeholder="كلمة المرور"
+          type="password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+        />
 
-          <button
-            type="submit"
-            className="w-full rounded-xl bg-white py-3 font-bold text-slate-950 transition hover:bg-slate-200"
-          >
-            إنشاء الحساب
-          </button>
-        </form>
+        <button
+          onClick={submit}
+          className="mt-5 w-full rounded-2xl bg-slate-950 py-4 font-black text-white"
+        >
+          إنشاء الحساب
+        </button>
 
         {message && (
-          <div className="mt-5 rounded-xl border border-white/10 bg-white/5 p-3 text-center text-sm text-slate-300">
+          <p className="mt-4 rounded-2xl bg-red-50 p-3 text-center text-sm font-bold text-red-600">
             {message}
-          </div>
+          </p>
         )}
 
-        <p className="mt-6 text-center text-sm text-slate-400">
-          لديك حساب بالفعل؟{" "}
-          <Link href="/login" className="font-semibold text-white">
+        <p className="mt-6 text-center text-sm text-slate-500">
+          لديك حساب؟
+          <Link href="/login" className="mr-2 font-black text-slate-950">
             تسجيل الدخول
           </Link>
         </p>
-
-        <Link
-          href="/"
-          className="mt-4 block text-center text-xs text-slate-500 hover:text-slate-300"
-        >
-          العودة إلى الرئيسية
-        </Link>
       </div>
     </main>
   )

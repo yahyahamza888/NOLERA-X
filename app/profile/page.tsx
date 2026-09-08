@@ -1,96 +1,70 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
-import { ArrowLeft, UserRound, Mail, Wallet, ShieldCheck, CreditCard } from "lucide-react"
-import { demoAccount } from "../../lib/account"
+import { updateCurrentUser } from "../../lib/nolera-auth"
+import { useNoleraAuth } from "../../lib/use-nolera-auth"
 
 export default function ProfilePage() {
+  const { user } = useNoleraAuth()
+  const [name, setName] = useState("")
+  const [phone, setPhone] = useState("")
+  const [message, setMessage] = useState("")
+
+  if (!user) {
+    return (
+      <main dir="rtl" className="p-6 text-center">
+        <Link href="/login">سجل الدخول أولًا</Link>
+      </main>
+    )
+  }
+
+  function save() {
+    try {
+      updateCurrentUser({ name, phone })
+      setMessage("تم حفظ بيانات الملف الشخصي.")
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "حدث خطأ.")
+    }
+  }
+
   return (
-    <main className="min-h-screen bg-slate-950 p-6 text-white">
-      <div className="mx-auto max-w-2xl">
-        <Link
-          href="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-white/60 hover:text-white"
-        >
-          <ArrowLeft size={18} />
-          العودة إلى NOLERA X
+    <main dir="rtl" className="min-h-screen bg-slate-100 p-5">
+      <div className="mx-auto max-w-xl rounded-[28px] bg-white p-7 shadow">
+        <Link href="/account" className="text-sm font-bold text-slate-500">
+          ← الحساب
         </Link>
 
-        <div className="mb-8">
-          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-cyan-400/10 text-cyan-300">
-            <UserRound size={30} />
-          </div>
+        <h1 className="mt-5 text-3xl font-black">الملف الشخصي 👤</h1>
 
-          <h1 className="mt-5 text-3xl font-bold">Profile</h1>
-          <p className="mt-2 text-white/40">
-            الملف الشخصي وحساب NOLERA X
+        <p className="mt-5 text-sm text-slate-500">{user.email}</p>
+
+        <input
+          className="mt-5 w-full rounded-2xl bg-slate-100 p-4 outline-none"
+          placeholder={user.name}
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+
+        <input
+          className="mt-3 w-full rounded-2xl bg-slate-100 p-4 outline-none"
+          placeholder={user.phone || "رقم الهاتف"}
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+        />
+
+        <button
+          onClick={save}
+          className="mt-5 w-full rounded-2xl bg-slate-950 py-4 font-black text-white"
+        >
+          حفظ التغييرات
+        </button>
+
+        {message && (
+          <p className="mt-4 text-center text-sm font-bold text-green-600">
+            {message}
           </p>
-        </div>
-
-        <div className="space-y-4">
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="flex items-center gap-4">
-              <UserRound size={20} className="text-cyan-300" />
-              <div>
-                <p className="text-xs text-white/35">الاسم</p>
-                <p className="mt-1 font-semibold">{demoAccount.name}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="flex items-center gap-4">
-              <Mail size={20} className="text-cyan-300" />
-              <div>
-                <p className="text-xs text-white/35">البريد الإلكتروني</p>
-                <p className="mt-1 font-semibold">{demoAccount.email}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="flex items-center gap-4">
-              <CreditCard size={20} className="text-cyan-300" />
-              <div>
-                <p className="text-xs text-white/35">NOLERA ID</p>
-                <p className="mt-1 font-semibold">{demoAccount.id}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="flex items-center gap-4">
-              <Wallet size={20} className="text-cyan-300" />
-              <div>
-                <p className="text-xs text-white/35">العملة الأساسية</p>
-                <p className="mt-1 font-semibold">{demoAccount.currency}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
-            <div className="flex items-center gap-4">
-              <ShieldCheck size={20} className="text-cyan-300" />
-              <div>
-                <p className="text-xs text-white/35">حالة المحفظة</p>
-                <p className="mt-1 font-semibold">
-                  {demoAccount.walletConnected ? "متصلة" : "غير متصلة"}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <Link
-          href="/settings"
-          className="mt-6 block rounded-xl bg-cyan-400 py-4 text-center font-bold text-slate-950 hover:bg-cyan-300"
-        >
-          إدارة إعدادات الحساب
-        </Link>
-
-        <p className="mt-6 text-center text-xs text-white/30">
-          وضع تجريبي — بيانات الحساب الحالية ليست مرتبطة بقاعدة بيانات حقيقية.
-        </p>
+        )}
       </div>
     </main>
   )

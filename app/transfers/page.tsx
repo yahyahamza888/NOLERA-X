@@ -3,13 +3,14 @@
 import { useState } from "react"
 import Link from "next/link"
 import { ArrowLeft, Send, Wallet } from "lucide-react"
-import { transfer, financeState } from "../../lib/finance"
+import { transfer } from "../../lib/nolera-actions"
+import { useNoleraState } from "../../lib/use-nolera-state"
 
 export default function TransfersPage() {
   const [recipient, setRecipient] = useState("")
   const [amount, setAmount] = useState("")
   const [message, setMessage] = useState("")
-  const [balance, setBalance] = useState(financeState.balance)
+  const { balance } = useNoleraState()
 
   function handleTransfer(e: React.FormEvent) {
     e.preventDefault()
@@ -26,18 +27,15 @@ export default function TransfersPage() {
       return
     }
 
-    if (value > financeState.balance) {
-      setMessage("الرصيد غير كافٍ")
-      return
-    }
-
-    const success = transfer(value, recipient, "تحويل مالي")
-
-    if (success) {
-      setBalance(financeState.balance)
+    try {
+      transfer(value, recipient.trim(), "تحويل مالي")
       setRecipient("")
       setAmount("")
       setMessage(`تم تحويل $${value.toLocaleString()} بنجاح`)
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "تعذر تنفيذ التحويل"
+      )
     }
   }
 
@@ -123,7 +121,7 @@ export default function TransfersPage() {
           )}
 
           <p className="mt-6 text-center text-xs text-white/30">
-            وضع تجريبي — لا توجد حركة مالية حقيقية.
+            نظام NOLERA X — سيتم ربطه بقاعدة البيانات وخدمة التحويل لاحقًا.
           </p>
         </div>
       </div>

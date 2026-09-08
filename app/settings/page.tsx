@@ -1,110 +1,56 @@
-"use client";
+"use client"
 
-import { useState } from "react";
+import { useState } from "react"
+import Link from "next/link"
 
 export default function SettingsPage() {
-  const [notifications, setNotifications] = useState(true);
-  const [marketing, setMarketing] = useState(false);
-  const [language, setLanguage] = useState("العربية");
+  const [notifications, setNotifications] = useState(true)
+  const [language, setLanguage] = useState("العربية")
 
   return (
-    <main className="min-h-screen bg-[#05070b] text-white p-6 md:p-10">
-      <div className="mx-auto max-w-3xl">
-        <h1 className="text-3xl font-bold">Settings</h1>
-        <p className="mt-2 text-white/60">
-          تخصيص إعدادات حسابك في NOLERA X
-        </p>
+    <main dir="rtl" className="min-h-screen bg-slate-100 p-5">
+      <div className="mx-auto max-w-xl rounded-[28px] bg-white p-7 shadow">
+        <Link href="/account" className="text-sm font-bold text-slate-500">
+          ← الحساب
+        </Link>
 
-        <div className="mt-8 space-y-4">
+        <h1 className="mt-5 text-3xl font-black">الإعدادات ⚙️</h1>
 
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-            <h2 className="font-bold">General</h2>
-
-            <div className="mt-5 flex items-center justify-between gap-4">
-              <div>
-                <p>اللغة</p>
-                <p className="mt-1 text-sm text-white/40">
-                  اختر لغة واجهة NOLERA X
-                </p>
-              </div>
-
-              <select
-                value={language}
-                onChange={(e) => setLanguage(e.target.value)}
-                className="rounded-xl border border-white/10 bg-black/30 px-4 py-2 outline-none"
-              >
-                <option>العربية</option>
-                <option>English</option>
-              </select>
+        <div className="mt-7 rounded-2xl bg-slate-50 p-5">
+          <div className="flex items-center justify-between">
+            <div>
+              <h2 className="font-black">الإشعارات</h2>
+              <p className="mt-1 text-sm text-slate-500">
+                تنبيهات الحساب والمعاملات
+              </p>
             </div>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-            <h2 className="font-bold">Notifications</h2>
-
-            <div className="mt-5 flex items-center justify-between gap-4">
-              <div>
-                <p>إشعارات الحساب</p>
-                <p className="mt-1 text-sm text-white/40">
-                  إشعارات التحويلات والعمليات المهمة.
-                </p>
-              </div>
-
-              <button
-                onClick={() => setNotifications(!notifications)}
-                className={`rounded-full px-5 py-2 font-semibold ${
-                  notifications
-                    ? "bg-cyan-400 text-black"
-                    : "bg-white/10 text-white"
-                }`}
-              >
-                {notifications ? "مفعّل" : "متوقف"}
-              </button>
-            </div>
-
-            <div className="mt-6 flex items-center justify-between gap-4 border-t border-white/10 pt-6">
-              <div>
-                <p>العروض والتحديثات</p>
-                <p className="mt-1 text-sm text-white/40">
-                  استقبال الأخبار والعروض من NOLERA X.
-                </p>
-              </div>
-
-              <button
-                onClick={() => setMarketing(!marketing)}
-                className={`rounded-full px-5 py-2 font-semibold ${
-                  marketing
-                    ? "bg-emerald-400 text-black"
-                    : "bg-white/10 text-white"
-                }`}
-              >
-                {marketing ? "مفعّل" : "متوقف"}
-              </button>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-red-300/10 bg-red-300/5 p-6">
-            <h2 className="font-bold text-red-200">Danger Zone</h2>
-            <p className="mt-2 text-sm text-white/50">
-              خيارات حذف الحساب أو تعطيله ستتم إضافتها بعد بناء نظام الحسابات
-              الحقيقي.
-            </p>
 
             <button
-              disabled
-              className="mt-5 rounded-xl border border-red-300/20 px-5 py-3 text-red-200/40"
+              onClick={() => setNotifications(!notifications)}
+              className={`rounded-full px-5 py-2 font-black ${
+                notifications
+                  ? "bg-green-600 text-white"
+                  : "bg-slate-200"
+              }`}
             >
-              حذف الحساب
+              {notifications ? "مفعلة" : "متوقفة"}
             </button>
           </div>
-
         </div>
 
-        <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.02] p-4 text-sm text-white/40">
-          إعدادات النسخة الحالية تجريبية وسيتم حفظها بشكل دائم بعد ربط قاعدة
-          البيانات.
+        <div className="mt-4 rounded-2xl bg-slate-50 p-5">
+          <h2 className="font-black">لغة التطبيق</h2>
+
+          <select
+            value={language}
+            onChange={(e) => setLanguage(e.target.value)}
+            className="mt-3 w-full rounded-2xl bg-white p-4 outline-none"
+          >
+            <option>العربية</option>
+            <option>English</option>
+          </select>
         </div>
       </div>
     </main>
-  );
+  )
 }

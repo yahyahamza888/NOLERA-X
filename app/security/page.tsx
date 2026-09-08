@@ -1,94 +1,80 @@
-"use client";
+"use client"
 
-import { useState } from "react";
+import { useState } from "react"
+import Link from "next/link"
+import { changePassword } from "../../lib/nolera-auth"
+import { useNoleraAuth } from "../../lib/use-nolera-auth"
 
 export default function SecurityPage() {
-  const [twoFactor, setTwoFactor] = useState(false);
-  const [biometric, setBiometric] = useState(false);
+  const { user } = useNoleraAuth()
+  const [oldPassword, setOldPassword] = useState("")
+  const [newPassword, setNewPassword] = useState("")
+  const [message, setMessage] = useState("")
+
+  if (!user) {
+    return (
+      <main dir="rtl" className="p-6 text-center">
+        <Link href="/login">سجل الدخول أولًا</Link>
+      </main>
+    )
+  }
+
+  function savePassword() {
+    try {
+      changePassword(oldPassword, newPassword)
+      setOldPassword("")
+      setNewPassword("")
+      setMessage("تم تغيير كلمة المرور بنجاح.")
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : "حدث خطأ.")
+    }
+  }
 
   return (
-    <main className="min-h-screen bg-[#05070b] text-white p-6 md:p-10">
-      <div className="mx-auto max-w-3xl">
-        <h1 className="text-3xl font-bold">Security Center</h1>
-        <p className="mt-2 text-white/60">
-          إدارة حماية حسابك في NOLERA X
-        </p>
+    <main dir="rtl" className="min-h-screen bg-slate-100 p-5">
+      <div className="mx-auto max-w-xl rounded-[28px] bg-white p-7 shadow">
+        <Link href="/account" className="text-sm font-bold text-slate-500">
+          ← الحساب
+        </Link>
 
-        <div className="mt-8 space-y-4">
+        <h1 className="mt-5 text-3xl font-black">أمان الحساب 🛡️</h1>
 
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="font-bold">Two-Factor Authentication</h2>
-                <p className="mt-1 text-sm text-white/50">
-                  طبقة حماية إضافية عند تسجيل الدخول.
-                </p>
-              </div>
-
-              <button
-                onClick={() => setTwoFactor(!twoFactor)}
-                className={`rounded-full px-5 py-2 font-semibold ${
-                  twoFactor
-                    ? "bg-emerald-400 text-black"
-                    : "bg-white/10 text-white"
-                }`}
-              >
-                {twoFactor ? "مفعّل" : "غير مفعّل"}
-              </button>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <h2 className="font-bold">Biometric Login</h2>
-                <p className="mt-1 text-sm text-white/50">
-                  تسجيل الدخول باستخدام بصمة الجهاز عند توفرها.
-                </p>
-              </div>
-
-              <button
-                onClick={() => setBiometric(!biometric)}
-                className={`rounded-full px-5 py-2 font-semibold ${
-                  biometric
-                    ? "bg-cyan-400 text-black"
-                    : "bg-white/10 text-white"
-                }`}
-              >
-                {biometric ? "مفعّل" : "غير مفعّل"}
-              </button>
-            </div>
-          </div>
-
-          <div className="rounded-3xl border border-white/10 bg-white/[0.03] p-6">
-            <h2 className="font-bold">Login Activity</h2>
-
-            <div className="mt-5 space-y-4">
-              <div className="flex items-center justify-between border-b border-white/10 pb-4">
-                <div>
-                  <p className="font-medium">Android Device</p>
-                  <p className="text-sm text-white/40">الآن</p>
-                </div>
-                <span className="text-emerald-300">الجلسة الحالية</span>
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="font-medium">Web Browser</p>
-                  <p className="text-sm text-white/40">أمس</p>
-                </div>
-                <span className="text-white/50">تم تسجيل الدخول</span>
-              </div>
-            </div>
-          </div>
-
+        <div className="mt-6 rounded-2xl bg-green-50 p-5">
+          <p className="font-black text-green-700">الحساب نشط</p>
+          <p className="mt-1 text-sm text-green-600">
+            يمكنك تغيير كلمة المرور من هنا.
+          </p>
         </div>
 
-        <div className="mt-6 rounded-2xl border border-red-300/10 bg-red-300/5 p-4 text-sm text-red-100/70">
-          هذه إعدادات تجريبية. المصادقة الحقيقية وإدارة الجلسات ستحتاج إلى
-          نظام Backend آمن قبل إطلاق الخدمات المالية.
-        </div>
+        <input
+          className="mt-6 w-full rounded-2xl bg-slate-100 p-4 outline-none"
+          type="password"
+          placeholder="كلمة المرور الحالية"
+          value={oldPassword}
+          onChange={(e) => setOldPassword(e.target.value)}
+        />
+
+        <input
+          className="mt-3 w-full rounded-2xl bg-slate-100 p-4 outline-none"
+          type="password"
+          placeholder="كلمة المرور الجديدة"
+          value={newPassword}
+          onChange={(e) => setNewPassword(e.target.value)}
+        />
+
+        <button
+          onClick={savePassword}
+          className="mt-5 w-full rounded-2xl bg-slate-950 py-4 font-black text-white"
+        >
+          تغيير كلمة المرور
+        </button>
+
+        {message && (
+          <p className="mt-4 text-center text-sm font-bold text-green-600">
+            {message}
+          </p>
+        )}
       </div>
     </main>
-  );
+  )
 }

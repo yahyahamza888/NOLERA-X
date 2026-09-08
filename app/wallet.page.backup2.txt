@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useNoleraState } from "../../lib/use-nolera-state"
 import Link from "next/link"
 import { demoAccount, connectWallet, disconnectWallet } from "../../lib/account"
 import { Wallet, Copy, CheckCircle2, ArrowLeft, Link2, ShieldCheck } from "lucide-react"
@@ -9,7 +8,6 @@ import { Wallet, Copy, CheckCircle2, ArrowLeft, Link2, ShieldCheck } from "lucid
 export default function WalletPage() {
   const [connected, setConnected] = useState(demoAccount.walletConnected)
   const [copied, setCopied] = useState("")
-  const { balance } = useNoleraState()
 
   const copyAddress = (address: string) => {
     navigator.clipboard.writeText(address)
@@ -80,7 +78,7 @@ export default function WalletPage() {
             <div className="rounded-2xl bg-black/20 p-5">
               <p className="text-sm text-white/40">الرصيد المركزي</p>
               <p className="mt-2 text-3xl font-bold">
-                ${balance.toLocaleString()}
+                ${demoAccount.fiatBalance.toLocaleString()}
               </p>
               <p className="mt-1 text-xs text-white/30">
                 {demoAccount.currency}
@@ -93,7 +91,7 @@ export default function WalletPage() {
                 {connected ? "Connected" : "Not Connected"}
               </p>
               <p className="mt-1 text-xs text-white/30">
-                الرصيد المحلي متصل بنظام NOLERA X
+                بيانات تجريبية — لا توجد معاملة حقيقية
               </p>
             </div>
           </div>

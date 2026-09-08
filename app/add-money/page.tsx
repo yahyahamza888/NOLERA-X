@@ -1,14 +1,15 @@
-"use client"
+ "use client"
 
 import { useState } from "react"
 import Link from "next/link"
 import { ArrowLeft, Plus, Wallet } from "lucide-react"
-import { deposit, financeState } from "../../lib/finance"
+import { deposit } from "../../lib/nolera-actions"
+import { useNoleraState } from "../../lib/use-nolera-state"
 
 export default function AddMoneyPage() {
   const [amount, setAmount] = useState("")
   const [message, setMessage] = useState("")
-  const [balance, setBalance] = useState(financeState.balance)
+  const { balance } = useNoleraState()
 
   function handleDeposit(e: React.FormEvent) {
     e.preventDefault()
@@ -20,12 +21,12 @@ export default function AddMoneyPage() {
       return
     }
 
-    const success = deposit(value, "إيداع في الحساب")
-
-    if (success) {
-      setBalance(financeState.balance)
+    try {
+      deposit(value, "إيداع في الحساب")
       setAmount("")
       setMessage(`تم إيداع $${value.toLocaleString()} بنجاح`)
+    } catch {
+      setMessage("تعذر تنفيذ عملية الإيداع")
     }
   }
 
@@ -97,7 +98,7 @@ export default function AddMoneyPage() {
           )}
 
           <p className="mt-6 text-center text-xs text-white/30">
-            وضع تجريبي — لا توجد حركة مالية حقيقية.
+            نظام NOLERA X — سيتم ربطه بقاعدة البيانات ومزود الدفع لاحقًا.
           </p>
         </div>
       </div>

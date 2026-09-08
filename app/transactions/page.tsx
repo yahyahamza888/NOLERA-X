@@ -1,97 +1,89 @@
 "use client"
 
-import Link from "next/link"
-import { ArrowLeft, ArrowDownToLine, ArrowUpFromLine, Send } from "lucide-react"
-import { getTransactions, financeState } from "../../lib/finance"
+import { useNoleraState } from "../../lib/use-nolera-state"
 
 export default function TransactionsPage() {
-  const transactions = getTransactions()
+  const { transactions, balance } = useNoleraState()
+
+  const formatAmount = (amount: number) =>
+    amount.toLocaleString("ar-SD")
+
+  const getTypeLabel = (type: string) => {
+    switch (type) {
+      case "deposit":
+        return "إيداع"
+      case "withdraw":
+        return "سحب"
+      case "transfer":
+        return "تحويل"
+      case "purchase":
+        return "شراء"
+      default:
+        return "عملية"
+    }
+  }
 
   return (
-    <main className="min-h-screen bg-slate-950 p-6 text-white">
-      <div className="mx-auto max-w-3xl">
-        <Link
-          href="/"
-          className="mb-8 inline-flex items-center gap-2 text-sm text-white/60 hover:text-white"
-        >
-          <ArrowLeft size={18} />
-          العودة إلى NOLERA X
-        </Link>
-
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold">Transactions</h1>
-          <p className="mt-2 text-white/40">
-            سجل العمليات المالية في حساب NOLERA X
+    <main dir="rtl" className="min-h-screen bg-slate-950 text-white p-6">
+      <div className="mx-auto max-w-4xl space-y-6">
+        <div>
+          <p className="text-sm text-slate-400">NOLERA X</p>
+          <h1 className="text-3xl font-bold">سجل العمليات</h1>
+          <p className="mt-2 text-slate-400">
+            جميع عمليات حسابك المسجلة داخل النظام
           </p>
         </div>
 
-        <div className="mb-6 rounded-2xl border border-white/10 bg-white/5 p-5">
-          <p className="text-sm text-white/40">الرصيد الحالي</p>
+        <div className="rounded-2xl border border-white/10 bg-white/5 p-5">
+          <p className="text-sm text-slate-400">الرصيد الحالي</p>
           <p className="mt-2 text-3xl font-bold">
-            ${financeState.balance.toLocaleString()}
+            {formatAmount(balance)}
           </p>
         </div>
 
-        {transactions.length === 0 ? (
-          <div className="rounded-2xl border border-white/10 bg-white/5 p-10 text-center">
-            <p className="text-white/60">لا توجد عمليات بعد</p>
-            <p className="mt-2 text-sm text-white/30">
-              عند إجراء إيداع أو سحب أو تحويل ستظهر العملية هنا.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {transactions.map((transaction) => {
-              const isDeposit = transaction.type === "deposit"
-              const isWithdraw = transaction.type === "withdraw"
-
-              return (
-                <div
-                  key={transaction.id}
-                  className="flex items-center justify-between rounded-2xl border border-white/10 bg-white/5 p-5"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white/10">
-                      {isDeposit ? (
-                        <ArrowDownToLine size={22} />
-                      ) : isWithdraw ? (
-                        <ArrowUpFromLine size={22} />
-                      ) : (
-                        <Send size={22} />
-                      )}
-                    </div>
-
-                    <div>
-                      <p className="font-semibold">
-                        {transaction.description}
-                      </p>
-
-                      <p className="mt-1 text-xs text-white/30">
-                        {new Date(transaction.date).toLocaleString()}
-                      </p>
-                    </div>
+        <section className="space-y-3">
+          {transactions.length === 0 ? (
+            <div className="rounded-2xl border border-white/10 bg-white/5 p-8 text-center">
+              <p className="text-lg font-semibold">لا توجد عمليات حتى الآن</p>
+              <p className="mt-2 text-sm text-slate-400">
+                عند تنفيذ إيداع أو سحب أو تحويل أو شراء ستظهر العملية هنا.
+              </p>
+            </div>
+          ) : (
+            transactions.map((tx) => (
+              <div
+                key={tx.id}
+                className="rounded-2xl border border-white/10 bg-white/5 p-5"
+              >
+                <div className="flex items-center justify-between gap-4">
+                  <div>
+                    <p className="font-semibold">{tx.title}</p>
+                    <p className="mt-1 text-sm text-slate-400">
+                      {getTypeLabel(tx.type)}
+                      {tx.meta ? ` • ${tx.meta}` : ""}
+                    </p>
+                    <p className="mt-1 text-xs text-slate-500">
+                      {tx.date}
+                    </p>
                   </div>
 
-                  <div className="text-right">
-                    <p className="font-bold">
-                      {isDeposit ? "+" : "-"}$
-                      {transaction.amount.toLocaleString()}
+                  <div className="text-left">
+                    <p className="text-lg font-bold">
+                      {tx.type === "deposit" ? "+" : "-"}
+                      {formatAmount(tx.amount)}
                     </p>
-
-                    <p className="mt-1 text-xs text-white/30">
-                      {transaction.status === "completed"
-                        ? "مكتملة"
-                        : "قيد التنفيذ"}
+                    <p className="text-xs text-slate-400">
+                      {tx.currency} • {tx.status === "completed" ? "مكتملة" : "معلقة"}
                     </p>
                   </div>
                 </div>
-              )
-            })}
-          </div>
-        )}
+              </div>
+            ))
+          )}
+        </section>
 
-        <p className="mt-8 text-center text-xs text-white/30">
-          وضع تجريبي — سجل العمليات محفوظ مؤقتًا داخل النظام.
+        <p className="text-center text-xs text-slate-500">
+          نظام NOLERA X — السجل المحلي جاهز للربط بقاعدة البيانات لاحقًا.
         </p>
       </div>
     </main>
