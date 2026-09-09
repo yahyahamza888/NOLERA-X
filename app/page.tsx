@@ -27,6 +27,8 @@ import {
   ChevronLeft,
   Zap,
   CircleUserRound,
+  Megaphone,
+  Heart,
 } from "lucide-react";
 
 const services = [
@@ -39,6 +41,8 @@ const services = [
   { name: "المتجر", href: "/store", icon: Store, tone: "purple" },
   { name: "الأسواق", href: "/markets", icon: Globe2, tone: "orange" },
   { name: "أبو حنين AI", href: "/ai", icon: Sparkles, tone: "purple" },
+  { name: "NOLERA PARADISE", href: "/paradise", icon: Heart, tone: "purple" },
+  { name: "NOLERA ADS", href: "/ads", icon: Megaphone, tone: "orange" },
   { name: "NOLERA ID", href: "/id", icon: CircleUserRound, tone: "orange" },
   { name: "التحقق", href: "/verification", icon: ShieldCheck, tone: "purple" },
   { name: "الإعدادات", href: "/settings", icon: Settings, tone: "orange" },
@@ -483,7 +487,7 @@ export default function HomePage() {
       )}
 
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-purple-100 bg-white/95 px-2 py-2 shadow-[0_-5px_20px_rgba(91,45,120,.08)] backdrop-blur-xl lg:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-3 gap-1">
+        <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
           <Link
             href="/"
             className="flex flex-col items-center gap-1 rounded-xl bg-purple-50 px-2 py-2 text-[11px] font-black text-purple-700"
@@ -499,8 +503,22 @@ export default function HomePage() {
             محفظتي
           </Link>
           <Link
+            href="/paradise"
+            className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-bold text-slate-500"
+          >
+            <Heart size={20} />
+            Paradise
+          </Link>
+          <Link
+            href="/ads"
+            className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-bold text-slate-500"
+          >
+            <Megaphone size={20} />
+            Ads
+          </Link>
+          <Link
             href="/profile"
-            className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-bold text-slate-500"
+            className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-bold text-slate-500"
           >
             <UserRound size={20} />
             حسابي
