@@ -144,3 +144,18 @@ export async function getMyProducts() {
 
   return data || []
 }
+
+export async function getStoreProduct(
+  productId: string,
+): Promise<StoreProduct | null> {
+  if (!productId) throw new Error("المنتج غير صحيح.")
+
+  const { data, error } = await supabase.rpc(
+    "nolera_get_product",
+    { p_product_id: productId },
+  )
+
+  if (error) throw new Error(error.message)
+
+  return (data || null) as StoreProduct | null
+}

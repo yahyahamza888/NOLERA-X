@@ -1,0 +1,307 @@
+"use client"
+
+import Link from "next/link"
+import { useEffect, useState } from "react"
+import {
+  ArrowLeft,
+  Check,
+  ShoppingBag,
+  Sparkles,
+  Wallet,
+} from "lucide-react"
+import {
+  getStoreProduct,
+  type StoreProduct,
+} from "../../../lib/nolera-store"
+import { getWallets } from "../../../lib/nolera-finance"
+import { getSupabaseClient } from "../../../lib/nolera-auth"
+
+type Props = {
+  params: Promise<{ id: string }>
+}
+
+export default function StoreProductPage({
+  params,
+}: Props) {
+  const [product, setProduct] =
+    useState<StoreProduct | null>(null)
+
+  const [loading, setLoading] = useState(true)
+  const [buying, setBuying] = useState(false)
+  const [message, setMessage] = useState("")
+  const [error, setError] = useState("")
+  const [balance, setBalance] = useState(0)
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const { id } = await params
+
+        const [item, wallets] =
+          await Promise.all([
+            getStoreProduct(id),
+            getWallets(),
+          ])
+
+        setProduct(item)
+
+        const sdg = wallets.find(
+          (wallet: any) =>
+            String(wallet.currency).toUpperCase() ===
+            "SDG",
+        )
+
+        setBalance(Number(sdg?.balance || 0))
+      } catch (err: any) {
+        setError(
+          err?.message ||
+            "تعذر تحميل المنتج.",
+        )
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    load()
+  }, [params])
+
+  async function buyNow() {
+    if (!product) return
+
+    if (balance < Number(product.price)) {
+      setError(
+        `الرصيد غير كافٍ. السعر ${Number(
+          product.price,
+        ).toLocaleString()} ${product.currency}.`,
+      )
+      return
+    }
+
+    try {
+      setBuying(true)
+      setError("")
+      setMessage("")
+
+      const supabase =
+        getSupabaseClient()
+
+      const {
+        data: { user },
+      } = await supabase.auth.getUser()
+
+      if (!user) {
+        throw new Error(
+          "يجب تسجيل الدخول لإكمال الشراء.",
+        )
+      }
+
+      const { data, error } =
+        await supabase.rpc(
+          "nolera_checkout",
+          {
+            p_items: [
+              {
+                product_id: product.id,
+                quantity: 1,
+              },
+            ],
+          },
+        )
+
+      if (error) {
+        throw new Error(error.message)
+      }
+
+      if (!data?.success) {
+        throw new Error(
+          "تعذر إكمال عملية الشراء.",
+        )
+      }
+
+      setBalance(
+        Number(
+          data.buyer_balance ??
+            balance - Number(product.price),
+        ),
+      )
+
+      setMessage(
+        `تم الشراء بنجاح 🎉 رقم الطلب: ${
+          data.reference || data.order_id
+        }`,
+      )
+
+      window.dispatchEvent(
+        new Event("nolera-data-updated"),
+      )
+    } catch (err: any) {
+      setError(
+        err?.message ||
+          "تعذر إكمال الشراء.",
+      )
+    } finally {
+      setBuying(false)
+    }
+  }
+
+  if (loading) {
+    return (
+      <main
+        dir="rtl"
+        className="min-h-screen bg-[#faf8ff] p-6"
+      >
+        <div className="mx-auto max-w-5xl">
+          <div className="h-12 w-32 animate-pulse rounded-2xl bg-white" />
+          <div className="mt-6 h-96 animate-pulse rounded-[30px] bg-white" />
+        </div>
+      </main>
+    )
+  }
+
+  if (!product) {
+    return (
+      <main
+        dir="rtl"
+        className="min-h-screen bg-[#faf8ff] px-4 py-10"
+      >
+        <div className="mx-auto max-w-xl rounded-[30px] bg-white p-8 text-center shadow-sm">
+          <div className="text-6xl">📦</div>
+
+          <h1 className="mt-5 text-2xl font-black">
+            المنتج غير موجود
+          </h1>
+
+          <p className="mt-2 text-sm text-slate-500">
+            ربما تم حذف المنتج أو لم يعد منشورًا.
+          </p>
+
+          <Link
+            href="/store"
+            className="mt-6 inline-flex items-center gap-2 rounded-2xl bg-purple-600 px-5 py-3 text-sm font-black text-white"
+          >
+            <ArrowLeft size={17} />
+            العودة للمتجر
+          </Link>
+        </div>
+      </main>
+    )
+  }
+
+  return (
+    <main
+      dir="rtl"
+      className="min-h-screen bg-[#faf8ff] text-slate-900"
+    >
+      <header className="border-b border-purple-100 bg-white">
+        <div className="mx-auto flex max-w-6xl items-center justify-between gap-3 px-4 py-4 sm:px-6">
+          <Link
+            href="/store"
+            className="flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-bold"
+          >
+            <ArrowLeft size={18} />
+            المتجر
+          </Link>
+
+          <Link
+            href="/orders"
+            className="rounded-2xl bg-slate-950 px-4 py-2.5 text-sm font-bold text-white"
+          >
+            طلباتي
+          </Link>
+        </div>
+      </header>
+
+      <section className="mx-auto max-w-6xl px-4 py-7 sm:px-6 sm:py-10">
+        {message && (
+          <div className="mb-6 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold text-emerald-700">
+            <Check size={18} />
+            {message}
+          </div>
+        )}
+
+        {error && (
+          <div className="mb-6 rounded-2xl border border-red-200 bg-red-50 p-4 text-sm font-bold text-red-700">
+            {error}
+          </div>
+        )}
+
+        <div className="overflow-hidden rounded-[32px] border border-slate-200 bg-white shadow-sm">
+          <div className="grid lg:grid-cols-2">
+            <div className="flex min-h-[360px] items-center justify-center bg-gradient-to-br from-purple-100 via-white to-orange-100 p-10">
+              <div className="text-[110px] drop-shadow-sm">
+                {product.icon || "📦"}
+              </div>
+            </div>
+
+            <div className="p-6 sm:p-10">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="rounded-full bg-purple-50 px-3 py-1.5 text-xs font-black text-purple-700">
+                  {product.category ||
+                    "منتج رقمي"}
+                </span>
+
+                <span className="rounded-full bg-emerald-50 px-3 py-1.5 text-xs font-black text-emerald-700">
+                  منشور
+                </span>
+              </div>
+
+              <h1 className="mt-5 text-3xl font-black leading-tight sm:text-4xl">
+                {product.name}
+              </h1>
+
+              <p className="mt-5 whitespace-pre-line text-sm leading-8 text-slate-600 sm:text-base">
+                {product.description}
+              </p>
+
+              <div className="mt-8 rounded-2xl bg-slate-50 p-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm text-slate-500">
+                    السعر
+                  </span>
+
+                  <span className="text-2xl font-black">
+                    {Number(
+                      product.price,
+                    ).toLocaleString()}{" "}
+                    {product.currency}
+                  </span>
+                </div>
+
+                <div className="mt-3 flex items-center gap-2 text-xs text-slate-400">
+                  <Wallet size={14} />
+                  رصيدك الحالي:{" "}
+                  {balance.toLocaleString()} SDG
+                </div>
+              </div>
+
+              <button
+                onClick={buyNow}
+                disabled={buying}
+                className="mt-5 flex w-full items-center justify-center gap-2 rounded-2xl bg-gradient-to-r from-purple-600 to-orange-500 py-4 text-sm font-black text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+              >
+                <ShoppingBag size={19} />
+                {buying
+                  ? "جارٍ إتمام الشراء..."
+                  : "شراء الآن"}
+              </button>
+
+              <Link
+                href="/ai"
+                className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-purple-200 bg-purple-50 py-3.5 text-sm font-black text-purple-700"
+              >
+                <Sparkles size={17} />
+                اصنع منتجًا مشابهًا بالـAI
+              </Link>
+
+              <p className="mt-5 text-center text-[11px] leading-5 text-slate-400">
+                الدفع يتم من رصيد NOLERA داخل النظام،
+                وتتم العملية عبر معاملة آمنة على الخادم.
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+    </main>
+  )
+}
+
