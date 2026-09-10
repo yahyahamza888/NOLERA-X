@@ -578,12 +578,26 @@ export default function StorePage() {
 
             {cart.length > 0 && (
               <div className="border-t border-slate-100 p-5">
-                <div className="mb-3 flex items-center justify-between">
-                  <span className="text-sm text-slate-500">الإجمالي</span>
-                  <span className="text-2xl font-black">
-                    {cartTotal.toLocaleString()} SDG
-                  </span>
-                </div>
+                  <div className="mb-3 space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-500">سعر المنتجات</span>
+                      <span className="font-bold">
+                        {cartTotal.toLocaleString()} SDG
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm text-slate-500">رسوم متجر NOLERA (10%)</span>
+                      <span className="font-bold text-purple-600">
+                        {(cartTotal * 0.10).toLocaleString()} SDG
+                      </span>
+                    </div>
+                    <div className="flex items-center justify-between border-t border-slate-200 pt-3">
+                      <span className="text-base font-black">الإجمالي</span>
+                      <span className="text-2xl font-black">
+                        {(cartTotal * 1.10).toLocaleString()} SDG
+                      </span>
+                    </div>
+                  </div>
 
                 <button
                   disabled={checkoutLoading}
