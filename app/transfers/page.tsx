@@ -3,9 +3,12 @@
 import Link from "next/link"
 import { ArrowLeft, Send } from "lucide-react"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { transferMoney } from "../../lib/nolera-finance"
+import { requireNoleraAuth } from "../../lib/nolera-auth-guard"
 
 export default function TransfersPage() {
+  const router = useRouter()
   const [currency, setCurrency] = useState("USD")
   const [recipient, setRecipient] = useState("")
   const [amount, setAmount] = useState("")
@@ -16,6 +19,9 @@ export default function TransfersPage() {
   async function submit() {
     setError("")
     setMessage("")
+    const authenticated = await requireNoleraAuth(router)
+    if (!authenticated) return
+
     setLoading(true)
 
     try {

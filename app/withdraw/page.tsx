@@ -3,9 +3,12 @@
 import Link from "next/link"
 import { ArrowLeft, MinusCircle } from "lucide-react"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
 import { changeWallet } from "../../lib/nolera-finance"
+import { requireNoleraAuth } from "../../lib/nolera-auth-guard"
 
 export default function WithdrawPage() {
+  const router = useRouter()
   const [currency, setCurrency] = useState("USD")
   const [amount, setAmount] = useState("")
   const [message, setMessage] = useState("")
@@ -15,6 +18,9 @@ export default function WithdrawPage() {
   async function submit() {
     setError("")
     setMessage("")
+    const authenticated = await requireNoleraAuth(router)
+    if (!authenticated) return
+
     setLoading(true)
 
     try {

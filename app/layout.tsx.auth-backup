@@ -3,7 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import GlobalLoginHandler from "@/components/global-login-handler";
 
-import ProtectedActionHandler from "../components/protected-action-handler"
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -26,8 +25,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <GlobalLoginHandler />
-      <ProtectedActionHandler />{children}</body>
+        <GlobalLoginHandler />{children}</body>
     </html>
   );
 }

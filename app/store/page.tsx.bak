@@ -2,7 +2,6 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
-import { useRouter } from "next/navigation"
 import {
   ArrowLeft,
   Check,
@@ -22,7 +21,6 @@ import {
 } from "../../lib/nolera-store"
 import { getWallets } from "../../lib/nolera-finance"
 import { getSupabaseClient } from "../../lib/nolera-auth"
-import { requireNoleraAuth } from "../../lib/nolera-auth-guard"
 
 type CartItem = {
   product: StoreProduct
@@ -43,7 +41,6 @@ const categoryNames: Record<string, string> = {
 }
 
 export default function StorePage() {
-  const router = useRouter()
   const [products, setProducts] = useState<StoreProduct[]>([])
   const [cart, setCart] = useState<CartItem[]>([])
   const [search, setSearch] = useState("")
@@ -165,9 +162,6 @@ export default function StorePage() {
   }
 
   async function checkout() {
-    const authenticated = await requireNoleraAuth(router)
-    if (!authenticated) return
-
     if (!cart.length) {
       setError("السلة فارغة.")
       return
@@ -271,7 +265,7 @@ export default function StorePage() {
             >
               <ShoppingBag size={19} />
               {cartCount > 0 && (
-                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-sky-500 px-1 text-[10px] font-black">
+                <span className="absolute -right-1 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-orange-500 px-1 text-[10px] font-black">
                   {cartCount}
                 </span>
               )}
@@ -281,7 +275,7 @@ export default function StorePage() {
       </header>
 
       <section className="mx-auto max-w-7xl px-4 pb-6 pt-7 sm:px-6">
-        <div className="overflow-hidden rounded-[30px] bg-gradient-to-br from-[#6f36a9] via-[#8240b6] to-[#a85bd0] p-6 text-white shadow-xl sm:p-9">
+        <div className="overflow-hidden rounded-[30px] bg-gradient-to-br from-purple-700 via-purple-600 to-orange-500 p-6 text-white shadow-xl sm:p-9">
           <div className="max-w-2xl">
             <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold backdrop-blur">
               <Sparkles size={14} />
@@ -397,7 +391,7 @@ export default function StorePage() {
                   href={`/store/${product.id}`}
                   className="block"
                 >
-                  <div className="flex h-44 items-center justify-center bg-gradient-to-br from-purple-100 via-white to-sky-100 text-6xl">
+                  <div className="flex h-44 items-center justify-center bg-gradient-to-br from-purple-100 via-white to-orange-100 text-6xl">
                     {product.icon || "📦"}
                   </div>
 
@@ -580,7 +574,7 @@ export default function StorePage() {
                 <button
                   disabled={checkoutLoading}
                   onClick={checkout}
-                  className="w-full rounded-2xl bg-gradient-to-r from-[#6f36a9] to-[#a85bd0] py-4 text-sm font-black text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
+                  className="w-full rounded-2xl bg-gradient-to-r from-purple-600 to-orange-500 py-4 text-sm font-black text-white shadow-lg disabled:cursor-not-allowed disabled:opacity-60"
                 >
                   {checkoutLoading ? "جارٍ إتمام الطلب..." : "إتمام الشراء"}
                 </button>

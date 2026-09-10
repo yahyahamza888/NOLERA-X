@@ -18,7 +18,16 @@ export default function LoginPage() {
 
     try {
       await loginUser(email, password)
-      router.push("/account")
+      const next =
+        typeof window !== "undefined"
+          ? new URLSearchParams(window.location.search).get("next")
+          : null
+
+      if (next && next.startsWith("/")) {
+        router.push(next)
+      } else {
+        router.push("/account")
+      }
       router.refresh()
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "حدث خطأ.")
