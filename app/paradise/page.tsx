@@ -15,11 +15,9 @@ import {
   Store,
   Users,
   Video,
-  UserPlus,
   ShoppingBag,
   ArrowRight,
 } from "lucide-react";
-
 import {
   createPost,
   createStory,
@@ -27,8 +25,12 @@ import {
   getStories,
   toggleFollow,
   toggleLike,
+  shareParadisePost,
+  getParadiseComments,
+  addParadiseComment,
   type ParadisePost,
   type ParadiseStory,
+  type ParadiseComment,
 } from "@/lib/nolera-paradise";
 
 const currentUserId = "NXR-DEMO-USER";
@@ -110,6 +112,11 @@ export default function ParadisePage() {
     refresh();
   }
 
+  function sharePost(post: ParadisePost) {
+    shareParadisePost(post.id);
+    refresh();
+  }
+
   function follow(authorId: string) {
     toggleFollow(authorId);
 
@@ -147,11 +154,9 @@ export default function ParadisePage() {
             <button className="rounded-full bg-slate-100 p-2.5">
               <Bell size={20} />
             </button>
-
             <button className="rounded-full bg-slate-100 p-2.5">
               <MessageCircle size={20} />
             </button>
-
             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-purple-600 font-bold text-white">
               N
             </div>
@@ -234,7 +239,6 @@ export default function ParadisePage() {
                           {story.authorName.charAt(0)}
                         </div>
                       </div>
-
                       <span className="max-w-[80px] truncate text-xs">
                         {story.authorName}
                       </span>
@@ -262,11 +266,9 @@ export default function ParadisePage() {
                     <button className="rounded-xl bg-slate-50 p-2 text-slate-600">
                       <ImageIcon size={19} />
                     </button>
-
                     <button className="rounded-xl bg-slate-50 p-2 text-slate-600">
                       <Video size={19} />
                     </button>
-
                     <button className="rounded-xl bg-slate-50 p-2 text-slate-600">
                       <Sparkles size={19} />
                     </button>
@@ -322,7 +324,6 @@ export default function ParadisePage() {
                         <span className="font-black text-purple-600">
                           {product.price}
                         </span>
-
                         <ShoppingBag size={16} className="text-slate-400" />
                       </div>
                     </Link>
@@ -349,7 +350,9 @@ export default function ParadisePage() {
                       post={post}
                       currentUserId={currentUserId}
                       onLike={() => likePost(post)}
+                      onShare={() => sharePost(post)}
                       onFollow={() => follow(post.authorId)}
+                      onCommentAdded={refresh}
                       isFollowing={following.includes(post.authorId)}
                     />
                   ))
@@ -369,9 +372,7 @@ export default function ParadisePage() {
 
                 <div>
                   <h2 className="font-bold">Paradise AI</h2>
-                  <p className="text-xs text-slate-500">
-                    Create with AI
-                  </p>
+                  <p className="text-xs text-slate-500">Create with AI</p>
                 </div>
               </div>
 
@@ -458,16 +459,48 @@ function PostCard({
   post,
   currentUserId,
   onLike,
+  onShare,
   onFollow,
+  onCommentAdded,
   isFollowing,
 }: {
   post: ParadisePost;
   currentUserId: string;
   onLike: () => void;
+  onShare: () => void;
   onFollow: () => void;
+  onCommentAdded: () => void;
   isFollowing: boolean;
 }) {
   const liked = post.liked;
+  const [showComments, setShowComments] = useState(false);
+  const [comments, setComments] = useState<ParadiseComment[]>([]);
+  const [commentText, setCommentText] = useState("");
+
+  function loadComments() {
+    setComments(getParadiseComments(post.id));
+  }
+
+  function toggleComments() {
+    if (!showComments) loadComments();
+    setShowComments((v) => !v);
+  }
+
+  function submitComment() {
+    const text = commentText.trim();
+    if (!text) return;
+
+    addParadiseComment({
+      postId: post.id,
+      authorId: currentUserId,
+      authorName: "NOLERA User",
+      content: text,
+    });
+
+    setCommentText("");
+    loadComments();
+    onCommentAdded();
+  }
 
   return (
     <article className="rounded-3xl border border-slate-200 bg-white p-5 shadow-sm">
@@ -519,20 +552,82 @@ function PostCard({
           {post.likes}
         </button>
 
-        <button className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50">
+        <button
+          onClick={toggleComments}
+          className={`flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold ${
+            showComments
+              ? "bg-purple-50 text-purple-600"
+              : "text-slate-500 hover:bg-slate-50"
+          }`}
+        >
           <MessageCircle size={18} />
           {post.comments}
         </button>
 
         <button
-          onClick={() => {}}
+          onClick={onShare}
           className="flex items-center gap-2 rounded-xl px-3 py-2 text-sm font-semibold text-slate-500 hover:bg-slate-50"
         >
           <Share2 size={18} />
           {post.shares}
         </button>
       </div>
+
+      {showComments && (
+        <div className="mt-4 border-t border-slate-100 pt-4">
+          <div className="mb-3 flex gap-2">
+            <input
+              value={commentText}
+              onChange={(e) => setCommentText(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && submitComment()}
+              placeholder="اكتب تعليقًا..."
+              className="flex-1 rounded-xl bg-slate-50 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-purple-200"
+            />
+            <button
+              onClick={submitComment}
+              disabled={!commentText.trim()}
+              className="rounded-xl bg-purple-600 px-4 py-2 text-sm font-bold text-white disabled:opacity-40"
+            >
+              <Send size={16} />
+            </button>
+          </div>
+
+          {comments.length === 0 ? (
+            <p className="text-center text-xs text-slate-400">
+              لا توجد تعليقات بعد
+            </p>
+          ) : (
+            <div className="space-y-3">
+              {comments.map((comment) => (
+                <div key={comment.id} className="flex gap-2">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-slate-200 text-xs font-bold">
+                    {comment.authorName.charAt(0)}
+                  </div>
+                  <div className="flex-1 rounded-xl bg-slate-50 px-3 py-2">
+                    <p className="text-xs font-bold">{comment.authorName}</p>
+                    <p className="text-sm">{comment.content}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
     </article>
+  );
+}
+
+function DiscoverItem({ name }: { name: string }) {
+  return (
+    <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3">
+        <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-slate-100 text-sm font-bold">
+          {name.charAt(0)}
+        </div>
+        <span className="text-sm font-semibold">{name}</span>
+      </div>
+      <button className="text-xs font-bold text-purple-600">View</button>
+    </div>
   );
 }
 
@@ -550,30 +645,12 @@ function NavButton({
   return (
     <button
       onClick={onClick}
-      className={`mb-2 flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-semibold ${
-        active
-          ? "bg-purple-50 text-purple-700"
-          : "text-slate-600 hover:bg-slate-50"
+      className={`mb-1 flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-semibold ${
+        active ? "bg-purple-50 text-purple-600" : "text-slate-600 hover:bg-slate-50"
       }`}
     >
       {icon}
       {label}
     </button>
-  );
-}
-
-function DiscoverItem({ name }: { name: string }) {
-  return (
-    <div className="flex items-center justify-between gap-3">
-      <div className="flex items-center gap-3">
-        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-slate-100 font-bold">
-          {name.charAt(0)}
-        </div>
-
-        <span className="text-sm font-semibold">{name}</span>
-      </div>
-
-      <UserPlus size={17} className="text-slate-400" />
-    </div>
   );
 }
