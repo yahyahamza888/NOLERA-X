@@ -1,5 +1,6 @@
 "use client";
 
+import { useNoleraAuth } from "../lib/use-nolera-auth"
 import { financeState, getTransactions } from "../lib/finance";
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -33,19 +34,19 @@ import {
 
 const services = [
   { name: "المحفظة", href: "/wallet", icon: Wallet, tone: "purple" },
-  { name: "التحويل", href: "/transfers", icon: Send, tone: "orange" },
+  { name: "التحويل", href: "/transfers", icon: Send, tone: "blue" },
   { name: "إضافة أموال", href: "/add-money", icon: Plus, tone: "purple" },
-  { name: "السحب", href: "/withdraw", icon: ArrowUpFromLine, tone: "orange" },
+  { name: "السحب", href: "/withdraw", icon: ArrowUpFromLine, tone: "blue" },
   { name: "البطاقات", href: "/cards", icon: CreditCard, tone: "purple" },
-  { name: "الفواتير", href: "/bills", icon: ReceiptText, tone: "orange" },
+  { name: "الفواتير", href: "/bills", icon: ReceiptText, tone: "blue" },
   { name: "المتجر", href: "/store", icon: Store, tone: "purple" },
-  { name: "الأسواق", href: "/markets", icon: Globe2, tone: "orange" },
+  { name: "الأسواق", href: "/markets", icon: Globe2, tone: "blue" },
   { name: "أبو حنين AI", href: "/ai", icon: Sparkles, tone: "purple" },
   { name: "NOLERA PARADISE", href: "/paradise", icon: Heart, tone: "purple" },
-  { name: "NOLERA ADS", href: "/ads", icon: Megaphone, tone: "orange" },
-  { name: "NOLERA ID", href: "/id", icon: CircleUserRound, tone: "orange" },
+  { name: "NOLERA ADS", href: "/ads", icon: Megaphone, tone: "blue" },
+  { name: "NOLERA ID", href: "/id", icon: CircleUserRound, tone: "blue" },
   { name: "التحقق", href: "/verification", icon: ShieldCheck, tone: "purple" },
-  { name: "الإعدادات", href: "/settings", icon: Settings, tone: "orange" },
+  { name: "الإعدادات", href: "/settings", icon: Settings, tone: "blue" },
 ];
 
 const products = [
@@ -57,6 +58,7 @@ const products = [
 ];
 
 export default function HomePage() {
+  const { user, loading: authLoading } = useNoleraAuth()
   const [showBalance, setShowBalance] = useState(true);
   const [balance, setBalance] = useState(financeState.balance);
   const [mobileMenu, setMobileMenu] = useState(false);
@@ -129,22 +131,41 @@ export default function HomePage() {
                   className="relative rounded-xl border border-purple-100 bg-white p-2.5 text-purple-700"
                 >
                   <Bell size={19} />
-                  <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-orange-500" />
+                  <span className="absolute right-2 top-2 h-1.5 w-1.5 rounded-full bg-[#38bdf8]" />
                 </Link>
-                <Link
-                  href="/profile"
-                  className="flex items-center gap-2 rounded-xl bg-purple-50 px-3 py-2 text-sm font-bold text-purple-700"
-                >
-                  <UserRound size={17} />
-                  <span className="hidden sm:inline">حسابي</span>
-                </Link>
+                {authLoading ? (
+                  <div className="h-10 w-20 animate-pulse rounded-xl bg-purple-50" />
+                ) : user ? (
+                  <Link
+                    href="/account"
+                    className="flex items-center gap-2 rounded-xl bg-purple-50 px-3 py-2 text-sm font-bold text-purple-700"
+                  >
+                    <UserRound size={17} />
+                    <span className="hidden sm:inline">حسابي</span>
+                  </Link>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <Link
+                      href="/login"
+                      className="rounded-xl border border-purple-100 bg-white px-3 py-2 text-xs font-black text-purple-700"
+                    >
+                      تسجيل الدخول
+                    </Link>
+                    <Link
+                      href="/register"
+                      className="rounded-xl bg-purple-700 px-3 py-2 text-xs font-black text-white"
+                    >
+                      إنشاء حساب
+                    </Link>
+                  </div>
+                )}
               </div>
             </div>
           </header>
 
           <div className="mx-auto w-full max-w-7xl px-3 py-4 sm:px-6 sm:py-6">
             <section className="relative overflow-hidden rounded-[28px] bg-gradient-to-br from-[#6f36a9] via-[#8240b6] to-[#a85bd0] p-5 text-white shadow-xl shadow-purple-200 sm:p-7">
-              <div className="absolute -left-16 -top-20 h-48 w-48 rounded-full bg-orange-400/20 blur-3xl" />
+              <div className="absolute -left-16 -top-20 h-48 w-48 rounded-full bg-[#38bdf8]/20 blur-3xl" />
               <div className="absolute -bottom-20 right-10 h-44 w-44 rounded-full bg-white/10 blur-3xl" />
 
               <div className="relative">
@@ -171,7 +192,7 @@ export default function HomePage() {
                         )}
                       </button>
                     </div>
-                    <div className="mt-2 text-xs text-orange-200">
+                    <div className="mt-2 text-xs text-[#bae6fd]">
                       حساب NOLERA X
                     </div>
                   </div>
@@ -212,7 +233,7 @@ export default function HomePage() {
             <section className="mt-6">
               <div className="mb-3 flex items-end justify-between">
                 <div>
-                  <p className="text-xs font-bold text-orange-500">
+                  <p className="text-xs font-bold text-[#38bdf8]">
                     NOLERA X
                   </p>
                   <h2 className="mt-1 text-xl font-black">الخدمات</h2>
@@ -238,7 +259,7 @@ export default function HomePage() {
                       <div
                         className={`mx-auto flex h-11 w-11 items-center justify-center rounded-2xl ${
                           orange
-                            ? "bg-orange-50 text-orange-500"
+                            ? "bg-[#e0f2fe] text-[#38bdf8]"
                             : "bg-purple-50 text-purple-700"
                         }`}
                       >
@@ -256,7 +277,7 @@ export default function HomePage() {
             <section className="mt-7">
               <div className="mb-3 flex items-center justify-between">
                 <div>
-                  <p className="text-xs font-bold text-orange-500">
+                  <p className="text-xs font-bold text-[#38bdf8]">
                     NOLERA X MARKET
                   </p>
                   <h2 className="mt-1 text-xl font-black">المتجر</h2>
@@ -284,7 +305,7 @@ export default function HomePage() {
                   onClick={() => setTab("new")}
                   className={`rounded-xl px-4 py-2 text-xs font-bold ${
                     tab === "new"
-                      ? "bg-white text-orange-500 shadow-sm"
+                      ? "bg-white text-[#38bdf8] shadow-sm"
                       : "text-purple-500"
                   }`}
                 >
@@ -299,7 +320,7 @@ export default function HomePage() {
                     key={product.name}
                     className="min-w-[145px] snap-start rounded-2xl border border-purple-100 bg-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:min-w-0"
                   >
-                    <div className="flex h-24 items-center justify-center rounded-xl bg-gradient-to-br from-purple-50 to-orange-50 text-4xl">
+                    <div className="flex h-24 items-center justify-center rounded-xl bg-gradient-to-br from-purple-50 to-[#e0f2fe] text-4xl">
                       {tab === "new" ? "✨" : product.icon}
                     </div>
                     <div className="mt-3 truncate text-sm font-black">
@@ -308,7 +329,7 @@ export default function HomePage() {
                     <div className="mt-1 text-[10px] text-slate-400">
                       {product.category}
                     </div>
-                    <div className="mt-2 font-black text-orange-500">
+                    <div className="mt-2 font-black text-[#38bdf8]">
                       {product.price}
                     </div>
                   </Link>
@@ -412,7 +433,7 @@ export default function HomePage() {
                 </div>
                 <Link
                   href="/cards"
-                  className="mt-4 block rounded-xl bg-orange-500 py-3 text-center text-xs font-black"
+                  className="mt-4 block rounded-xl bg-[#38bdf8] py-3 text-center text-xs font-black"
                 >
                   إدارة البطاقة
                 </Link>
@@ -432,9 +453,9 @@ export default function HomePage() {
               </Link>
               <Link
                 href="/security"
-                className="rounded-2xl border border-orange-100 bg-white p-4 shadow-sm"
+                className="rounded-2xl border border-[#bae6fd]/50 bg-white p-4 shadow-sm"
               >
-                <ShieldCheck className="text-orange-500" size={23} />
+                <ShieldCheck className="text-[#38bdf8]" size={23} />
                 <div className="mt-3 text-sm font-black">الأمان</div>
                 <div className="mt-1 text-[10px] leading-4 text-slate-400">
                   حماية الحساب والمعاملات
@@ -517,11 +538,11 @@ export default function HomePage() {
             Ads
           </Link>
           <Link
-            href="/profile"
+            href={user ? "/account" : "/login"}
             className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-bold text-slate-500"
           >
             <UserRound size={20} />
-            حسابي
+            {user ? "حسابي" : "دخول"}
           </Link>
         </div>
       </nav>
@@ -543,7 +564,7 @@ function Brand({ compact = false }: { compact?: boolean }) {
         <div className="text-base font-black tracking-tight text-purple-800">
           NOLERA X
         </div>
-        <div className="text-[9px] font-bold tracking-[0.18em] text-orange-500">
+        <div className="text-[9px] font-bold tracking-[0.18em] text-[#38bdf8]">
           DIGITAL FINANCE
         </div>
       </div>
