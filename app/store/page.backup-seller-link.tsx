@@ -252,14 +252,6 @@ export default function StorePage() {
 
           <div className="flex items-center gap-2">
             <Link
-            href="/seller"
-            className="flex items-center gap-2 rounded-2xl border border-purple-200 bg-purple-50 px-4 py-3 text-sm font-black text-purple-700"
-          >
-            <ShoppingBag size={17} />
-            لوحة البائع
-          </Link>
-
-          <Link
               href="/create-product"
               className="hidden rounded-2xl bg-purple-600 px-4 py-2.5 text-sm font-bold text-white shadow-lg shadow-purple-200 transition hover:bg-purple-700 sm:block"
             >
