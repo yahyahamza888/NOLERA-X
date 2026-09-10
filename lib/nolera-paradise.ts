@@ -40,6 +40,7 @@ export interface ParadiseStory {
   authorId: string;
   authorName: string;
   mediaUrl?: string;
+  caption?: string;
   text?: string;
   views: number;
   createdAt: string;
@@ -85,7 +86,6 @@ function read<T>(key: string, fallback: T): T {
 
 function write<T>(key: string, value: T) {
   if (typeof window === "undefined") return;
-
   localStorage.setItem(key, JSON.stringify(value));
 }
 
@@ -212,9 +212,7 @@ export function createParadiseStory(
   >
 ) {
   const createdAt = new Date();
-  const expiresAt = new Date(
-    createdAt.getTime() + 24 * 60 * 60 * 1000
-  );
+  const expiresAt = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
 
   const stories = getParadiseStories();
 
@@ -350,6 +348,20 @@ export function getParadiseFeed() {
       new Date(b.createdAt).getTime() -
       new Date(a.createdAt).getTime()
   );
+}
+
+/* PAGE COMPATIBILITY */
+
+export const createPost = createParadisePost;
+
+export const createStory = createParadiseStory;
+
+export const getFeed = getParadiseFeed;
+
+export const getStories = getParadiseStories;
+
+export function toggleLike(postId: string, _userId?: string) {
+  return toggleParadiseLike(postId);
 }
 
 /* RESET */
