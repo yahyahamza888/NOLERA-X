@@ -19,7 +19,7 @@ import {
   Eye,
   EyeOff,
 } from "lucide-react"
-import { getSupabaseClient, logoutUser } from "../../lib/nolera-auth"
+import { logoutUser } from "../../lib/nolera-auth"
 import { useNoleraAuth } from "../../lib/use-nolera-auth"
 import { getWallets } from "../../lib/nolera-finance"
 
@@ -28,7 +28,6 @@ export default function AccountPage() {
   const { user, loading: authLoading } = useNoleraAuth()
   const [sdgBalance, setSdgBalance] = useState(0)
   const [showBalance, setShowBalance] = useState(true)
-  const [accountRole, setAccountRole] = useState("user")
 
   async function refreshBalance() {
     try {
@@ -48,19 +47,6 @@ export default function AccountPage() {
 
     return () => window.removeEventListener("nolera-data-updated", handler)
   }, [])
-
-  useEffect(() => {
-    if (!user?.id) return
-
-    getSupabaseClient()
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        setAccountRole(data?.role || "user")
-      })
-  }, [user?.id])
 
   async function logout() {
     await logoutUser()
@@ -291,23 +277,7 @@ export default function AccountPage() {
           </div>
 
           <div className="grid grid-cols-3 gap-2.5 sm:grid-cols-4 lg:grid-cols-6">
-            {(accountRole === "admin" || accountRole === "super_admin") && (
-                                <Link
-                                  href="/admin"
-                                  className="group rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 to-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-4"
-                                >
-                                  <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-100 text-purple-700">
-                                    <ShieldCheck size={20} />
-                                  </div>
-                                  <div className="mt-2 text-center text-[11px] font-bold leading-4 text-slate-700 sm:text-xs">
-                                    {accountRole === "super_admin"
-                                      ? "لوحة تحكم المالك"
-                                      : "لوحة تحكم الإدارة"}
-                                  </div>
-                                </Link>
-                              )}
-
-                              {cards.map((item) => {
+            {cards.map((item) => {
               const Icon = item.icon
               const neon = item.tone === "neon"
 

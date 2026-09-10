@@ -78,14 +78,6 @@ export default function AdminPage() {
   const [to, setTo] = useState("SDG")
   const [rate, setRate] = useState("")
   const [message, setMessage] = useState("")
-  const [shareMessage, setShareMessage] = useState("")
-  const [employeeName, setEmployeeName] = useState("")
-  const [employeeJob, setEmployeeJob] = useState("")
-  const [jobTitle, setJobTitle] = useState("")
-  const [employees, setEmployees] = useState<any[]>([])
-  const [jobs, setJobs] = useState<string[]>([])
-  const [employeeMessage, setEmployeeMessage] = useState("")
-
   const [loading, setLoading] = useState(true)
 
   const [command, setCommand] = useState("")
@@ -125,7 +117,6 @@ export default function AdminPage() {
       )
       setMessage("تمت الموافقة على الحملة وتفعيلها.")
       loadAds()
-  loadHRData()
     }
   }
 
@@ -358,129 +349,6 @@ export default function AdminPage() {
     }
   }
 
-
-  function loadHRData() {
-    try {
-      setEmployees(JSON.parse(localStorage.getItem("nolera-employees-v1") || "[]"))
-      setJobs(JSON.parse(localStorage.getItem("nolera-jobs-v1") || "[]"))
-    } catch {
-      setEmployees([])
-      setJobs([])
-    }
-  }
-
-  function saveHRData(nextEmployees: any[], nextJobs: string[]) {
-    localStorage.setItem("nolera-employees-v1", JSON.stringify(nextEmployees))
-    localStorage.setItem("nolera-jobs-v1", JSON.stringify(nextJobs))
-    setEmployees(nextEmployees)
-    setJobs(nextJobs)
-  }
-
-  function addJob() {
-    const title = jobTitle.trim()
-    if (!title) return
-    if (jobs.includes(title)) {
-      setEmployeeMessage("الوظيفة موجودة بالفعل.")
-      return
-    }
-    saveHRData(employees, [...jobs, title])
-    setJobTitle("")
-    setEmployeeMessage("تمت إضافة الوظيفة بنجاح.")
-  }
-
-  function addEmployee() {
-    const name = employeeName.trim()
-    const job = employeeJob.trim()
-
-    if (!name || !job) {
-      setEmployeeMessage("أدخل اسم الموظف والوظيفة.")
-      return
-    }
-
-    const employee = {
-      id: crypto.randomUUID(),
-      name,
-      job,
-      status: "active",
-      createdAt: new Date().toISOString(),
-      reason: "",
-    }
-
-    saveHRData([...employees, employee], jobs)
-    setEmployeeName("")
-    setEmployeeJob("")
-    setEmployeeMessage("تمت إضافة الموظف بنجاح.")
-  }
-
-  function markResignation(id: string) {
-    const reason = window.prompt("سبب الاستقالة:")
-    if (reason === null) return
-
-    const next = employees.map((employee) =>
-      employee.id === id
-        ? {
-            ...employee,
-            status: "resigned",
-            reason: reason.trim() || "استقالة",
-            endedAt: new Date().toISOString(),
-          }
-        : employee
-    )
-
-    saveHRData(next, jobs)
-    setEmployeeMessage("تم تسجيل الاستقالة.")
-  }
-
-  function terminateEmployee(id: string) {
-    const reason = window.prompt("سبب إنهاء الخدمة:")
-    if (reason === null) return
-
-    const next = employees.map((employee) =>
-      employee.id === id
-        ? {
-            ...employee,
-            status: "terminated",
-            reason: reason.trim() || "مخالفة قواعد العمل",
-            endedAt: new Date().toISOString(),
-          }
-        : employee
-    )
-
-    saveHRData(next, jobs)
-    setEmployeeMessage("تم إنهاء خدمة الموظف.")
-  }
-
-  async function shareWebsite() {
-    const url = window.location.origin
-
-    try {
-      if (navigator.share) {
-        await navigator.share({
-          title: "NOLERA X",
-          text: "شارك موقع NOLERA X",
-          url,
-        })
-        setShareMessage("تم فتح قائمة المشاركة.")
-      } else {
-        await navigator.clipboard.writeText(url)
-        setShareMessage("المشاركة غير متاحة؛ تم نسخ الرابط.")
-      }
-    } catch {
-      setShareMessage("")
-    }
-  }
-
-  async function copyWebsite() {
-    const url = window.location.origin
-
-    try {
-      await navigator.clipboard.writeText(url)
-      setShareMessage("تم نسخ رابط NOLERA X ✓")
-    } catch {
-      setShareMessage("تعذر نسخ الرابط.")
-    }
-  }
-
   async function saveRate() {
     const value = Number(rate)
 
@@ -606,50 +474,6 @@ export default function AdminPage() {
             </div>
           </div>
         </header>
-
-        {/* WEBSITE SHARE */}
-        <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm sm:p-7">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <p className="text-sm font-bold text-purple-600">NOLERA X</p>
-              <h2 className="mt-1 text-2xl font-black text-slate-900">
-                مشاركة الموقع 🌐
-              </h2>
-              <p className="mt-2 text-sm text-slate-500">
-                شارك رابط NOLERA X مباشرة مع أي شخص.
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-purple-50 px-4 py-3 text-center">
-              <p className="text-xs font-bold text-purple-600">رابط الموقع</p>
-              <p className="mt-1 max-w-[220px] truncate text-sm font-black text-purple-900">
-                {typeof window !== "undefined" ? window.location.origin : "NOLERA X"}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-            <button
-              onClick={shareWebsite}
-              className="flex-1 rounded-2xl bg-gradient-to-r from-[#512d68] to-[#e86f32] py-4 font-black text-white shadow-lg"
-            >
-              📤 مشاركة NOLERA X
-            </button>
-
-            <button
-              onClick={copyWebsite}
-              className="rounded-2xl border border-purple-200 bg-purple-50 px-6 py-4 font-black text-purple-700"
-            >
-              📋 نسخ الرابط
-            </button>
-          </div>
-
-          {shareMessage && (
-            <p className="mt-3 rounded-xl bg-emerald-50 p-3 text-center text-sm font-bold text-emerald-700">
-              {shareMessage}
-            </p>
-          )}
-        </section>
 
         {/* AI AGENT */}
         <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm sm:p-7">

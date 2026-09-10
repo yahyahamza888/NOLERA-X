@@ -79,13 +79,6 @@ export default function AdminPage() {
   const [rate, setRate] = useState("")
   const [message, setMessage] = useState("")
   const [shareMessage, setShareMessage] = useState("")
-  const [employeeName, setEmployeeName] = useState("")
-  const [employeeJob, setEmployeeJob] = useState("")
-  const [jobTitle, setJobTitle] = useState("")
-  const [employees, setEmployees] = useState<any[]>([])
-  const [jobs, setJobs] = useState<string[]>([])
-  const [employeeMessage, setEmployeeMessage] = useState("")
-
   const [loading, setLoading] = useState(true)
 
   const [command, setCommand] = useState("")
@@ -125,7 +118,6 @@ export default function AdminPage() {
       )
       setMessage("تمت الموافقة على الحملة وتفعيلها.")
       loadAds()
-  loadHRData()
     }
   }
 
@@ -356,98 +348,6 @@ export default function AdminPage() {
           : "تعذر رفض الأمر.",
       )
     }
-  }
-
-
-  function loadHRData() {
-    try {
-      setEmployees(JSON.parse(localStorage.getItem("nolera-employees-v1") || "[]"))
-      setJobs(JSON.parse(localStorage.getItem("nolera-jobs-v1") || "[]"))
-    } catch {
-      setEmployees([])
-      setJobs([])
-    }
-  }
-
-  function saveHRData(nextEmployees: any[], nextJobs: string[]) {
-    localStorage.setItem("nolera-employees-v1", JSON.stringify(nextEmployees))
-    localStorage.setItem("nolera-jobs-v1", JSON.stringify(nextJobs))
-    setEmployees(nextEmployees)
-    setJobs(nextJobs)
-  }
-
-  function addJob() {
-    const title = jobTitle.trim()
-    if (!title) return
-    if (jobs.includes(title)) {
-      setEmployeeMessage("الوظيفة موجودة بالفعل.")
-      return
-    }
-    saveHRData(employees, [...jobs, title])
-    setJobTitle("")
-    setEmployeeMessage("تمت إضافة الوظيفة بنجاح.")
-  }
-
-  function addEmployee() {
-    const name = employeeName.trim()
-    const job = employeeJob.trim()
-
-    if (!name || !job) {
-      setEmployeeMessage("أدخل اسم الموظف والوظيفة.")
-      return
-    }
-
-    const employee = {
-      id: crypto.randomUUID(),
-      name,
-      job,
-      status: "active",
-      createdAt: new Date().toISOString(),
-      reason: "",
-    }
-
-    saveHRData([...employees, employee], jobs)
-    setEmployeeName("")
-    setEmployeeJob("")
-    setEmployeeMessage("تمت إضافة الموظف بنجاح.")
-  }
-
-  function markResignation(id: string) {
-    const reason = window.prompt("سبب الاستقالة:")
-    if (reason === null) return
-
-    const next = employees.map((employee) =>
-      employee.id === id
-        ? {
-            ...employee,
-            status: "resigned",
-            reason: reason.trim() || "استقالة",
-            endedAt: new Date().toISOString(),
-          }
-        : employee
-    )
-
-    saveHRData(next, jobs)
-    setEmployeeMessage("تم تسجيل الاستقالة.")
-  }
-
-  function terminateEmployee(id: string) {
-    const reason = window.prompt("سبب إنهاء الخدمة:")
-    if (reason === null) return
-
-    const next = employees.map((employee) =>
-      employee.id === id
-        ? {
-            ...employee,
-            status: "terminated",
-            reason: reason.trim() || "مخالفة قواعد العمل",
-            endedAt: new Date().toISOString(),
-          }
-        : employee
-    )
-
-    saveHRData(next, jobs)
-    setEmployeeMessage("تم إنهاء خدمة الموظف.")
   }
 
   async function shareWebsite() {

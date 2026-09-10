@@ -173,23 +173,6 @@ export default function SellerPage() {
     [sales]
   )
 
-  const commissionRate = 0.05
-
-  const commission = useMemo(
-    () => totalSales * commissionRate,
-    [totalSales],
-  )
-
-  const netEarnings = useMemo(
-    () => totalSales - commission,
-    [totalSales, commission],
-  )
-
-  const averageSale = useMemo(
-    () => (sales.length ? totalSales / sales.length : 0),
-    [sales.length, totalSales],
-  )
-
   const totalUnits = useMemo(
     () =>
       sales.reduce(
@@ -338,42 +321,35 @@ export default function SellerPage() {
       )}
 
       <section className="mx-auto max-w-7xl px-4 pb-8 sm:px-6">
-          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
-            <StatCard
-              icon={<DollarSign size={21} />}
-              label="إجمالي المبيعات"
-              value={formatMoney(totalSales)}
-              description="إجمالي قيمة المنتجات المباعة"
-            />
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          <StatCard
+            icon={<DollarSign size={21} />}
+            label="إجمالي المبيعات"
+            value={formatMoney(totalSales)}
+            description="إجمالي قيمة المنتجات المباعة"
+          />
 
-            <StatCard
-              icon={<TrendingUp size={21} />}
-              label="صافي الأرباح"
-              value={formatMoney(netEarnings)}
-              description={`بعد خصم ${commissionRate * 100}% عمولة NOLERA`}
-            />
+          <StatCard
+            icon={<ShoppingBag size={21} />}
+            label="عمليات البيع"
+            value={sales.length.toLocaleString("ar-SD")}
+            description="طلبات تحتوي منتجاتك"
+          />
 
-            <StatCard
-              icon={<Wallet size={21} />}
-              label="عمولة NOLERA"
-              value={formatMoney(commission)}
-              description={`${commissionRate * 100}% من إجمالي المبيعات`}
-            />
+          <StatCard
+            icon={<Package size={21} />}
+            label="الوحدات المباعة"
+            value={totalUnits.toLocaleString("ar-SD")}
+            description="إجمالي الكميات المباعة"
+          />
 
-            <StatCard
-              icon={<ShoppingBag size={21} />}
-              label="متوسط البيع"
-              value={formatMoney(averageSale)}
-              description={`${sales.length.toLocaleString("ar-SD")} عملية بيع`}
-            />
-
-            <StatCard
-              icon={<Box size={21} />}
-              label="منتجاتي"
-              value={products.length.toLocaleString("ar-SD")}
-              description={`${publishedProducts} منتج منشور`}
-            />
-          </div>
+          <StatCard
+            icon={<Box size={21} />}
+            label="منتجاتي"
+            value={products.length.toLocaleString("ar-SD")}
+            description={`${publishedProducts} منتج منشور`}
+          />
+        </div>
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-6 px-4 pb-8 lg:grid-cols-[1.35fr_.65fr] sm:px-6">
