@@ -3,8 +3,11 @@
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { getSupabaseClient } from "../../lib/nolera-auth"
+import { useMemo } from "react"
+import { activateAd, deleteAd, getAds, pauseAd, type NoleraAd } from "../../lib/nolera-ads"
 
 const supabase = getSupabaseClient()
+const ADS_ADVERTISER = "NXR-DEMO-ADVERTISER"
 
 type Command = {
   id: string
@@ -80,6 +83,7 @@ export default function AdminPage() {
   const [command, setCommand] = useState("")
   const [commandLoading, setCommandLoading] = useState(false)
   const [commands, setCommands] = useState<Command[]>([])
+  const [ads, setAds] = useState<NoleraAd[]>([])
 
   const isSuperAdmin = role === "super_admin"
   const isAdmin = role === "admin" || isSuperAdmin
@@ -98,7 +102,50 @@ export default function AdminPage() {
     }
   }
 
+  function loadAds() {
+    setAds(getAds(ADS_ADVERTISER))
+  }
+
+  function approveAd(id: string) {
+    const ad = ads.find((item) => item.id === id)
+    if (!ad) return
+    if (ad.status === "pending" || ad.status === "draft") {
+      const updated = { ...ad, status: "active" as const, updatedAt: new Date().toISOString() }
+      localStorage.setItem(
+        "nolera-ads-v1",
+        JSON.stringify(getAds().map((item) => item.id === id ? updated : item))
+      )
+      setMessage("تمت الموافقة على الحملة وتفعيلها.")
+      loadAds()
+    }
+  }
+
+  function rejectAd(id: string) {
+    const ad = ads.find((item) => item.id === id)
+    if (!ad) return
+    const updated = { ...ad, status: "rejected" as const, updatedAt: new Date().toISOString() }
+    localStorage.setItem(
+      "nolera-ads-v1",
+      JSON.stringify(getAds().map((item) => item.id === id ? updated : item))
+    )
+    setMessage("تم رفض الحملة.")
+    loadAds()
+  }
+
+  function toggleAdminAd(ad: NoleraAd) {
+    if (ad.status === "active") pauseAd(ad.id)
+    else if (ad.status === "paused") activateAd(ad.id)
+    loadAds()
+  }
+
+  function removeAdminAd(id: string) {
+    deleteAd(id)
+    setMessage("تم حذف الحملة.")
+    loadAds()
+  }
+
   useEffect(() => {
+    loadAds()
     async function load() {
       try {
         const {
@@ -582,6 +629,114 @@ export default function AdminPage() {
                   <p className="mt-3 text-xs text-slate-400">
                     {new Date(item.created_at).toLocaleString("ar")}
                   </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+
+        {/* NOLERA ADS MANAGEMENT */}
+        <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm sm:p-7">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-bold text-purple-600">NOLERA ADS</p>
+              <h2 className="mt-1 text-2xl font-black text-slate-900">
+                إدارة الحملات الإعلانية 📣
+              </h2>
+              <p className="mt-2 text-sm text-slate-500">
+                مراجعة الحملات والموافقة عليها أو رفضها وإدارة حالتها.
+              </p>
+            </div>
+
+            <div className="flex gap-2">
+              <div className="rounded-2xl bg-amber-50 px-4 py-3 text-center">
+                <p className="text-xs text-amber-600">قيد المراجعة</p>
+                <p className="text-xl font-black text-amber-700">
+                  {ads.filter((ad) => ad.status === "pending").length}
+                </p>
+              </div>
+
+              <div className="rounded-2xl bg-purple-50 px-4 py-3 text-center">
+                <p className="text-xs text-purple-600">كل الحملات</p>
+                <p className="text-xl font-black text-purple-700">{ads.length}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-5 flex justify-end">
+            <button
+              onClick={loadAds}
+              className="rounded-xl bg-slate-100 px-4 py-2 text-sm font-bold"
+            >
+              تحديث الحملات
+            </button>
+          </div>
+
+          {ads.length === 0 ? (
+            <div className="mt-4 rounded-2xl bg-slate-50 p-8 text-center text-sm text-slate-500">
+              لا توجد حملات إعلانية حالياً.
+            </div>
+          ) : (
+            <div className="mt-4 space-y-3">
+              {ads.map((ad) => (
+                <div
+                  key={ad.id}
+                  className="rounded-2xl border border-slate-200 p-4"
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-black">{ad.title}</h3>
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold">
+                          {ad.status}
+                        </span>
+                      </div>
+
+                      <p className="mt-1 text-sm text-slate-500">
+                        {ad.description}
+                      </p>
+
+                      <p className="mt-2 text-xs text-slate-400">
+                        {ad.country || "Global"} · {ad.language || "ar"} · ${ad.budget}
+                      </p>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2">
+                      {ad.status === "pending" && (
+                        <>
+                          <button
+                            onClick={() => approveAd(ad.id)}
+                            className="rounded-xl bg-emerald-600 px-4 py-2 text-xs font-black text-white"
+                          >
+                            ✓ موافقة
+                          </button>
+
+                          <button
+                            onClick={() => rejectAd(ad.id)}
+                            className="rounded-xl bg-red-600 px-4 py-2 text-xs font-black text-white"
+                          >
+                            ✕ رفض
+                          </button>
+                        </>
+                      )}
+
+                      {(ad.status === "active" || ad.status === "paused") && (
+                        <button
+                          onClick={() => toggleAdminAd(ad)}
+                          className="rounded-xl bg-slate-900 px-4 py-2 text-xs font-black text-white"
+                        >
+                          {ad.status === "active" ? "إيقاف" : "تشغيل"}
+                        </button>
+                      )}
+
+                      <button
+                        onClick={() => removeAdminAd(ad.id)}
+                        className="rounded-xl border border-red-200 px-4 py-2 text-xs font-black text-red-600"
+                      >
+                        حذف
+                      </button>
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
