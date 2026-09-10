@@ -440,6 +440,96 @@ export default function HomePage() {
               </div>
             </section>
 
+
+            <section className="mt-7 overflow-hidden rounded-[28px] border border-purple-100 bg-white shadow-sm">
+              <div className="relative overflow-hidden bg-gradient-to-br from-[#24152f] via-[#45225b] to-[#6d35a8] p-5 text-white sm:p-7">
+                <div className="absolute -right-16 -top-20 h-52 w-52 rounded-full bg-[#38bdf8]/15 blur-3xl" />
+                <div className="absolute -left-20 -bottom-24 h-60 w-60 rounded-full bg-purple-300/10 blur-3xl" />
+
+                <div className="relative flex items-center justify-between gap-4">
+                  <div>
+                    <p className="text-[10px] font-black tracking-[0.18em] text-[#7dd3fc]">
+                      NOLERA WORLD MAP
+                    </p>
+                    <h2 className="mt-1 text-xl font-black sm:text-2xl">
+                      العالم داخل NOLERA X
+                    </h2>
+                    <p className="mt-1 max-w-xl text-xs leading-5 text-white/65">
+                      منظومة رقمية تبدأ من السودان وتمتد إلى العالم.
+                    </p>
+                  </div>
+
+                  <div className="hidden h-12 w-12 items-center justify-center rounded-2xl border border-white/15 bg-white/10 text-2xl sm:flex">
+                    🌍
+                  </div>
+                </div>
+
+                <div className="relative mt-5 overflow-hidden rounded-[24px] border border-white/10 bg-[#17101f]/70 p-2 sm:p-4">
+                  <svg
+                    viewBox="0 0 1000 500"
+                    className="h-auto w-full"
+                    role="img"
+                    aria-label="خريطة العالم"
+                  >
+                    <defs>
+                      <radialGradient id="worldGlow">
+                        <stop offset="0%" stopColor="#a855f7" stopOpacity=".45" />
+                        <stop offset="100%" stopColor="#a855f7" stopOpacity="0" />
+                      </radialGradient>
+                      <filter id="mapGlow">
+                        <feGaussianBlur stdDeviation="5" />
+                      </filter>
+                    </defs>
+
+                    <ellipse cx="500" cy="250" rx="390" ry="190" fill="url(#worldGlow)" />
+
+                    <g
+                      fill="#d8b4fe"
+                      stroke="#f5eaff"
+                      strokeWidth="2"
+                      strokeLinejoin="round"
+                    >
+                      {/* North America */}
+                      <path d="M90 105 L145 70 L205 82 L245 112 L230 145 L190 145 L172 178 L132 165 L118 140 L82 132 Z" />
+                      {/* South America */}
+                      <path d="M270 205 L315 220 L340 265 L327 315 L300 365 L272 395 L252 350 L258 310 L240 270 Z" />
+                      {/* Europe */}
+                      <path d="M455 120 L490 105 L520 120 L535 145 L510 160 L480 150 L458 138 Z" />
+                      {/* Asia */}
+                      <path d="M520 125 L575 92 L650 100 L720 125 L790 150 L850 190 L820 220 L760 208 L720 225 L675 205 L620 215 L580 190 L535 175 Z" />
+                      {/* Africa */}
+                      <path d="M465 190 L515 180 L555 215 L550 275 L520 330 L480 355 L450 310 L442 255 Z" />
+                      {/* Australia */}
+                      <path d="M735 330 L785 315 L835 335 L850 370 L820 395 L770 390 L735 365 Z" />
+                      {/* Greenland */}
+                      <path d="M300 55 L350 38 L390 55 L380 95 L335 105 L305 88 Z" />
+                    </g>
+
+                    {/* Sudan / NOLERA origin */}
+                    <circle cx="503" cy="251" r="16" fill="#38bdf8" opacity=".25" filter="url(#mapGlow)" />
+                    <circle cx="503" cy="251" r="7" fill="#38bdf8" stroke="white" strokeWidth="3" />
+                    <path d="M503 251 L555 215" stroke="#38bdf8" strokeWidth="2" strokeDasharray="6 6" />
+                    <rect x="555" y="198" width="150" height="38" rx="12" fill="#ffffff" fillOpacity=".12" stroke="#ffffff" strokeOpacity=".18" />
+                    <text x="575" y="222" fill="white" fontSize="15" fontWeight="800">
+                      NOLERA X
+                    </text>
+                  </svg>
+                </div>
+
+                <div className="relative mt-4 flex flex-wrap items-center gap-2">
+                  <div className="rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-bold">
+                    🌍 Global Network
+                  </div>
+                  <div className="rounded-full border border-[#38bdf8]/30 bg-[#38bdf8]/10 px-3 py-1.5 text-[10px] font-bold text-[#bae6fd]">
+                    🇸🇩 Sudan Origin
+                  </div>
+                  <div className="rounded-full border border-white/10 bg-white/10 px-3 py-1.5 text-[10px] font-bold">
+                    NOLERA X
+                  </div>
+                </div>
+              </div>
+            </section>
+
             <section className="mt-6 grid grid-cols-2 gap-3">
               <Link
                 href="/id"
