@@ -2,6 +2,7 @@
 
 import Link from "next/link"
 import { useEffect, useMemo, useState } from "react"
+import MediaCapture from "../../components/media-capture"
 import {
   createStoreProduct,
   getMyProducts,
@@ -28,6 +29,8 @@ export default function CreateProductPage() {
   const [currency, setCurrency] = useState("SDG")
   const [type, setType] = useState(types[0].name)
   const [icon, setIcon] = useState(types[0].icon)
+  const [productMedia, setProductMedia] = useState<string | null>(null)
+  const [productMediaType, setProductMediaType] = useState<"image" | null>(null)
   const [products, setProducts] = useState<any[]>([])
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(false)
@@ -134,6 +137,8 @@ export default function CreateProductPage() {
       setAudience("")
       setBenefits("")
       setPrice("")
+      setProductMedia(null)
+      setProductMediaType(null)
 
       setMessage(
         "تم إنشاء المنتج ونشره في NOLERA STORE بنجاح 🎉"
@@ -339,6 +344,22 @@ export default function CreateProductPage() {
               className="mt-2 w-full resize-none rounded-2xl bg-slate-100 p-4 outline-none focus:ring-4 focus:ring-purple-100"
             />
 
+            {/* PRODUCT MEDIA */}
+            <label className="mt-6 block text-sm font-black">
+              🖼️ صورة المنتج
+            </label>
+            <div className="mt-3">
+              <MediaCapture
+                label="التقاط صورة أو اختيارها من الهاتف"
+                accept="image/*"
+                capture="environment"
+                onChange={(_, preview) => {
+                  setProductMedia(preview)
+                  setProductMediaType(preview ? "image" : null)
+                }}
+              />
+            </div>
+
             {/* PRICE */}
             <label className="mt-6 block text-sm font-black">
               💰 السعر
@@ -386,9 +407,17 @@ export default function CreateProductPage() {
               </p>
 
               <div className="mt-5 rounded-[26px] bg-white p-5 text-slate-900">
-                <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-100 text-3xl">
-                  {icon}
-                </div>
+                {productMedia ? (
+                  <img
+                    src={productMedia}
+                    alt="معاينة صورة المنتج"
+                    className="h-48 w-full rounded-2xl object-cover"
+                  />
+                ) : (
+                  <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-purple-100 text-3xl">
+                    {icon}
+                  </div>
+                )}
 
                 <p className="mt-5 text-xs font-bold text-purple-600">
                   {selectedType.name}
