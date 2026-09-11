@@ -1,8 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import { useNoleraState } from "@/lib/use-nolera-state"
-import { purchase } from "@/lib/nolera-actions"
 
 const bills = [
   { id: "electricity", title: "الكهرباء", icon: "⚡" },
@@ -11,9 +9,7 @@ const bills = [
   { id: "phone", title: "الهاتف", icon: "📱" },
 ]
 
-export default function BillsPage() {
-  const { balance } = useNoleraState()
-  const [selected, setSelected] = useState("")
+export default function BillsPage() {const [selected, setSelected] = useState("")
   const [amount, setAmount] = useState("")
   const [account, setAccount] = useState("")
   const [message, setMessage] = useState("")
@@ -26,7 +22,7 @@ export default function BillsPage() {
         throw new Error("أكمل بيانات الفاتورة.")
       }
 
-      purchase(value, bills.find((b) => b.id === selected)?.title || "سداد فاتورة")
+      (() => { throw new Error("دفع الفواتير يحتاج إلى Billing/Payment API آمن. لم يتم خصم أي رصيد."); })()
       setMessage("✅ تمت عملية السداد بنجاح.")
       setAmount("")
       setAccount("")
@@ -39,7 +35,7 @@ export default function BillsPage() {
     <main dir="rtl" className="min-h-screen bg-slate-50 p-6">
       <div className="mx-auto max-w-4xl">
         <h1 className="text-3xl font-bold text-slate-900">دفع الفواتير</h1>
-        <p className="mt-2 text-slate-500">الرصيد الحالي: {balance.toLocaleString()} SDG</p>
+        <p className="mt-2 text-slate-500">الرصيد الحالي: {0 .toLocaleString()} SDG</p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {bills.map((bill) => (

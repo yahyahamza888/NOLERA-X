@@ -1,107 +1,100 @@
-"use client"
+"use client";
 
-import {
-  addTransaction,
-  changeBalance,
-  getBalance,
-} from "./nolera-state"
+import { getSupabaseClient } from "./nolera-auth";
 
-export function deposit(amount: number, title = "إيداع") {
-  if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error("مبلغ الإيداع غير صحيح")
+type RpcResult = {
+  success?: boolean;
+  type?: string;
+  currency?: string;
+  amount?: number;
+  balance?: number;
+  sender_balance?: number;
+  receiver_balance?: number;
+  fee?: number;
+  reference?: string;
+  operation_id?: string;
+};
+
+async function callRpc(
+  functionName: string,
+  args: Record<string, unknown>
+): Promise<RpcResult> {
+  const supabase = getSupabaseClient();
+
+  const { data: userData, error: userError } =
+    await supabase.auth.getUser();
+
+  if (userError || !userData.user) {
+    throw new Error("يجب تسجيل الدخول أولاً.");
   }
 
-  const balance = changeBalance(amount)
+  const { data, error } = await supabase.rpc(functionName, args);
 
-  addTransaction({
-    type: "deposit",
-    title,
-    amount,
-    currency: "SDG",
-    status: "completed",
-  })
+  if (error) {
+    throw new Error(error.message || "فشلت العملية المالية.");
+  }
 
-  return balance
+  return (data || {}) as RpcResult;
 }
 
-export function withdraw(amount: number, title = "سحب") {
+function validateAmount(amount: number) {
   if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error("مبلغ السحب غير صحيح")
+    throw new Error("المبلغ غير صحيح.");
   }
-
-  const current = getBalance()
-
-  if (amount > current) {
-    throw new Error("الرصيد غير كافٍ")
-  }
-
-  const balance = changeBalance(-amount)
-
-  addTransaction({
-    type: "withdraw",
-    title,
-    amount,
-    currency: "SDG",
-    status: "completed",
-  })
-
-  return balance
 }
 
-export function transfer(
+export async function deposit(
   amount: number,
-  recipient: string,
-  title = "تحويل"
+  currency = "SDG"
 ) {
-  if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error("مبلغ التحويل غير صحيح")
-  }
+  validateAmount(amount);
 
-  const current = getBalance()
-
-  if (amount > current) {
-    throw new Error("الرصيد غير كافٍ")
-  }
-
-  const balance = changeBalance(-amount)
-
-  addTransaction({
-    type: "transfer",
-    title,
-    amount,
-    currency: "SDG",
-    status: "completed",
-    meta: recipient,
-  })
-
-  return balance
+  return callRpc("nolera_deposit", {
+    p_currency: currency,
+    p_amount: amount,
+  });
 }
 
-export function purchase(
+export async function withdraw(
   amount: number,
-  merchant: string,
-  title = "شراء"
+  currency = "SDG"
 ) {
-  if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error("مبلغ الشراء غير صحيح")
+  validateAmount(amount);
+
+  return callRpc("nolera_withdraw", {
+    p_currency: currency,
+    p_amount: amount,
+  });
+}
+
+export async function transfer(
+  amount: number,
+  recipientId: string,
+  currency = "SDG"
+) {
+  validateAmount(amount);
+
+  if (!recipientId?.trim()) {
+    throw new Error("معرّف المستلم غير صحيح.");
   }
 
-  const current = getBalance()
+  return callRpc("nolera_transfer", {
+    p_currency: currency,
+    p_recipient_id: recipientId,
+    p_amount: amount,
+  });
+}
 
-  if (amount > current) {
-    throw new Error("الرصيد غير كافٍ")
-  }
-
-  const balance = changeBalance(-amount)
-
-  addTransaction({
-    type: "purchase",
-    title,
-    amount,
-    currency: "SDG",
-    status: "completed",
-    meta: merchant,
-  })
-
-  return balance
+/*
+ * لا يوجد حالياً nolera_purchase في Supabase.
+ * لذلك لا يتم خصم أي رصيد من المتصفح.
+ */
+export async function purchase(
+  _amount: number,
+  _merchant?: string,
+  _title = "شراء"
+) {
+  throw new Error(
+    "الدفع لهذا النوع من المشتريات يحتاج إلى Purchase RPC آمن في Backend. لم يتم خصم أي رصيد."
+  );
 }

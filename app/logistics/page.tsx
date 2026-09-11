@@ -33,8 +33,8 @@ import {
   Filter,
 } from "lucide-react";
 
-import { getBalance } from "@/lib/nolera-state";
-import { purchase } from "@/lib/nolera-actions";
+import { getWallets } from "@/lib/nolera-finance";
+
 
 type Category =
   | "real-estate"
@@ -197,12 +197,22 @@ export default function LogisticsPage() {
     });
   }, [category, search, country, city, area]);
 
-  function refreshWallet() {
-    setBalance(getBalance());
+  async function refreshWallet() {
+    try {
+      const wallets = await getWallets();
+      const wallet =
+        wallets.find((w: any) => w.currency === "SDG") ||
+        wallets.find((w: any) => w.currency === "USD") ||
+        wallets[0];
+
+      setBalance(Number(wallet?.balance || 0));
+    } catch {
+      setBalance(0);
+    }
   }
 
   function openPaidService(service: string, price: number) {
-    refreshWallet();
+    void refreshWallet();
     setSelectedService(`${service}|${price}`);
     setShowPayment(true);
   }
@@ -214,10 +224,8 @@ export default function LogisticsPage() {
     const price = Number(rawPrice);
 
     try {
-      purchase(
-        price,
-        "NOLERA Global Services",
-        `Logistics / ${service}`
+      throw new Error(
+        "دفع خدمات Logistics يحتاج إلى Backend Payment API آمن. لم يتم خصم أي رصيد."
       );
 
       const newRequest: RequestItem = {
@@ -530,7 +538,7 @@ export default function LogisticsPage() {
           {(() => {
             const [service, raw] = selectedService.split("|");
             const amount = Number(raw);
-            const current = getBalance();
+            const current = balance;
             const enough = current >= amount;
 
             return (

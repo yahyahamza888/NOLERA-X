@@ -28,7 +28,7 @@ import {
   GraduationCap,
 } from "lucide-react"
 
-import { getBalance } from "@/lib/nolera-state"
+import { getWallets } from "@/lib/nolera-finance"
 import { createStoreProduct } from "@/lib/nolera-store"
 
 type ToolType = "Native" | "API" | "External" | "Hybrid"
@@ -179,7 +179,21 @@ export default function AIPage() {
   const [copied, setCopied] = useState(false)
 
   useEffect(() => {
-    setBalance(getBalance())
+    let mounted = true;
+
+    getWallets()
+      .then((wallets) => {
+        if (!mounted) return;
+        const wallet =
+          wallets.find((w: any) => w.currency === "SDG") ||
+          wallets.find((w: any) => w.currency === "USD") ||
+          wallets[0];
+
+        setBalance(Number(wallet?.balance || 0));
+      })
+      .catch(() => {
+        if (mounted) setBalance(0);
+      });
 
     try {
       const savedTools = localStorage.getItem(STORAGE_TOOLS)
@@ -190,10 +204,24 @@ export default function AIPage() {
       if (savedProducts) setProducts(JSON.parse(savedProducts))
       if (savedWebsites) setWebsites(JSON.parse(savedWebsites))
     } catch {}
+
+    return () => {
+      mounted = false;
+    };
   }, [])
 
-  function refreshBalance() {
-    setBalance(getBalance())
+  async function refreshBalance() {
+    try {
+      const wallets = await getWallets();
+      const wallet =
+        wallets.find((w: any) => w.currency === "SDG") ||
+        wallets.find((w: any) => w.currency === "USD") ||
+        wallets[0];
+
+      setBalance(Number(wallet?.balance || 0));
+    } catch {
+      setBalance(0);
+    }
   }
 
   const visibleTools = useMemo(() => {
