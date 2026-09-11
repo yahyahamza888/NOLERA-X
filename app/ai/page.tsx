@@ -278,7 +278,7 @@ ${productName} هو منتج رقمي عملي يساعد المستخدم عل�
 
       const savedProduct: DigitalProduct = {
         ...product,
-        id: String(storeProduct?.id || product.id),
+        id: String(storeProduct?.product?.id || storeProduct?.id || product.id),
       }
 
       const next = [savedProduct, ...products]
