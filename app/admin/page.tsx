@@ -91,6 +91,8 @@ export default function AdminPage() {
   const [command, setCommand] = useState("")
   const [commandLoading, setCommandLoading] = useState(false)
   const [commands, setCommands] = useState<Command[]>([])
+  const [kycRequests, setKycRequests] = useState<any[]>([])
+  const [kycLoading, setKycLoading] = useState(false)
   const [ads, setAds] = useState<NoleraAd[]>([])
 
   const isSuperAdmin = role === "super_admin"
@@ -177,6 +179,7 @@ export default function AdminPage() {
 
         if (data?.role === "admin" || data?.role === "super_admin") {
           await loadCommands()
+          await loadKycRequests()
         }
       } catch (error) {
         setMessage(
@@ -358,6 +361,69 @@ export default function AdminPage() {
     }
   }
 
+
+  async function loadKycRequests() {
+    setKycLoading(true)
+    try {
+      const { data, error } = await supabase
+        .from("verifications")
+        .select("id, user_id, full_name, document_type, document_number, status, notes, created_at")
+        .order("created_at", { ascending: false })
+        .limit(50)
+
+      if (error) throw error
+      setKycRequests(data || [])
+    } catch (error) {
+      setMessage(
+        error instanceof Error ? error.message : "تعذر تحميل طلبات KYC."
+      )
+    } finally {
+      setKycLoading(false)
+    }
+  }
+
+  async function reviewKyc(
+    id: string,
+    status: "approved" | "rejected"
+  ) {
+    const request = kycRequests.find((item) => item.id === id)
+    if (!request) return
+
+    const label = status === "approved" ? "قبول" : "رفض"
+    const notes = window.prompt(
+      `ملاحظات ${label} طلب ${request.full_name || "العميل"}:`,
+      request.notes || ""
+    )
+
+    if (notes === null) return
+
+    try {
+      const { error } = await supabase.rpc(
+        "nolera_review_verification",
+        {
+          p_verification_id: id,
+          p_status: status,
+          p_notes: notes.trim() || null,
+        }
+      )
+
+      if (error) throw error
+
+      setMessage(
+        status === "approved"
+          ? "تم قبول طلب KYC وتحديث حالة الحساب."
+          : "تم رفض طلب KYC وتحديث حالة الحساب."
+      )
+
+      await loadKycRequests()
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "تعذر تحديث طلب KYC."
+      )
+    }
+  }
 
   function loadHRData() {
     try {
@@ -969,6 +1035,121 @@ export default function AdminPage() {
                 المجتمع والمحتوى والمنتجات.
               </p>
             </Link>
+          </div>
+        </section>
+
+        {/* KYC MANAGEMENT */}
+        <section className="mt-5 rounded-[28px] bg-white p-6 shadow-sm">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <p className="text-sm font-bold text-purple-600">NOLERA KYC</p>
+              <h2 className="mt-1 text-xl font-black text-slate-900">
+                إدارة التحقق والهوية 🛡️
+              </h2>
+              <p className="mt-2 text-sm text-slate-500">
+                مراجعة طلبات التحقق وقبولها أو رفضها مع تسجيل ملاحظات المراجع.
+              </p>
+            </div>
+
+            <button
+              onClick={loadKycRequests}
+              disabled={kycLoading}
+              className="rounded-2xl bg-purple-50 px-5 py-3 text-sm font-black text-purple-700 disabled:opacity-50"
+            >
+              {kycLoading ? "جاري التحديث..." : "↻ تحديث الطلبات"}
+            </button>
+          </div>
+
+          <div className="mt-5 space-y-3">
+            {kycRequests.length === 0 ? (
+              <div className="rounded-2xl bg-slate-50 p-6 text-center text-sm font-bold text-slate-500">
+                لا توجد طلبات تحقق حالياً.
+              </div>
+            ) : (
+              kycRequests.map((request) => (
+                <div
+                  key={request.id}
+                  className="rounded-3xl border border-slate-100 bg-slate-50 p-5"
+                >
+                  <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+                    <div className="min-w-0">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <h3 className="font-black text-slate-900">
+                          {request.full_name || "بدون اسم"}
+                        </h3>
+
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-black ${
+                            request.status === "approved"
+                              ? "bg-emerald-100 text-emerald-700"
+                              : request.status === "rejected"
+                                ? "bg-red-100 text-red-700"
+                                : "bg-amber-100 text-amber-700"
+                          }`}
+                        >
+                          {request.status === "approved"
+                            ? "مقبول"
+                            : request.status === "rejected"
+                              ? "مرفوض"
+                              : "قيد المراجعة"}
+                        </span>
+                      </div>
+
+                      <div className="mt-3 grid gap-2 text-sm text-slate-600 sm:grid-cols-2">
+                        <p>
+                          <span className="font-bold">المستند:</span>{" "}
+                          {request.document_type || "-"}
+                        </p>
+
+                        <p>
+                          <span className="font-bold">الرقم:</span>{" "}
+                          {request.document_number
+                            ? `••••${String(request.document_number).slice(-4)}`
+                            : "-"}
+                        </p>
+
+                        <p>
+                          <span className="font-bold">التاريخ:</span>{" "}
+                          {request.created_at
+                            ? new Date(request.created_at).toLocaleDateString("ar")
+                            : "-"}
+                        </p>
+
+                        <p className="truncate">
+                          <span className="font-bold">User ID:</span>{" "}
+                          {request.user_id || "-"}
+                        </p>
+                      </div>
+
+                      {request.notes && (
+                        <div className="mt-3 rounded-2xl bg-white p-3 text-sm text-slate-600">
+                          <span className="font-bold">ملاحظات:</span>{" "}
+                          {request.notes}
+                        </div>
+                      )}
+                    </div>
+
+                    {request.status === "pending" && (
+                      <div className="flex shrink-0 gap-2">
+                        <button
+                          onClick={() => reviewKyc(request.id, "approved")}
+                          className="rounded-2xl bg-emerald-500 px-5 py-3 text-sm font-black text-white"
+                        >
+                          ✓ قبول
+                        </button>
+
+                        <button
+                          onClick={() => reviewKyc(request.id, "rejected")}
+                          className="rounded-2xl bg-red-500 px-5 py-3 text-sm font-black text-white"
+                        >
+                          ✕ رفض
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </section>
 

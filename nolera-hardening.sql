@@ -284,3 +284,58 @@ $$;
 
 revoke all on function public.nolera_get_my_verification() from public;
 grant execute on function public.nolera_get_my_verification() to authenticated;
+
+create or replace function public.nolera_review_verification(
+  p_verification_id uuid,
+  p_status text,
+  p_notes text default null
+)
+returns public.verifications
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_role text;
+  v_row public.verifications;
+begin
+  if auth.uid() is null then
+    raise exception 'Authentication required';
+  end if;
+
+  select role into v_role
+  from public.profiles
+  where id = auth.uid();
+
+  if v_role not in ('admin', 'super_admin') then
+    raise exception 'Admin access required';
+  end if;
+
+  if p_status not in ('approved', 'rejected') then
+    raise exception 'Invalid verification status';
+  end if;
+
+  update public.verifications
+  set
+    status = p_status,
+    notes = nullif(trim(coalesce(p_notes, '')), '')
+  where id = p_verification_id
+  returning * into v_row;
+
+  if not found then
+    raise exception 'Verification request not found';
+  end if;
+
+  update public.profiles
+  set
+    verification_status = p_status,
+    updated_at = now()
+  where id = v_row.user_id;
+
+  return v_row;
+end;
+$$;
+
+revoke all on function public.nolera_review_verification(uuid,text,text) from public;
+grant execute on function public.nolera_review_verification(uuid,text,text) to authenticated;
+
