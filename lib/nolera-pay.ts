@@ -1,140 +1,133 @@
-"use client";
+import { getSupabaseClient } from "./nolera-auth";
 
-import {
-  addBalance,
-  subtractBalance,
-  createCoreTransaction,
-  type NoleraCurrency,
-  type NoleraMoney,
-} from "./nolera-core-v2";
+export type PaymentStatus = "pending" | "paid" | "failed" | "cancelled";
 
-export interface PaymentLink {
+export type PaymentLink = {
   id: string;
-  reference: string;
-  amount?: number;
-  currency?: NoleraCurrency;
-  description?: string;
-  createdAt: string;
-  status: "active" | "paid" | "cancelled";
-}
-
-export interface Invoice {
-  id: string;
-  invoiceNumber: string;
-  customer: string;
+  userId: string;
   amount: number;
-  currency: NoleraCurrency;
-  description: string;
-  status: "draft" | "pending" | "paid" | "cancelled";
+  currency: string;
+  description?: string;
+  status: PaymentStatus;
   createdAt: string;
+  expiresAt?: string;
+};
+
+export type Invoice = {
+  id: string;
+  userId: string;
+  amount: number;
+  currency: string;
+  description?: string;
+  status: PaymentStatus;
+  createdAt: string;
+  dueAt?: string;
+};
+
+function requireUserId(userId?: string) {
+  if (userId) return userId;
+  throw new Error("Authentication required");
 }
 
-const LINKS_KEY = "nolera-pay-links";
-const INVOICES_KEY = "nolera-pay-invoices";
+export async function createPaymentLink(input: {
+  amount: number;
+  currency: string;
+  description?: string;
+  expiresAt?: string;
+}) {
+  const supabase = getSupabaseClient();
+  const { data: auth } = await supabase.auth.getUser();
+  const userId = requireUserId(auth.user?.id);
 
-function save<T>(key: string, value: T) {
-  localStorage.setItem(key, JSON.stringify(value));
-}
-
-function load<T>(key: string, fallback: T): T {
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
-}
-
-export function createPaymentLink(
-  amount?: number,
-  currency?: NoleraCurrency,
-  description?: string,
-): PaymentLink {
-  const links = load<PaymentLink[]>(LINKS_KEY, []);
-
-  const link: PaymentLink = {
-    id: crypto.randomUUID(),
-    reference: `PAY-${Date.now().toString(36).toUpperCase()}`,
-    amount,
-    currency,
-    description,
-    createdAt: new Date().toISOString(),
-    status: "active",
-  };
-
-  links.unshift(link);
-  save(LINKS_KEY, links);
-
-  return link;
-}
-
-export function getPaymentLinks(): PaymentLink[] {
-  return load<PaymentLink[]>(LINKS_KEY, []);
-}
-
-export function cancelPaymentLink(id: string) {
-  const links = getPaymentLinks().map((link) =>
-    link.id === id ? { ...link, status: "cancelled" as const } : link,
-  );
-
-  save(LINKS_KEY, links);
-}
-
-export function createInvoice(
-  customer: string,
-  amount: number,
-  currency: NoleraCurrency,
-  description: string,
-): Invoice {
-  if (amount <= 0) throw new Error("Invalid invoice amount");
-
-  const invoices = load<Invoice[]>(INVOICES_KEY, []);
-
-  const invoice: Invoice = {
-    id: crypto.randomUUID(),
-    invoiceNumber: `INV-${Date.now().toString(36).toUpperCase()}`,
-    customer,
-    amount,
-    currency,
-    description,
-    status: "pending",
-    createdAt: new Date().toISOString(),
-  };
-
-  invoices.unshift(invoice);
-  save(INVOICES_KEY, invoices);
-
-  return invoice;
-}
-
-export function getInvoices(): Invoice[] {
-  return load<Invoice[]>(INVOICES_KEY, []);
-}
-
-export function payMerchant(
-  merchant: string,
-  amount: number,
-  currency: NoleraCurrency,
-  description = "NOLERA PAY",
-): NoleraMoney {
-  if (amount <= 0) {
+  if (!Number.isFinite(input.amount) || input.amount <= 0) {
     throw new Error("Invalid payment amount");
   }
 
-  subtractBalance(currency, amount);
-
-  createCoreTransaction({
-    userId: "current-user",
-    operation: "payment",
-    amount,
-    currency,
-    status: "completed",
-    recipient: merchant,
-    description,
-  });
-
+  // Backend-ready boundary:
+  // Payment links must be persisted by the backend/API.
+  // No localStorage and no local balance mutation.
   return {
-    amount,
-    currency,
+    id: crypto.randomUUID(),
+    userId,
+    amount: input.amount,
+    currency: input.currency,
+    description: input.description,
+    status: "pending" as const,
+    createdAt: new Date().toISOString(),
+    expiresAt: input.expiresAt,
+    backendRequired: true,
+  };
+}
+
+export async function createInvoice(input: {
+  amount: number;
+  currency: string;
+  description?: string;
+  dueAt?: string;
+}) {
+  const supabase = getSupabaseClient();
+  const { data: auth } = await supabase.auth.getUser();
+  const userId = requireUserId(auth.user?.id);
+
+  if (!Number.isFinite(input.amount) || input.amount <= 0) {
+    throw new Error("Invalid invoice amount");
+  }
+
+  // Backend-ready boundary:
+  // Invoice persistence/payment must happen server-side.
+  return {
+    id: crypto.randomUUID(),
+    userId,
+    amount: input.amount,
+    currency: input.currency,
+    description: input.description,
+    status: "pending" as const,
+    createdAt: new Date().toISOString(),
+    dueAt: input.dueAt,
+    backendRequired: true,
+  };
+}
+
+export async function payMerchant(_input: {
+  merchantId: string;
+  amount: number;
+  currency: string;
+  description?: string;
+}) {
+  const supabase = getSupabaseClient();
+  const { data: auth } = await supabase.auth.getUser();
+  requireUserId(auth.user?.id);
+
+  if (!Number.isFinite(_input.amount) || _input.amount <= 0) {
+    throw new Error("Invalid payment amount");
+  }
+
+  // IMPORTANT:
+  // Never subtract money in the browser.
+  // Real merchant payments must call a protected backend/RPC
+  // that validates balance, merchant, currency and authorization
+  // atomically on the server.
+  throw new Error(
+    "Merchant payment backend is not connected yet. No local balance was changed."
+  );
+}
+
+export async function getPaymentLink(_id: string) {
+  // Backend/API lookup boundary.
+  // Deliberately does not read localStorage.
+  return null;
+}
+
+export async function getInvoice(_id: string) {
+  // Backend/API lookup boundary.
+  // Deliberately does not read localStorage.
+  return null;
+}
+
+export async function cancelPayment(_id: string) {
+  // Cancellation must be performed by the backend/API.
+  return {
+    success: false,
+    backendRequired: true,
   };
 }
