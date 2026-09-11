@@ -60,55 +60,15 @@ const products = [
 export default function HomePage() {
   const { user, loading: authLoading } = useNoleraAuth()
   const [showBalance, setShowBalance] = useState(true);
-  const [balance, setBalance] = useState(0);
-  const [balanceCurrency, setBalanceCurrency] = useState("USD");
-  const [transactions, setTransactions] = useState<any[]>([]);
-  const [financialLoading, setFinancialLoading] = useState(true);
-  const [financialError, setFinancialError] = useState("");
+  const [balance, setBalance] = useState(balance);
   const [mobileMenu, setMobileMenu] = useState(false);
   const [tab, setTab] = useState<"best" | "new">("best");
 
   useEffect(() => {
-    let active = true;
-
-    async function loadFinancialData() {
-      try {
-        setFinancialLoading(true);
-        setFinancialError("");
-
-        const [wallets, txs] = await Promise.all([
-          getWallets(),
-          getSupabaseTransactions(4),
-        ]);
-
-        if (!active) return;
-
-        const preferredWallet =
-          wallets?.find((wallet: any) => wallet.currency === "USD") ??
-          wallets?.find((wallet: any) => wallet.currency === "SDG") ??
-          wallets?.[0];
-
-        setBalance(Number(preferredWallet?.balance ?? 0));
-        setBalanceCurrency(preferredWallet?.currency ?? "USD");
-        setTransactions(Array.isArray(txs) ? txs.slice(0, 4) : []);
-      } catch (error) {
-        if (!active) return;
-
-        console.error("NOLERA financial data error:", error);
-        setFinancialError("تعذر تحميل البيانات المالية.");
-        setBalance(0);
-        setTransactions([]);
-      } finally {
-        if (active) setFinancialLoading(false);
-      }
-    }
-
-    loadFinancialData();
-
-    return () => {
-      active = false;
-    };
+    setBalance(balance);
   }, []);
+
+  const transactions = transactions.slice(0, 4);
 
   return (
     <main
@@ -218,10 +178,7 @@ export default function HomePage() {
                     <div className="mt-2 flex items-center gap-3">
                       <div className="text-3xl font-black tracking-tight sm:text-5xl">
                         {showBalance
-                          ? `${balanceCurrency} ${balance.toLocaleString(undefined, {
-                              minimumFractionDigits: 2,
-                              maximumFractionDigits: 2,
-                            })}`
+                          ? `$${balance.toLocaleString()}`
                           : "••••••••"}
                       </div>
                       <button
@@ -400,16 +357,29 @@ export default function HomePage() {
                 </div>
 
                 <div className="mt-4 divide-y divide-purple-50">
-                  {financialLoading ? (
-                    <div className="py-6 text-center text-sm text-slate-400">
-                      جاري تحميل العمليات...
-                    </div>
-                  ) : financialError ? (
-                    <div className="py-6 text-center text-sm text-red-500">
-                      {financialError}
-                    </div>
-                  ) : transactions.length > 0 ? (
-                    transactions.map((tx: any) => (
+                  {(transactions.length
+                    ? transactions
+                    : [
+                        {
+                          id: "1",
+                          type: "payment",
+                          amount: -18.5,
+                          description: "NOLERA Coffee",
+                        },
+                        {
+                          id: "2",
+                          type: "receive",
+                          amount: 250,
+                          description: "Money received",
+                        },
+                        {
+                          id: "3",
+                          type: "payment",
+                          amount: -12,
+                          description: "Cloud Services",
+                        },
+                      ]
+                  ).map((tx: any) => (
                     <div
                       key={tx.id}
                       className="flex items-center gap-3 py-3"
@@ -432,18 +402,11 @@ export default function HomePage() {
                             : "text-slate-700"
                         }`}
                       >
-                        {Number(tx.amount) >= 0 ? "+" : "-"}
+                        {Number(tx.amount) >= 0 ? "+" : "-"}$
                         {Math.abs(Number(tx.amount || 0)).toFixed(2)}
-                        {" "}
-                        {tx.currency || balanceCurrency}
                       </div>
                     </div>
-                    ))
-                  ) : (
-                    <div className="py-6 text-center text-sm text-slate-400">
-                      لا توجد عمليات مالية حتى الآن.
-                    </div>
-                  )}
+                  ))}
                 </div>
               </div>
 
