@@ -48,6 +48,7 @@ export default function StorePage() {
   const [cart, setCart] = useState<CartItem[]>([])
   const [search, setSearch] = useState("")
   const [category, setCategory] = useState("الكل")
+  const [sortMode, setSortMode] = useState("best")
   const [cartOpen, setCartOpen] = useState(false)
   const [loading, setLoading] = useState(true)
   const [checkoutLoading, setCheckoutLoading] = useState(false)
@@ -115,6 +116,48 @@ export default function StorePage() {
       return matchesCategory && (!query || text.includes(query))
     })
   }, [products, search, category])
+
+  const sortedProducts = useMemo(() => {
+    const list = [...filteredProducts]
+
+    if (sortMode === "best") {
+      return list.sort((a: any, b: any) =>
+        Number(b.sales_count ?? b.sales ?? b.orders_count ?? 0) -
+        Number(a.sales_count ?? a.sales ?? a.orders_count ?? 0)
+      )
+    }
+
+    if (sortMode === "worst") {
+      return list.sort((a: any, b: any) =>
+        Number(a.sales_count ?? a.sales ?? a.orders_count ?? 0) -
+        Number(b.sales_count ?? b.sales ?? b.orders_count ?? 0)
+      )
+    }
+
+    if (sortMode === "low") {
+      return list.sort((a: any, b: any) =>
+        Number(a.price ?? 0) - Number(b.price ?? 0)
+      )
+    }
+
+    if (sortMode === "high") {
+      return list.sort((a: any, b: any) =>
+        Number(b.price ?? 0) - Number(a.price ?? 0)
+      )
+    }
+
+    return list
+  }, [filteredProducts, sortMode])
+
+  const newProducts = useMemo(() => {
+    return [...products]
+      .sort((a: any, b: any) => {
+        const ad = new Date(a.created_at ?? 0).getTime()
+        const bd = new Date(b.created_at ?? 0).getTime()
+        return bd - ad
+      })
+      .slice(0, 8)
+  }, [products])
 
   const cartTotal = cart.reduce(
     (sum, item) => sum + Number(item.product.price) * item.quantity,
@@ -288,76 +331,107 @@ export default function StorePage() {
         </div>
       </header>
 
-      <section className="mx-auto max-w-7xl px-4 pb-6 pt-7 sm:px-6">
-        <div className="overflow-hidden rounded-[30px] bg-gradient-to-br from-[#6f36a9] via-[#8240b6] to-[#a85bd0] p-6 text-white shadow-xl sm:p-9">
-          <div className="max-w-2xl">
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full bg-white/15 px-3 py-1 text-xs font-bold backdrop-blur">
-              <Sparkles size={14} />
-              NOLERA MARKET
+      <section className="mx-auto max-w-7xl px-4 pb-4 pt-6 sm:px-6">
+        <div className="rounded-[28px] border border-purple-100 bg-white p-4 shadow-sm sm:p-5">
+
+          <div className="mb-4 flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-black text-purple-600">NOLERA STORE</p>
+              <h2 className="text-xl font-black sm:text-2xl">
+                سوق المنتجات الرقمية
+              </h2>
             </div>
 
-            <h2 className="text-3xl font-black leading-tight sm:text-5xl">
-              اكتشف، اشترِ، وابدأ
-              <br />
-              في بيع منتجاتك الرقمية.
-            </h2>
-
-            <p className="mt-4 max-w-xl text-sm leading-7 text-white/85 sm:text-base">
-              مكان واحد للكتب والقوالب والتصاميم والدورات والخدمات الرقمية
-              داخل منظومة NOLERA.
-            </p>
-
-            <div className="mt-6 flex flex-wrap gap-3">
-              <Link
-                href="/create-product"
-                className="rounded-2xl bg-white px-5 py-3 text-sm font-black text-purple-700"
-              >
-                اصنع منتجك
-              </Link>
-
-              <Link
-                href="/ai"
-                className="rounded-2xl border border-white/30 bg-white/10 px-5 py-3 text-sm font-black backdrop-blur"
-              >
-                صناعة المنتجات بالـAI ✨
-              </Link>
+            <div className="rounded-2xl bg-purple-50 px-3 py-2 text-xs font-black text-purple-700">
+              {products.length} منتج
             </div>
           </div>
-        </div>
-      </section>
 
-      <section className="mx-auto max-w-7xl px-4 sm:px-6">
-        <div className="mb-6 flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-          <div className="relative flex-1 lg:max-w-xl">
+          <div className="mb-4 flex gap-2 overflow-x-auto pb-1">
+            {[
+              ["best", "🔥 الأكثر مبيعًا"],
+              ["worst", "📉 الأقل مبيعًا"],
+              ["low", "💰 الأقل سعرًا"],
+              ["high", "💎 الأعلى سعرًا"],
+            ].map(([value, label]) => (
+              <button
+                key={value}
+                type="button"
+                onClick={() => setSortMode(value)}
+                className={`whitespace-nowrap rounded-2xl px-4 py-2.5 text-xs font-black transition ${
+                  sortMode === value
+                    ? "bg-purple-600 text-white shadow-md shadow-purple-200"
+                    : "border border-slate-200 bg-white text-slate-600 hover:border-purple-200 hover:bg-purple-50"
+                }`}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
+
+          <div className="relative">
             <Search
-              size={19}
+              size={18}
               className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400"
             />
             <input
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="ابحث عن منتج..."
-              className="w-full rounded-2xl border border-slate-200 bg-white py-3.5 pl-4 pr-11 outline-none transition focus:border-purple-400"
+              className="w-full rounded-2xl border border-slate-200 bg-slate-50 py-3.5 pl-4 pr-11 text-sm font-bold outline-none transition focus:border-purple-400 focus:bg-white"
             />
           </div>
+        </div>
+      </section>
 
-          <div className="flex gap-2 overflow-x-auto pb-1">
-            {categories.map((item) => (
-              <button
-                key={item}
-                onClick={() => setCategory(item)}
-                className={`whitespace-nowrap rounded-2xl px-4 py-2.5 text-sm font-bold transition ${
-                  category === item
-                    ? "bg-slate-950 text-white"
-                    : "border border-slate-200 bg-white text-slate-600"
-                }`}
-              >
-                {categoryNames[item] || item}
-              </button>
-            ))}
+      <section className="mx-auto max-w-7xl px-4 pb-5 sm:px-6">
+        <div className="mb-3 flex items-center justify-between">
+          <div>
+            <p className="text-xs font-black text-purple-600">NEW PRODUCTS</p>
+            <h2 className="text-xl font-black">🆕 منتجات جديدة</h2>
           </div>
+
+          <span className="text-xs font-bold text-slate-400">
+            اسحب للمزيد ←
+          </span>
         </div>
 
+        <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory">
+          {newProducts.length === 0 ? (
+            <div className="w-full rounded-3xl border border-dashed border-slate-200 bg-white p-8 text-center text-sm font-bold text-slate-400">
+              لا توجد منتجات جديدة حاليًا
+            </div>
+          ) : (
+            newProducts.map((product: any) => (
+              <Link
+                key={product.id}
+                href={`/store/${product.id}`}
+                className="w-[210px] shrink-0 snap-start overflow-hidden rounded-[24px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
+              >
+                <div className="flex h-32 items-center justify-center bg-gradient-to-br from-purple-100 via-white to-sky-100 text-5xl">
+                  {product.icon || "📦"}
+                </div>
+
+                <div className="p-4">
+                  <h3 className="truncate text-sm font-black">
+                    {product.name}
+                  </h3>
+
+                  <p className="mt-1 truncate text-xs text-slate-500">
+                    {product.description || "منتج رقمي من NOLERA"}
+                  </p>
+
+                  <div className="mt-3 text-sm font-black text-purple-700">
+                    {Number(product.price || 0).toLocaleString()} SDG
+                  </div>
+                </div>
+              </Link>
+            ))
+          )}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 pb-6 sm:px-6">
         {message && (
           <div className="mb-5 flex items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 p-4 text-sm font-bold text-emerald-700">
             <Check size={18} />
@@ -373,7 +447,7 @@ export default function StorePage() {
 
         <div className="mb-5 flex items-end justify-between">
           <div>
-            <p className="text-sm font-bold text-purple-600">MARKETPLACE</p>
+            <p className="text-sm font-bold text-purple-600">NOLERA MARKET</p>
             <h2 className="text-2xl font-black">المنتجات</h2>
           </div>
 
@@ -396,7 +470,7 @@ export default function StorePage() {
           </div>
         ) : (
           <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {filteredProducts.map((product) => (
+            {sortedProducts.map((product) => (
               <article
                 key={product.id}
                 className="group overflow-hidden rounded-[26px] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-xl"

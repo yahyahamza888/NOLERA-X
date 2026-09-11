@@ -685,65 +685,132 @@ export default function HomePage() {
                 <X size={20} />
               </button>
             </div>
-            <nav className="mt-7 space-y-1.5">
-              {services.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    onClick={() => setMobileMenu(false)}
-                    key={item.name}
-                    href={item.href}
-                    className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-700"
-                  >
-                    <Icon size={19} />
-                    {item.name}
+            <div className="mt-7 space-y-5">
+
+              <div>
+                <p className="mb-2 px-2 text-xs font-black text-purple-600">الخدمات المالية</p>
+                <nav className="space-y-1.5">
+                  <Link onClick={() => setMobileMenu(false)} href="/transfers" className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-700">
+                    <Send size={19} />
+                    تحويل الأموال
                   </Link>
-                );
-              })}
-            </nav>
+                  <Link onClick={() => setMobileMenu(false)} href="/wallet" className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-700">
+                    <Wallet size={19} />
+                    المحفظة
+                  </Link>
+                  <Link onClick={() => setMobileMenu(false)} href="/transactions" className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-700">
+                    <ArrowDownToLine size={19} />
+                    المعاملات
+                  </Link>
+                  <Link onClick={() => setMobileMenu(false)} href="/cards" className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-700">
+                    <CreditCard size={19} />
+                    البطاقات
+                  </Link>
+                </nav>
+              </div>
+
+              <div>
+                <p className="mb-2 px-2 text-xs font-black text-purple-600">حسابي</p>
+                <nav className="space-y-1.5">
+                  <Link onClick={() => setMobileMenu(false)} href="/account" className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-700">
+                    <UserRound size={19} />
+                    حسابي
+                  </Link>
+                  <Link onClick={() => setMobileMenu(false)} href="/notifications" className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-700">
+                    <Bell size={19} />
+                    الإشعارات
+                  </Link>
+                  <Link onClick={() => setMobileMenu(false)} href="/verification" className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-700">
+                    <ShieldCheck size={19} />
+                    التحقق والهوية
+                  </Link>
+                  <Link onClick={() => setMobileMenu(false)} href="/security" className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-700">
+                    <ShieldCheck size={19} />
+                    أمان الحساب
+                  </Link>
+                  <Link onClick={() => setMobileMenu(false)} href="/settings" className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-700">
+                    <Settings size={19} />
+                    الإعدادات
+                  </Link>
+                </nav>
+              </div>
+
+              <div>
+                <p className="mb-2 px-2 text-xs font-black text-purple-600">التجارة والمنتجات</p>
+                <nav className="space-y-1.5">
+                  <Link onClick={() => setMobileMenu(false)} href="/orders" className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-700">
+                    <ShoppingBag size={19} />
+                    طلباتي
+                  </Link>
+                  <Link onClick={() => setMobileMenu(false)} href="/create-product" className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-700">
+                    <Plus size={19} />
+                    إنشاء منتج
+                  </Link>
+                  <Link onClick={() => setMobileMenu(false)} href="/seller" className="flex items-center gap-3 rounded-2xl px-3 py-3 text-sm font-bold text-slate-600 hover:bg-purple-50 hover:text-purple-700">
+                    <Store size={19} />
+                    مبيعاتي
+                  </Link>
+                </nav>
+              </div>
+
+              <Link
+                onClick={() => setMobileMenu(false)}
+                href="/ai"
+                className="flex items-center gap-3 rounded-2xl bg-gradient-to-r from-purple-600 to-fuchsia-500 px-4 py-3 text-sm font-black text-white shadow-lg shadow-purple-200"
+              >
+                <Sparkles size={20} />
+                NOLERA AI Intelligence
+              </Link>
+
+            </div>
           </aside>
         </div>
       )}
 
       <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-purple-100 bg-white/95 px-2 py-2 shadow-[0_-5px_20px_rgba(91,45,120,.08)] backdrop-blur-xl lg:hidden">
-        <div className="mx-auto grid max-w-md grid-cols-5 gap-1">
-          <Link
-            href="/"
-            className="flex flex-col items-center gap-1 rounded-xl bg-purple-50 px-2 py-2 text-[11px] font-black text-purple-700"
-          >
-            <Home size={20} />
-            الرئيسية
-          </Link>
-          <Link
-            href="/wallet"
-            className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[11px] font-bold text-slate-500"
-          >
-            <Wallet size={20} />
-            محفظتي
-          </Link>
-          <Link
-            href="/paradise"
-            className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-bold text-slate-500"
-          >
-            <Heart size={20} />
-            Paradise
-          </Link>
-          <Link
-            href="/ads"
-            className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-bold text-slate-500"
-          >
-            <Megaphone size={20} />
-            Ads
-          </Link>
-          <Link
-            href={user ? "/account" : "/login"}
-            className="flex flex-col items-center gap-1 rounded-xl px-2 py-2 text-[10px] font-bold text-slate-500"
-          >
-            <UserRound size={20} />
-            {user ? "حسابي" : "دخول"}
-          </Link>
-        </div>
-      </nav>
+  <div className="mx-auto grid max-w-xl grid-cols-5 gap-1">
+    <Link
+      href="/"
+      className="flex flex-col items-center gap-1 rounded-xl bg-purple-50 px-1 py-2 text-[10px] font-black text-purple-700"
+    >
+      <Home size={20} />
+      الرئيسية
+    </Link>
+
+    <Link
+      href="/store"
+      className="flex flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-bold text-slate-500"
+    >
+      <ShoppingBag size={20} />
+      المتجر
+    </Link>
+
+    <Link
+      href="/paradise"
+      className="flex flex-col items-center gap-1 rounded-xl px-1 py-2 text-[9px] font-bold text-slate-500"
+    >
+      <Heart size={20} />
+      Paradise
+    </Link>
+
+    <Link
+      href="/ai"
+      className="flex flex-col items-center gap-1 rounded-xl bg-gradient-to-br from-purple-600 to-fuchsia-500 px-1 py-2 text-[9px] font-black text-white shadow-lg shadow-purple-200"
+    >
+      <Sparkles size={20} />
+      NOLERA AI
+    </Link>
+
+    <button
+      type="button"
+      onClick={() => setMobileMenu(true)}
+      className="flex flex-col items-center gap-1 rounded-xl px-1 py-2 text-[10px] font-bold text-slate-500"
+    >
+      <Menu size={20} />
+      المزيد
+    </button>
+  </div>
+</nav>
     </main>
   );
 }
