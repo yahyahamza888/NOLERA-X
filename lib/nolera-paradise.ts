@@ -1,5 +1,7 @@
 "use client";
 
+import { getSupabaseClient } from "./nolera-auth";
+
 export type ParadisePostType =
   | "text"
   | "image"
@@ -66,313 +68,472 @@ export interface ParadiseGroup {
   createdAt: string;
 }
 
-const POSTS_KEY = "nolera-paradise-posts-v1";
-const COMMENTS_KEY = "nolera-paradise-comments-v1";
-const STORIES_KEY = "nolera-paradise-stories-v1";
-const MESSAGES_KEY = "nolera-paradise-messages-v1";
-const GROUPS_KEY = "nolera-paradise-groups-v1";
-const FOLLOWING_KEY = "nolera-paradise-following-v1";
-
-function read<T>(key: string, fallback: T): T {
-  if (typeof window === "undefined") return fallback;
-
-  try {
-    const raw = localStorage.getItem(key);
-    return raw ? JSON.parse(raw) : fallback;
-  } catch {
-    return fallback;
-  }
+async function currentUser() {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase.auth.getUser();
+  if (error) throw error;
+  if (!data.user) throw new Error("Authentication required");
+  return data.user;
 }
 
-function write<T>(key: string, value: T) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(key, JSON.stringify(value));
+function profileName(user: any) {
+  return (
+    user.user_metadata?.full_name ||
+    user.user_metadata?.name ||
+    user.email?.split("@")[0] ||
+    "NOLERA User"
+  );
 }
 
-function createId(prefix: string) {
-  return `${prefix}-${Date.now()}-${Math.random()
-    .toString(36)
-    .slice(2, 8)
-    .toUpperCase()}`;
+function profileUsername(user: any) {
+  return (
+    user.user_metadata?.username ||
+    user.email?.split("@")[0] ||
+    "nolera_user"
+  );
 }
 
-/* POSTS */
-
-export function getParadisePosts() {
-  return read<ParadisePost[]>(POSTS_KEY, []);
+function mapPost(row: any, userId?: string): ParadisePost {
+  return {
+    id: row.id,
+    authorId: row.author_id,
+    authorName: row.profiles?.name || row.profiles?.full_name || "NOLERA User",
+    authorUsername:
+      row.profiles?.username ||
+      row.profiles?.email?.split("@")[0] ||
+      "nolera_user",
+    authorAvatar: row.profiles?.avatar_url,
+    content: row.content,
+    type: row.type,
+    mediaUrl: row.media_url,
+    linkUrl: row.link_url,
+    productId: row.product_id,
+    likes: row.likes || 0,
+    comments: row.comments || 0,
+    shares: row.shares || 0,
+    liked: false,
+    createdAt: row.created_at,
+  };
 }
 
-export function createParadisePost(
+export async function getParadisePosts() {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase
+    .from("paradise_posts")
+    .select("*")
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return (data || []).map((row) => mapPost(row));
+}
+
+export async function createParadisePost(
   input: Omit<
     ParadisePost,
     "id" | "likes" | "comments" | "shares" | "liked" | "createdAt"
   >
 ) {
-  const posts = getParadisePosts();
+  const user = await currentUser();
 
-  const post: ParadisePost = {
-    ...input,
-    id: createId("POST"),
-    likes: 0,
-    comments: 0,
-    shares: 0,
-    liked: false,
-    createdAt: new Date().toISOString(),
-  };
+  const { data, error } = await getSupabaseClient()
+    .from("paradise_posts")
+    .insert({
+      author_id: user.id,
+      content: input.content,
+      type: input.type,
+      media_url: input.mediaUrl || null,
+      link_url: input.linkUrl || null,
+      product_id: input.productId || null,
+    })
+    .select("*")
+    .single();
 
-  posts.unshift(post);
-  write(POSTS_KEY, posts);
+  if (error) throw error;
 
-  return post;
+  return mapPost(data, user.id);
 }
 
-export function deleteParadisePost(postId: string) {
-  write(
-    POSTS_KEY,
-    getParadisePosts().filter((post) => post.id !== postId)
-  );
+export async function deleteParadisePost(postId: string) {
+  const user = await currentUser();
+
+  const { error } = await getSupabaseClient()
+    .from("paradise_posts")
+    .delete()
+    .eq("id", postId)
+    .eq("author_id", user.id);
+
+  if (error) throw error;
 }
 
-export function toggleParadiseLike(postId: string) {
-  const posts = getParadisePosts();
-  const post = posts.find((item) => item.id === postId);
-
-  if (!post) return null;
-
-  post.liked = !post.liked;
-  post.likes = Math.max(0, post.likes + (post.liked ? 1 : -1));
-
-  write(POSTS_KEY, posts);
-
-  return post;
-}
-
-export function shareParadisePost(postId: string) {
-  const posts = getParadisePosts();
-  const post = posts.find((item) => item.id === postId);
-
-  if (!post) return null;
-
-  post.shares += 1;
-  write(POSTS_KEY, posts);
-
-  return post;
-}
-
-/* COMMENTS */
-
-export function getParadiseComments(postId?: string) {
-  const comments = read<ParadiseComment[]>(COMMENTS_KEY, []);
-
-  return postId
-    ? comments.filter((comment) => comment.postId === postId)
-    : comments;
-}
-
-export function addParadiseComment(
-  input: Omit<ParadiseComment, "id" | "likes" | "createdAt">
+export async function toggleParadiseLike(
+  postId: string,
+  _userId?: string
 ) {
-  const comments = getParadiseComments();
+  const supabase = getSupabaseClient();
 
-  const comment: ParadiseComment = {
-    ...input,
-    id: createId("COMMENT"),
-    likes: 0,
-    createdAt: new Date().toISOString(),
-  };
-
-  comments.push(comment);
-  write(COMMENTS_KEY, comments);
-
-  const posts = getParadisePosts();
-  const post = posts.find((item) => item.id === input.postId);
-
-  if (post) {
-    post.comments += 1;
-    write(POSTS_KEY, posts);
-  }
-
-  return comment;
-}
-
-/* STORIES */
-
-export function getParadiseStories() {
-  const now = Date.now();
-
-  return read<ParadiseStory[]>(STORIES_KEY, []).filter(
-    (story) => new Date(story.expiresAt).getTime() > now
+  const { data, error } = await supabase.rpc(
+    "nolera_toggle_paradise_like",
+    { p_post_id: postId }
   );
+
+  if (error) throw error;
+
+  return data;
 }
 
-export function createParadiseStory(
+
+export const toggleLike = toggleParadiseLike;
+
+export async function shareParadisePost(postId: string) {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase.rpc(
+    "nolera_share_paradise_post",
+    { p_post_id: postId }
+  );
+
+  if (error) throw error;
+
+  return Number(data || 0);
+}
+
+export async function getParadiseComments(postId?: string) {
+  const supabase = getSupabaseClient();
+
+  let query = supabase
+    .from("paradise_comments")
+    .select("*")
+    .order("created_at", { ascending: true });
+
+  if (postId) query = query.eq("post_id", postId);
+
+  const { data, error } = await query;
+
+  if (error) throw error;
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    postId: row.post_id,
+    authorId: row.author_id,
+    authorName: "NOLERA User",
+    content: row.content,
+    likes: row.likes || 0,
+    createdAt: row.created_at,
+  })) as ParadiseComment[];
+}
+
+export async function addParadiseComment(input: {
+  postId: string;
+  authorId?: string;
+  authorName?: string;
+  content: string;
+}) {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase.rpc(
+    "nolera_add_paradise_comment",
+    {
+      p_post_id: input.postId,
+      p_content: input.content,
+    }
+  );
+
+  if (error) throw error;
+
+  return data;
+}
+
+export async function getParadiseStories() {
+  const { data, error } = await getSupabaseClient()
+    .from("paradise_stories")
+    .select("*")
+    .gt("expires_at", new Date().toISOString())
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    authorId: row.author_id,
+    authorName: "NOLERA User",
+    mediaUrl: row.media_url,
+    caption: row.caption,
+    text: row.text,
+    views: row.views || 0,
+    createdAt: row.created_at,
+    expiresAt: row.expires_at,
+  })) as ParadiseStory[];
+}
+
+export async function createParadiseStory(
   input: Omit<
     ParadiseStory,
     "id" | "views" | "createdAt" | "expiresAt"
   >
 ) {
-  const createdAt = new Date();
-  const expiresAt = new Date(createdAt.getTime() + 24 * 60 * 60 * 1000);
+  const user = await currentUser();
 
-  const stories = getParadiseStories();
+  const { data, error } = await getSupabaseClient()
+    .from("paradise_stories")
+    .insert({
+      author_id: user.id,
+      media_url: input.mediaUrl || null,
+      caption: input.caption || null,
+      text: input.text || null,
+      expires_at: new Date(
+        Date.now() + 24 * 60 * 60 * 1000
+      ).toISOString(),
+    })
+    .select("*")
+    .single();
 
-  const story: ParadiseStory = {
-    ...input,
-    id: createId("STORY"),
-    views: 0,
-    createdAt: createdAt.toISOString(),
-    expiresAt: expiresAt.toISOString(),
-  };
+  if (error) throw error;
 
-  stories.unshift(story);
-  write(STORIES_KEY, stories);
-
-  return story;
+  return {
+    id: data.id,
+    authorId: data.author_id,
+    authorName: "NOLERA User",
+    mediaUrl: data.media_url,
+    caption: data.caption,
+    text: data.text,
+    views: data.views || 0,
+    createdAt: data.created_at,
+    expiresAt: data.expires_at,
+  } as ParadiseStory;
 }
 
-export function viewParadiseStory(storyId: string) {
-  const stories = getParadiseStories();
-  const story = stories.find((item) => item.id === storyId);
+export async function viewParadiseStory(storyId: string) {
+  await currentUser();
 
-  if (!story) return null;
+  const { data, error } = await getSupabaseClient()
+    .from("paradise_stories")
+    .select("views")
+    .eq("id", storyId)
+    .single();
 
-  story.views += 1;
-  write(STORIES_KEY, stories);
+  if (error) throw error;
 
-  return story;
+  const { data: updated, error: updateError } = await getSupabaseClient()
+    .from("paradise_stories")
+    .update({ views: (data?.views || 0) + 1 })
+    .eq("id", storyId)
+    .select("*")
+    .single();
+
+  if (updateError) throw updateError;
+
+  return updated;
 }
 
-/* FOLLOWING */
+export async function getFollowing() {
+  const user = await currentUser();
 
-export function getFollowing() {
-  return read<string[]>(FOLLOWING_KEY, []);
+  const { data, error } = await getSupabaseClient()
+    .from("paradise_follows")
+    .select("following_id")
+    .eq("follower_id", user.id);
+
+  if (error) throw error;
+
+  return (data || []).map((row) => row.following_id);
 }
 
-export function isFollowing(userId: string) {
-  return getFollowing().includes(userId);
+export async function isFollowing(userId: string) {
+  const user = await currentUser();
+
+  const { data, error } = await getSupabaseClient()
+    .from("paradise_follows")
+    .select("following_id")
+    .eq("follower_id", user.id)
+    .eq("following_id", userId)
+    .maybeSingle();
+
+  if (error) throw error;
+
+  return Boolean(data);
 }
 
-export function toggleFollow(userId: string) {
-  const following = getFollowing();
-  const index = following.indexOf(userId);
+export async function toggleFollow(userId: string) {
+  const user = await currentUser();
 
-  if (index >= 0) {
-    following.splice(index, 1);
-  } else {
-    following.push(userId);
+  const supabase = getSupabaseClient();
+
+  const { data: existing, error: lookupError } = await supabase
+    .from("paradise_follows")
+    .select("following_id")
+    .eq("follower_id", user.id)
+    .eq("following_id", userId)
+    .maybeSingle();
+
+  if (lookupError) throw lookupError;
+
+  if (existing) {
+    const { error } = await supabase
+      .from("paradise_follows")
+      .delete()
+      .eq("follower_id", user.id)
+      .eq("following_id", userId);
+
+    if (error) throw error;
+
+    return false;
   }
 
-  write(FOLLOWING_KEY, following);
+  const { error } = await supabase
+    .from("paradise_follows")
+    .insert({
+      follower_id: user.id,
+      following_id: userId,
+    });
 
-  return index < 0;
+  if (error) throw error;
+
+  return true;
 }
 
-/* MESSAGES */
-
-export function getParadiseMessages(
+export async function getParadiseMessages(
   userId?: string,
   otherUserId?: string
 ) {
-  const messages = read<ParadiseMessage[]>(MESSAGES_KEY, []);
+  const user = await currentUser();
 
-  if (!userId || !otherUserId) return messages;
+  if (userId && userId !== user.id) {
+    throw new Error("Unauthorized user context");
+  }
 
-  return messages.filter(
-    (message) =>
-      (message.senderId === userId &&
-        message.receiverId === otherUserId) ||
-      (message.senderId === otherUserId &&
-        message.receiverId === userId)
-  );
+  let query = getSupabaseClient()
+    .from("paradise_messages")
+    .select("*")
+    .order("created_at", { ascending: true });
+
+  if (otherUserId) {
+    query = query.or(
+      `and(sender_id.eq.${user.id},receiver_id.eq.${otherUserId}),and(sender_id.eq.${otherUserId},receiver_id.eq.${user.id})`
+    );
+  }
+
+  const { data, error } = await query;
+
+  if (error) throw error;
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    senderId: row.sender_id,
+    receiverId: row.receiver_id,
+    text: row.text,
+    createdAt: row.created_at,
+    read: row.read,
+  })) as ParadiseMessage[];
 }
 
-export function sendParadiseMessage(
+export async function sendParadiseMessage(
   input: Omit<ParadiseMessage, "id" | "createdAt" | "read">
 ) {
-  const messages = read<ParadiseMessage[]>(MESSAGES_KEY, []);
+  const user = await currentUser();
 
-  const message: ParadiseMessage = {
-    ...input,
-    id: createId("MSG"),
-    createdAt: new Date().toISOString(),
-    read: false,
-  };
+  if (input.senderId !== user.id) {
+    throw new Error("Sender must be the authenticated user");
+  }
 
-  messages.push(message);
-  write(MESSAGES_KEY, messages);
+  const { data, error } = await getSupabaseClient()
+    .from("paradise_messages")
+    .insert({
+      sender_id: user.id,
+      receiver_id: input.receiverId,
+      text: input.text,
+    })
+    .select("*")
+    .single();
 
-  return message;
+  if (error) throw error;
+
+  return {
+    id: data.id,
+    senderId: data.sender_id,
+    receiverId: data.receiver_id,
+    text: data.text,
+    createdAt: data.created_at,
+    read: data.read,
+  } as ParadiseMessage;
 }
 
-export function markParadiseMessageRead(messageId: string) {
-  const messages = read<ParadiseMessage[]>(MESSAGES_KEY, []);
-  const message = messages.find((item) => item.id === messageId);
+export async function markParadiseMessageRead(messageId: string) {
+  const user = await currentUser();
 
-  if (!message) return null;
+  const { data, error } = await getSupabaseClient()
+    .from("paradise_messages")
+    .update({ read: true })
+    .eq("id", messageId)
+    .eq("receiver_id", user.id)
+    .select("*")
+    .single();
 
-  message.read = true;
-  write(MESSAGES_KEY, messages);
+  if (error) throw error;
 
-  return message;
+  return data;
 }
 
-/* GROUPS */
+export async function getParadiseGroups() {
+  const { data, error } = await getSupabaseClient()
+    .from("paradise_groups")
+    .select("*")
+    .order("created_at", { ascending: false });
 
-export function getParadiseGroups() {
-  return read<ParadiseGroup[]>(GROUPS_KEY, []);
+  if (error) throw error;
+
+  return (data || []).map((row) => ({
+    id: row.id,
+    name: row.name,
+    description: row.description,
+    ownerId: row.owner_id,
+    members: row.members || 1,
+    imageUrl: row.image_url,
+    createdAt: row.created_at,
+  })) as ParadiseGroup[];
 }
 
-export function createParadiseGroup(
+export async function createParadiseGroup(
   input: Omit<ParadiseGroup, "id" | "members" | "createdAt">
 ) {
-  const groups = getParadiseGroups();
+  const user = await currentUser();
 
-  const group: ParadiseGroup = {
-    ...input,
-    id: createId("GROUP"),
-    members: 1,
-    createdAt: new Date().toISOString(),
-  };
+  const { data, error } = await getSupabaseClient()
+    .from("paradise_groups")
+    .insert({
+      name: input.name,
+      description: input.description,
+      owner_id: user.id,
+      members: 1,
+      image_url: input.imageUrl || null,
+    })
+    .select("*")
+    .single();
 
-  groups.unshift(group);
-  write(GROUPS_KEY, groups);
+  if (error) throw error;
 
-  return group;
+  return {
+    id: data.id,
+    name: data.name,
+    description: data.description,
+    ownerId: data.owner_id,
+    members: data.members,
+    imageUrl: data.image_url,
+    createdAt: data.created_at,
+  } as ParadiseGroup;
 }
 
-/* FEED */
-
-export function getParadiseFeed() {
-  return getParadisePosts().sort(
-    (a, b) =>
-      new Date(b.createdAt).getTime() -
-      new Date(a.createdAt).getTime()
-  );
+export async function getParadiseFeed() {
+  return getParadisePosts();
 }
-
-/* PAGE COMPATIBILITY */
 
 export const createPost = createParadisePost;
-
 export const createStory = createParadiseStory;
-
 export const getFeed = getParadiseFeed;
-
 export const getStories = getParadiseStories;
 
-export function toggleLike(postId: string, _userId?: string) {
-  return toggleParadiseLike(postId);
-}
 
-/* RESET */
-
-export function resetParadiseDemo() {
-  if (typeof window === "undefined") return;
-
-  localStorage.removeItem(POSTS_KEY);
-  localStorage.removeItem(COMMENTS_KEY);
-  localStorage.removeItem(STORIES_KEY);
-  localStorage.removeItem(MESSAGES_KEY);
-  localStorage.removeItem(GROUPS_KEY);
-  localStorage.removeItem(FOLLOWING_KEY);
+export async function resetParadiseDemo() {
+  throw new Error("Demo reset is disabled. Paradise uses backend data only.");
 }

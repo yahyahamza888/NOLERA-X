@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { getCurrentUser } from "@/lib/nolera-auth";
 import {
   BarChart3,
   Eye,
@@ -27,7 +28,6 @@ import {
   type NoleraAd,
 } from "@/lib/nolera-ads";
 
-const advertiserId = "NXR-DEMO-ADVERTISER";
 
 const objectives: { value: AdObjective; label: string }[] = [
   { value: "awareness", label: "زيادة الوعي" },
@@ -38,6 +38,7 @@ const objectives: { value: AdObjective; label: string }[] = [
 ];
 
 export default function AdsPage() {
+  const [advertiserId, setAdvertiserId] = useState("");
   const [ads, setAds] = useState<NoleraAd[]>([]);
   const [showCreate, setShowCreate] = useState(false);
 
@@ -63,18 +64,35 @@ export default function AdsPage() {
   });
 
   useEffect(() => {
-    refresh();
+    void initialize();
   }, []);
 
-  function refresh() {
-    setAds(getAds(advertiserId));
-    setAnalytics(getAdAnalytics(advertiserId));
+  async function initialize() {
+    const user = await getCurrentUser();
+    if (!user) return;
+
+    setAdvertiserId(user.id);
+    await refresh(user.id);
   }
 
-  function createCampaign() {
+  async function refresh(userId = advertiserId) {
+    if (!userId) return;
+
+    const [nextAds, nextAnalytics] = await Promise.all([
+      getAds(userId),
+      getAdAnalytics(userId),
+    ]);
+
+    setAds(nextAds);
+    setAnalytics(nextAnalytics);
+  }
+
+  async function createCampaign() {
     if (!title.trim() || !description.trim()) return;
 
-    createAd({
+    if (!advertiserId) return;
+
+    await createAd({
       advertiserId,
       title: title.trim(),
       description: description.trim(),
@@ -105,10 +123,10 @@ export default function AdsPage() {
     refresh();
   }
 
-  function removeAd(ad: NoleraAd) {
+  async function removeAd(ad: NoleraAd) {
     if (confirm("هل تريد حذف هذه الحملة؟")) {
-      deleteAd(ad.id);
-      refresh();
+      await deleteAd(ad.id);
+      await refresh();
     }
   }
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import { getCurrentUser } from "@/lib/nolera-auth";
 import MediaCapture from "@/components/media-capture";
 import Link from "next/link";
 import {
@@ -34,7 +35,7 @@ import {
   type ParadiseComment,
 } from "@/lib/nolera-paradise";
 
-const currentUserId = "NXR-DEMO-USER";
+const EMPTY_USER_ID = "";
 
 const storeProducts = [
   {
@@ -66,59 +67,89 @@ export default function ParadisePage() {
   const [composer, setComposer] = useState("");
   const [activeTab, setActiveTab] = useState("Home");
   const [following, setFollowing] = useState<string[]>([]);
+  const [currentUserId, setCurrentUserId] = useState(EMPTY_USER_ID);
+  const [currentUserName, setCurrentUserName] = useState("NOLERA User");
   const [postMedia, setPostMedia] = useState<string | null>(null);
   const [postMediaType, setPostMediaType] = useState<"image" | "video" | null>(null);
   const [storyMedia, setStoryMedia] = useState<string | null>(null);
 
   useEffect(() => {
-    refresh();
-    setFollowing(
-      typeof window !== "undefined"
-        ? JSON.parse(localStorage.getItem("nolera-paradise-following-v1") || "[]")
-        : []
-    );
+    void initialize();
   }, []);
 
-  function refresh() {
-    setPosts(getFeed());
-    setStories(getStories());
+  async function initialize() {
+    try {
+      const user = await getCurrentUser();
+
+      if (!user) {
+        setCurrentUserId("");
+        setPosts([]);
+        setStories([]);
+        setFollowing([]);
+        return;
+      }
+
+      setCurrentUserId(user.id);
+      setCurrentUserName(user.name || "NOLERA User");
+
+      await refresh();
+    } catch {
+      setPosts([]);
+      setStories([]);
+      setFollowing([]);
+    }
   }
 
-  function publishPost() {
+  async function refresh() {
+    if (!currentUserId) return;
+
+    const [nextPosts, nextStories] = await Promise.all([
+      getFeed(),
+      getStories(),
+    ]);
+
+    setPosts(nextPosts);
+    setStories(nextStories);
+  }
+
+  async function publishPost() {
     const text = composer.trim();
     if (!text) return;
 
-    createPost({
+    if (!currentUserId) return;
+
+    await createPost({
       authorId: currentUserId,
-      authorName: "NOLERA User",
-      authorUsername: "nolera_user",
-      type: "text",
+      authorName: currentUserName,
+      authorUsername: currentUserName.toLowerCase().replace(/\s+/g, "_"),
+      type: postMediaType || "text",
       content: text,
+      mediaUrl: postMedia || undefined,
     });
 
     setComposer("");
     refresh();
   }
 
-  function addStory() {
+  async function addStory() {
     createStory({
       authorId: currentUserId,
-      authorName: "NOLERA User",
+      authorName: currentUserName,
       mediaUrl: "",
       caption: "Welcome to NOLERA PARADISE",
     });
 
-    refresh();
+    await refresh();
   }
 
-  function likePost(post: ParadisePost) {
+  async function likePost(post: ParadisePost) {
     toggleLike(post.id, currentUserId);
     refresh();
   }
 
-  function sharePost(post: ParadisePost) {
-    shareParadisePost(post.id);
-    refresh();
+  async function sharePost(post: ParadisePost) {
+    await shareParadisePost(post.id);
+    await refresh();
   }
 
   function follow(authorId: string) {
@@ -381,7 +412,7 @@ export default function ParadisePage() {
                       onLike={() => likePost(post)}
                       onShare={() => sharePost(post)}
                       onFollow={() => follow(post.authorId)}
-                      onCommentAdded={refresh}
+                      onCommentAdded={() => void refresh()}
                       isFollowing={following.includes(post.authorId)}
                     />
                   ))
@@ -506,20 +537,20 @@ function PostCard({
   const [comments, setComments] = useState<ParadiseComment[]>([]);
   const [commentText, setCommentText] = useState("");
 
-  function loadComments() {
-    setComments(getParadiseComments(post.id));
+  async function loadComments() {
+    setComments(await getParadiseComments(post.id));
   }
 
   function toggleComments() {
-    if (!showComments) loadComments();
+    if (!showComments) void loadComments();
     setShowComments((v) => !v);
   }
 
-  function submitComment() {
+  async function submitComment() {
     const text = commentText.trim();
     if (!text) return;
 
-    addParadiseComment({
+    await addParadiseComment({
       postId: post.id,
       authorId: currentUserId,
       authorName: "NOLERA User",
@@ -527,7 +558,7 @@ function PostCard({
     });
 
     setCommentText("");
-    loadComments();
+    await loadComments();
     onCommentAdded();
   }
 

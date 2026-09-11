@@ -4,10 +4,10 @@ import Link from "next/link"
 import { useEffect, useState } from "react"
 import { getSupabaseClient } from "../../lib/nolera-auth"
 import { useMemo } from "react"
-import { activateAd, deleteAd, getAds, pauseAd, type NoleraAd } from "../../lib/nolera-ads"
+import { getAdminAds, adminSetAdStatus, adminDeleteAd, type NoleraAd } from "../../lib/nolera-ads"
 
 const supabase = getSupabaseClient()
-const ADS_ADVERTISER = "NXR-DEMO-ADVERTISER"
+const ADS_ADVERTISER = ""
 
 type Command = {
   id: string
@@ -112,51 +112,83 @@ export default function AdminPage() {
     }
   }
 
-  function loadAds() {
-    setAds(getAds(ADS_ADVERTISER))
-  }
-
-  function approveAd(id: string) {
-    const ad = ads.find((item) => item.id === id)
-    if (!ad) return
-    if (ad.status === "pending" || ad.status === "draft") {
-      const updated = { ...ad, status: "active" as const, updatedAt: new Date().toISOString() }
-      localStorage.setItem(
-        "nolera-ads-v1",
-        JSON.stringify(getAds().map((item) => item.id === id ? updated : item))
+  async function loadAds() {
+    try {
+      const data = await getAdminAds()
+      setAds(data)
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "تعذر تحميل الإعلانات."
       )
-      setMessage("تمت الموافقة على الحملة وتفعيلها.")
-      loadAds()
-  loadHRData()
     }
   }
 
-  function rejectAd(id: string) {
-    const ad = ads.find((item) => item.id === id)
-    if (!ad) return
-    const updated = { ...ad, status: "rejected" as const, updatedAt: new Date().toISOString() }
-    localStorage.setItem(
-      "nolera-ads-v1",
-      JSON.stringify(getAds().map((item) => item.id === id ? updated : item))
-    )
-    setMessage("تم رفض الحملة.")
-    loadAds()
+  async function approveAd(id: string) {
+    try {
+      await adminSetAdStatus(id, "active")
+      setMessage("تمت الموافقة على الحملة وتفعيلها.")
+      await loadAds()
+      await loadHRData()
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "تعذر تفعيل الحملة."
+      )
+    }
   }
 
-  function toggleAdminAd(ad: NoleraAd) {
-    if (ad.status === "active") pauseAd(ad.id)
-    else if (ad.status === "paused") activateAd(ad.id)
-    loadAds()
+  async function rejectAd(id: string) {
+    try {
+      await adminSetAdStatus(id, "rejected")
+      setMessage("تم رفض الحملة.")
+      await loadAds()
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "تعذر رفض الحملة."
+      )
+    }
   }
 
-  function removeAdminAd(id: string) {
-    deleteAd(id)
-    setMessage("تم حذف الحملة.")
-    loadAds()
+  async function toggleAdminAd(ad: NoleraAd) {
+    try {
+      if (ad.status === "active") {
+        await adminSetAdStatus(ad.id, "paused")
+      } else if (ad.status === "paused") {
+        await adminSetAdStatus(ad.id, "active")
+      } else {
+        return
+      }
+
+      await loadAds()
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "تعذر تغيير حالة الحملة."
+      )
+    }
+  }
+
+  async function removeAdminAd(id: string) {
+    try {
+      await adminDeleteAd(id)
+      setMessage("تم حذف الحملة.")
+      await loadAds()
+    } catch (error) {
+      setMessage(
+        error instanceof Error
+          ? error.message
+          : "تعذر حذف الحملة."
+      )
+    }
   }
 
   useEffect(() => {
-    loadAds()
     async function load() {
       try {
         const {
@@ -180,6 +212,7 @@ export default function AdminPage() {
         if (data?.role === "admin" || data?.role === "super_admin") {
           await loadCommands()
           await loadKycRequests()
+          await loadAds()
         }
       } catch (error) {
         setMessage(

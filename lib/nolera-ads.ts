@@ -1,5 +1,7 @@
 "use client";
 
+import { getSupabaseClient } from "./nolera-auth";
+
 export type AdStatus =
   | "draft"
   | "pending"
@@ -39,36 +41,62 @@ export interface NoleraAd {
   updatedAt: string;
 }
 
-const STORAGE_KEY = "nolera-ads-v1";
+async function currentUser() {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase.auth.getUser();
 
-function readAds(): NoleraAd[] {
-  if (typeof window === "undefined") return [];
+  if (error) throw error;
+  if (!data.user) throw new Error("Authentication required");
 
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
+  return data.user;
+}
+
+function mapAd(row: any): NoleraAd {
+  return {
+    id: row.id,
+    advertiserId: row.advertiser_id,
+    title: row.title,
+    description: row.description,
+    imageUrl: row.image_url,
+    targetUrl: row.target_url,
+    objective: row.objective,
+    currency: row.currency,
+    budget: Number(row.budget || 0),
+    spent: Number(row.spent || 0),
+    dailyBudget:
+      row.daily_budget == null ? undefined : Number(row.daily_budget),
+    status: row.status,
+    country: row.country,
+    language: row.language,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    impressions: Number(row.impressions || 0),
+    clicks: Number(row.clicks || 0),
+    conversions: Number(row.conversions || 0),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  };
+}
+
+export async function getAds(advertiserId?: string) {
+  const user = await currentUser();
+
+  if (advertiserId && advertiserId !== user.id) {
+    throw new Error("Unauthorized advertiser");
   }
+
+  const { data, error } = await getSupabaseClient()
+    .from("nolera_ads")
+    .select("*")
+    .eq("advertiser_id", user.id)
+    .order("created_at", { ascending: false });
+
+  if (error) throw error;
+
+  return (data || []).map(mapAd);
 }
 
-function writeAds(ads: NoleraAd[]) {
-  if (typeof window === "undefined") return;
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(ads));
-}
-
-function generateId() {
-  return `ADS-${Date.now()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
-}
-
-export function getAds(advertiserId?: string) {
-  const ads = readAds();
-  return advertiserId
-    ? ads.filter((ad) => ad.advertiserId === advertiserId)
-    : ads;
-}
-
-export function createAd(
+export async function createAd(
   input: Omit<
     NoleraAd,
     | "id"
@@ -80,43 +108,73 @@ export function createAd(
     | "updatedAt"
   >
 ) {
-  const now = new Date().toISOString();
+  const user = await currentUser();
 
-  const ad: NoleraAd = {
-    ...input,
-    id: generateId(),
-    spent: 0,
-    impressions: 0,
-    clicks: 0,
-    conversions: 0,
-    createdAt: now,
-    updatedAt: now,
-  };
+  if (!Number.isFinite(input.budget) || input.budget <= 0) {
+    throw new Error("Invalid advertising budget");
+  }
 
-  const ads = readAds();
-  ads.unshift(ad);
-  writeAds(ads);
+  const { data, error } = await getSupabaseClient()
+    .from("nolera_ads")
+    .insert({
+      advertiser_id: user.id,
+      title: input.title,
+      description: input.description,
+      image_url: input.imageUrl || null,
+      target_url: input.targetUrl || null,
+      objective: input.objective,
+      currency: input.currency,
+      budget: input.budget,
+      daily_budget: input.dailyBudget ?? null,
+      status: "pending",
+      country: input.country || null,
+      language: input.language || null,
+      start_date: input.startDate || null,
+      end_date: input.endDate || null,
+    })
+    .select("*")
+    .single();
 
-  return ad;
+  if (error) throw error;
+
+  return mapAd(data);
 }
 
-export function updateAd(
+export async function updateAd(
   id: string,
   updates: Partial<Omit<NoleraAd, "id" | "advertiserId">>
 ) {
-  const ads = readAds();
-  const index = ads.findIndex((ad) => ad.id === id);
+  await currentUser();
 
-  if (index === -1) return null;
+  const payload: Record<string, unknown> = {};
 
-  ads[index] = {
-    ...ads[index],
-    ...updates,
-    updatedAt: new Date().toISOString(),
-  };
+  if (updates.title !== undefined) payload.title = updates.title;
+  if (updates.description !== undefined)
+    payload.description = updates.description;
+  if (updates.imageUrl !== undefined) payload.image_url = updates.imageUrl;
+  if (updates.targetUrl !== undefined) payload.target_url = updates.targetUrl;
+  if (updates.objective !== undefined) payload.objective = updates.objective;
+  if (updates.budget !== undefined) payload.budget = updates.budget;
+  if (updates.dailyBudget !== undefined)
+    payload.daily_budget = updates.dailyBudget;
+  if (updates.status !== undefined) payload.status = updates.status;
+  if (updates.country !== undefined) payload.country = updates.country;
+  if (updates.language !== undefined) payload.language = updates.language;
+  if (updates.startDate !== undefined) payload.start_date = updates.startDate;
+  if (updates.endDate !== undefined) payload.end_date = updates.endDate;
 
-  writeAds(ads);
-  return ads[index];
+  payload.updated_at = new Date().toISOString();
+
+  const { data, error } = await getSupabaseClient()
+    .from("nolera_ads")
+    .update(payload)
+    .eq("id", id)
+    .select("*")
+    .single();
+
+  if (error) throw error;
+
+  return mapAd(data);
 }
 
 export function pauseAd(id: string) {
@@ -127,47 +185,39 @@ export function activateAd(id: string) {
   return updateAd(id, { status: "active" });
 }
 
-export function deleteAd(id: string) {
-  writeAds(readAds().filter((ad) => ad.id !== id));
+export async function deleteAd(id: string) {
+  await currentUser();
+
+  const { error } = await getSupabaseClient()
+    .from("nolera_ads")
+    .delete()
+    .eq("id", id);
+
+  if (error) throw error;
 }
 
-export function recordImpression(id: string) {
-  const ads = readAds();
-  const ad = ads.find((item) => item.id === id);
+export async function recordImpression(id: string) {
+  await currentUser();
 
-  if (!ad || ad.status !== "active") return null;
-
-  ad.impressions += 1;
-  ad.updatedAt = new Date().toISOString();
-  writeAds(ads);
-
-  return ad;
+  throw new Error(
+    "Ad analytics must be recorded through a secured backend/RPC. No local analytics mutation is allowed."
+  );
 }
 
-export function recordClick(id: string) {
-  const ads = readAds();
-  const ad = ads.find((item) => item.id === id);
+export async function recordClick(id: string) {
+  await currentUser();
 
-  if (!ad || ad.status !== "active") return null;
-
-  ad.clicks += 1;
-  ad.updatedAt = new Date().toISOString();
-  writeAds(ads);
-
-  return ad;
+  throw new Error(
+    "Ad analytics must be recorded through a secured backend/RPC. No local analytics mutation is allowed."
+  );
 }
 
-export function recordConversion(id: string) {
-  const ads = readAds();
-  const ad = ads.find((item) => item.id === id);
+export async function recordConversion(id: string) {
+  await currentUser();
 
-  if (!ad || ad.status !== "active") return null;
-
-  ad.conversions += 1;
-  ad.updatedAt = new Date().toISOString();
-  writeAds(ads);
-
-  return ad;
+  throw new Error(
+    "Ad analytics must be recorded through a secured backend/RPC. No local analytics mutation is allowed."
+  );
 }
 
 export function calculateCTR(ad: NoleraAd) {
@@ -182,8 +232,8 @@ export function calculateRemainingBudget(ad: NoleraAd) {
   return Math.max(0, ad.budget - ad.spent);
 }
 
-export function getAdAnalytics(advertiserId?: string) {
-  const ads = getAds(advertiserId);
+export async function getAdAnalytics(advertiserId?: string) {
+  const ads = await getAds(advertiserId);
 
   const impressions = ads.reduce((sum, ad) => sum + ad.impressions, 0);
   const clicks = ads.reduce((sum, ad) => sum + ad.clicks, 0);
@@ -204,8 +254,72 @@ export function getAdAnalytics(advertiserId?: string) {
   };
 }
 
-export function resetAdsDemo() {
-  if (typeof window !== "undefined") {
-    localStorage.removeItem(STORAGE_KEY);
-  }
+export async function resetAdsDemo() {
+  throw new Error("Demo reset is disabled. NOLERA ADS uses backend data only.");
+}
+
+export async function getAdminAds(): Promise<NoleraAd[]> {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase.rpc("nolera_admin_list_ads");
+
+  if (error) throw error;
+
+  return ((data || []) as any[]).map((row) => ({
+    id: row.id,
+    advertiserId: row.advertiser_id,
+    title: row.title,
+    description: row.description,
+    imageUrl: row.image_url,
+    targetUrl: row.target_url,
+    objective: row.objective,
+    currency: row.currency,
+    budget: Number(row.budget || 0),
+    spent: Number(row.spent || 0),
+    dailyBudget: Number(row.daily_budget || 0),
+    status: row.status,
+    country: row.country,
+    language: row.language,
+    startDate: row.start_date,
+    endDate: row.end_date,
+    impressions: Number(row.impressions || 0),
+    clicks: Number(row.clicks || 0),
+    conversions: Number(row.conversions || 0),
+    createdAt: row.created_at,
+    updatedAt: row.updated_at,
+  }));
+}
+
+export async function adminSetAdStatus(
+  id: string,
+  status: NoleraAd["status"]
+) {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase.rpc(
+    "nolera_admin_set_ad_status",
+    {
+      p_ad_id: id,
+      p_status: status,
+    }
+  );
+
+  if (error) throw error;
+
+  return Boolean(data);
+}
+
+export async function adminDeleteAd(id: string) {
+  const supabase = getSupabaseClient();
+
+  const { data, error } = await supabase.rpc(
+    "nolera_admin_delete_ad",
+    {
+      p_ad_id: id,
+    }
+  );
+
+  if (error) throw error;
+
+  return Boolean(data);
 }
