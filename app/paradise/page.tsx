@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import MediaCapture from "@/components/media-capture";
 import Link from "next/link";
 import {
   Bell,
@@ -65,6 +66,9 @@ export default function ParadisePage() {
   const [composer, setComposer] = useState("");
   const [activeTab, setActiveTab] = useState("Home");
   const [following, setFollowing] = useState<string[]>([]);
+  const [postMedia, setPostMedia] = useState<string | null>(null);
+  const [postMediaType, setPostMediaType] = useState<"image" | "video" | null>(null);
+  const [storyMedia, setStoryMedia] = useState<string | null>(null);
 
   useEffect(() => {
     refresh();
@@ -219,15 +223,21 @@ export default function ParadisePage() {
             <>
               <div className="mb-5 overflow-x-auto rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
                 <div className="flex gap-4">
-                  <button
-                    onClick={addStory}
-                    className="flex min-w-[82px] flex-col items-center gap-2"
-                  >
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full border-2 border-dashed border-purple-500 bg-purple-50 text-purple-600">
-                      <Camera size={23} />
-                    </div>
+                  <div className="flex min-w-[82px] flex-col items-center gap-2">
+                    <MediaCapture
+                      label="Add Story"
+                      accept="image/*,video/*"
+                      capture="environment"
+                      compact
+                      onChange={(_, preview) => {
+                        setStoryMedia(preview);
+                        if (preview) {
+                          setTimeout(() => addStory(), 50);
+                        }
+                      }}
+                    />
                     <span className="text-xs font-semibold">Add Story</span>
-                  </button>
+                  </div>
 
                   {stories.map((story) => (
                     <div
@@ -262,21 +272,40 @@ export default function ParadisePage() {
                 </div>
 
                 <div className="mt-3 flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex gap-2">
-                    <button className="rounded-xl bg-slate-50 p-2 text-slate-600">
-                      <ImageIcon size={19} />
-                    </button>
-                    <button className="rounded-xl bg-slate-50 p-2 text-slate-600">
-                      <Video size={19} />
-                    </button>
-                    <button className="rounded-xl bg-slate-50 p-2 text-slate-600">
+                  <div className="flex items-center gap-2">
+                    <MediaCapture
+                      label="صورة"
+                      accept="image/*"
+                      compact
+                      onChange={(_, preview) => {
+                        setPostMedia(preview);
+                        setPostMediaType(preview ? "image" : null);
+                      }}
+                    />
+
+                    <MediaCapture
+                      label="فيديو"
+                      accept="video/*"
+                      capture="environment"
+                      compact
+                      onChange={(_, preview) => {
+                        setPostMedia(preview);
+                        setPostMediaType(preview ? "video" : null);
+                      }}
+                    />
+
+                    <button
+                      type="button"
+                      className="rounded-xl bg-slate-50 p-2 text-slate-600"
+                      title="AI"
+                    >
                       <Sparkles size={19} />
                     </button>
                   </div>
 
                   <button
                     onClick={publishPost}
-                    disabled={!composer.trim()}
+                    disabled={!composer.trim() && !postMedia}
                     className="flex items-center gap-2 rounded-xl bg-purple-600 px-5 py-2.5 text-sm font-bold text-white disabled:opacity-40"
                   >
                     <Send size={17} />
@@ -538,6 +567,22 @@ function PostCard({
       <p className="mt-4 whitespace-pre-wrap text-[15px] leading-7">
         {post.content}
       </p>
+
+      {post.mediaUrl && post.type === "image" && (
+        <img
+          src={post.mediaUrl}
+          alt="Paradise post"
+          className="mt-4 max-h-[520px] w-full rounded-2xl object-cover"
+        />
+      )}
+
+      {post.mediaUrl && post.type === "video" && (
+        <video
+          src={post.mediaUrl}
+          controls
+          className="mt-4 max-h-[520px] w-full rounded-2xl bg-black object-contain"
+        />
+      )}
 
       <div className="mt-5 flex items-center justify-between border-t border-slate-100 pt-3">
         <button
