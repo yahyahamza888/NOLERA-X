@@ -29,7 +29,6 @@ import {
 } from "lucide-react"
 
 import { getBalance } from "@/lib/nolera-state"
-import { createStoreProduct } from "@/lib/nolera-store"
 
 type ToolType = "Native" | "API" | "External" | "Hybrid"
 
@@ -226,7 +225,7 @@ export default function AIPage() {
     )
   }
 
-  async function createDigitalProduct() {
+  function createDigitalProduct() {
     if (!productName.trim() || !productIdea.trim()) {
       setAnswer("أدخل اسم المنتج وفكرة المنتج أولاً.")
       return
@@ -264,44 +263,15 @@ ${productName} هو منتج رقمي عملي يساعد المستخدم عل�
       createdAt: new Date().toLocaleString("ar-SD"),
     }
 
-    try {
-      setAnswer("جاري إنشاء المنتج ونشره في NOLERA STORE...")
+    const next = [product, ...products]
+    setProducts(next)
+    localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(next))
 
-      const storeProduct = await createStoreProduct({
-        name: product.name,
-        description: product.description,
-        price: product.price,
-        currency: "SDG",
-        category: "رقمي",
-        icon: "📦",
-      })
-
-      const savedProduct: DigitalProduct = {
-        ...product,
-        id: String(storeProduct?.id || product.id),
-      }
-
-      const next = [savedProduct, ...products]
-      setProducts(next)
-      localStorage.setItem(STORAGE_PRODUCTS, JSON.stringify(next))
-
-      setAnswer(
-        `تم إنشاء المنتج "${product.name}" ونشره مباشرة في NOLERA STORE بنجاح. افتح المتجر الآن وستجده ضمن المنتجات الرقمية.`
-      )
-
-      setProductName("")
-      setProductIdea("")
-      setProductAudience("")
-      setProductPrice("")
-
-      window.dispatchEvent(new Event("nolera-data-updated"))
-    } catch (error) {
-      setAnswer(
-        error instanceof Error
-          ? `تعذر نشر المنتج في NOLERA STORE: ${error.message}`
-          : "تعذر نشر المنتج في NOLERA STORE."
-      )
-    }
+    setAnswer(`تم إنشاء المنتج الرقمي "${product.name}" وحفظه داخل NOLERA AI.`)
+    setProductName("")
+    setProductIdea("")
+    setProductAudience("")
+    setProductPrice("")
   }
 
   function createWebsite() {
