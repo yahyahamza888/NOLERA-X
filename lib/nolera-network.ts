@@ -1,4 +1,4 @@
-"use client";
+import { getSupabaseClient } from "./nolera-auth";
 
 export interface NoleraAPIKey {
   id: string;
@@ -16,104 +16,112 @@ export interface NoleraWebhook {
   createdAt: string;
 }
 
-const API_KEY_STORAGE = "nolera-api-keys";
-const WEBHOOK_STORAGE = "nolera-webhooks";
+async function requireUser() {
+  const supabase = getSupabaseClient();
+  const { data, error } = await supabase.auth.getUser();
 
-export function getAPIKeys(): NoleraAPIKey[] {
-  try {
-    return JSON.parse(
-      localStorage.getItem(API_KEY_STORAGE) ?? "[]",
-    );
-  } catch {
-    return [];
+  if (error || !data.user) {
+    throw new Error("Authentication required");
   }
+
+  return { supabase, user: data.user };
 }
 
-export function createAPIKey(name: string): NoleraAPIKey {
-  const keys = getAPIKeys();
+export async function getAPIKeys(): Promise<NoleraAPIKey[]> {
+  const { supabase } = await requireUser();
 
-  const secret =
-    "nx_live_" +
-    crypto.randomUUID().replaceAll("-", "");
+  const { data, error } = await supabase
+    .from("api_keys")
+    .select("id,name,key_preview,created_at,active")
+    .order("created_at", { ascending: false });
 
-  const apiKey: NoleraAPIKey = {
-    id: crypto.randomUUID(),
-    name,
-    keyPreview: secret.slice(0, 12) + "...",
-    createdAt: new Date().toISOString(),
-    active: true,
-  };
-
-  keys.unshift(apiKey);
-
-  localStorage.setItem(
-    API_KEY_STORAGE,
-    JSON.stringify(keys),
-  );
-
-  return apiKey;
-}
-
-export function revokeAPIKey(id: string) {
-  const keys = getAPIKeys().map((key) =>
-    key.id === id
-      ? { ...key, active: false }
-      : key,
-  );
-
-  localStorage.setItem(
-    API_KEY_STORAGE,
-    JSON.stringify(keys),
-  );
-}
-
-export function getWebhooks(): NoleraWebhook[] {
-  try {
-    return JSON.parse(
-      localStorage.getItem(WEBHOOK_STORAGE) ?? "[]",
-    );
-  } catch {
-    return [];
+  if (error) {
+    if (error.code === "42P01") return [];
+    throw error;
   }
+
+  return (data || []).map((row: any) => ({
+    id: row.id,
+    name: row.name,
+    keyPreview: row.key_preview,
+    createdAt: row.created_at,
+    active: Boolean(row.active),
+  }));
 }
 
-export function createWebhook(
+export async function createAPIKey(name: string): Promise<NoleraAPIKey> {
+  if (!name.trim()) {
+    throw new Error("API key name is required");
+  }
+
+  const { supabase } = await requireUser();
+
+  throw new Error(
+    "API key creation requires the secure backend API. No secret was generated in the browser."
+  );
+}
+
+export async function revokeAPIKey(id: string) {
+  const { supabase } = await requireUser();
+
+  const { error } = await supabase
+    .from("api_keys")
+    .update({ active: false })
+    .eq("id", id);
+
+  if (error) throw error;
+
+  return true;
+}
+
+export async function getWebhooks(): Promise<NoleraWebhook[]> {
+  const { supabase } = await requireUser();
+
+  const { data, error } = await supabase
+    .from("webhooks")
+    .select("id,url,events,active,created_at")
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    if (error.code === "42P01") return [];
+    throw error;
+  }
+
+  return (data || []).map((row: any) => ({
+    id: row.id,
+    url: row.url,
+    events: Array.isArray(row.events) ? row.events : [],
+    active: Boolean(row.active),
+    createdAt: row.created_at,
+  }));
+}
+
+export async function createWebhook(
   url: string,
   events: string[],
-): NoleraWebhook {
+): Promise<NoleraWebhook> {
   if (!url.startsWith("https://")) {
     throw new Error("Webhook URL must use HTTPS");
   }
 
-  const webhooks = getWebhooks();
+  if (!events.length) {
+    throw new Error("At least one webhook event is required");
+  }
 
-  const webhook: NoleraWebhook = {
-    id: crypto.randomUUID(),
-    url,
-    events,
-    active: true,
-    createdAt: new Date().toISOString(),
-  };
-
-  webhooks.unshift(webhook);
-
-  localStorage.setItem(
-    WEBHOOK_STORAGE,
-    JSON.stringify(webhooks),
+  throw new Error(
+    "Webhook creation requires the secure backend API. No webhook secret was generated in the browser."
   );
-
-  return webhook;
 }
 
-export function disableWebhook(id: string) {
-  const webhooks = getWebhooks().map((item) =>
-    item.id === id
-      ? { ...item, active: false }
-      : item,
-  );
+export async function disableWebhook(id: string) {
+  const { supabase } = await requireUser();
 
-  localStorage.setItem(
-    WEBHOOK_STORAGE,
-    JSON.stringify(webhooks),
-  );
+  const { error } = await supabase
+    .from("webhooks")
+    .update({ active: false })
+    .eq("id", id);
+
+  if (error) throw error;
+
+  return true;
 }
