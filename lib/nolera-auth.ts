@@ -104,10 +104,15 @@ export async function logoutUser() {
 
 export async function getCurrentUser(): Promise<NoleraUser | null> {
   const {
-    data: { user },
-  } = await supabase.auth.getUser()
+    data: { session },
+    error: sessionError,
+  } = await supabase.auth.getSession()
 
-  if (!user) return null
+  if (sessionError || !session?.user) {
+    return null
+  }
+
+  const user = session.user
 
   const { data: profile } = await supabase
     .from("profiles")

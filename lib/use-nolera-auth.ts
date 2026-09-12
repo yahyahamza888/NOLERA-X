@@ -21,18 +21,62 @@ export function useNoleraAuth() {
   }
 
   useEffect(() => {
-    refresh()
+    let active = true
+    let refreshTimer: ReturnType<typeof setTimeout> | null = null
+
+    async function initialLoad() {
+      try {
+        const current = await getCurrentUser()
+        if (active) {
+          setUser(current)
+        }
+      } finally {
+        if (active) {
+          setLoading(false)
+        }
+      }
+    }
+
+    initialLoad()
 
     const supabase = getSupabaseClient()
 
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(() => {
-      refresh()
-      window.dispatchEvent(new Event("nolera-auth-updated"))
+      if (refreshTimer) {
+        clearTimeout(refreshTimer)
+      }
+
+      refreshTimer = setTimeout(async () => {
+        if (!active) return
+
+        try {
+          const current = await getCurrentUser()
+          if (active) {
+            setUser(current)
+            setLoading(false)
+          }
+        } catch {
+          if (active) {
+            setUser(null)
+            setLoading(false)
+          }
+        }
+
+        if (active) {
+          window.dispatchEvent(new Event("nolera-auth-updated"))
+        }
+      }, 0)
     })
 
     return () => {
+      active = false
+
+      if (refreshTimer) {
+        clearTimeout(refreshTimer)
+      }
+
       subscription.unsubscribe()
     }
   }, [])

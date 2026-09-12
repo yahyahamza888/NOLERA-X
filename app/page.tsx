@@ -87,7 +87,7 @@ export default function HomePage() {
 
           <p className="mt-3 text-sm leading-6 text-white/60">
             {ar
-              ? "منصة تجارة إلكترونية عالمية رقمية عالمية"
+              ? "منصة التجارة الإلكترونية العالمية"
               : "A global digital financial platform"}
           </p>
         </div>
