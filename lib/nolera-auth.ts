@@ -87,9 +87,13 @@ export async function loginUser(email: string, password: string) {
     throw new Error("البريد الإلكتروني أو كلمة المرور غير صحيحة.")
   }
 
+  if (!data.session) {
+    throw new Error("تم التحقق من الحساب ولكن لم يتم إنشاء جلسة دخول.")
+  }
+
   window.dispatchEvent(new Event("nolera-auth-updated"))
 
-  return await getCurrentUser()
+  return mapUser(data.user)
 }
 
 export async function logoutUser() {
