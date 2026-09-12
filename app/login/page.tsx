@@ -17,7 +17,9 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      await loginUser(email, password)
+      const result = await loginUser(email, password)
+      alert("نجح تسجيل الدخول! المستخدم: " + JSON.stringify(result))
+
       const next =
         typeof window !== "undefined"
           ? new URLSearchParams(window.location.search).get("next")
@@ -30,6 +32,7 @@ export default function LoginPage() {
       }
       router.refresh()
     } catch (error) {
+      alert("فشل تسجيل الدخول: " + (error instanceof Error ? error.message : String(error)))
       setMessage(error instanceof Error ? error.message : "حدث خطأ.")
     } finally {
       setLoading(false)
