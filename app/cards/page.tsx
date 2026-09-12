@@ -19,7 +19,7 @@ export default function CardsPage() {
   const [cards, setCards] = useState<any[]>([])
   const [network, setNetwork] = useState("Visa")
   const [cardType, setCardType] = useState("virtual")
-  const [currency, setCurrency] = useState("SDG")
+  const [currency, setCurrency] = useState("USD")
   const [error, setError] = useState("")
   const [message, setMessage] = useState("")
   const [loading, setLoading] = useState(true)
@@ -246,7 +246,7 @@ export default function CardsPage() {
               onChange={(e) => setCurrency(e.target.value)}
               className="w-full rounded-2xl border border-slate-200 bg-white p-4 font-bold outline-none focus:border-purple-400"
             >
-              <option value="SDG">الجنيه السوداني — SDG</option>
+              <option value="USD">US Dollar — USD</option>
               <option value="USD">الدولار الأمريكي — USD</option>
               <option value="EUR">اليورو — EUR</option>
               <option value="GBP">الجنيه الإسترليني — GBP</option>

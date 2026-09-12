@@ -24,8 +24,8 @@ export default function ProductPage() {
         const { getSupabaseClient } = await import("../../../lib/nolera-auth")
         const supabase = getSupabaseClient()
         const { data: wallets } = await supabase.from("wallets").select("currency,balance")
-        const sdg = (wallets || []).find((w: any) => w.currency === "SDG")
-        setBalance(Number(sdg?.balance || 0))
+        const usd = (wallets || []).find((w: any) => w.currency === "USD")
+        setBalance(Number(usd?.balance || 0))
       } catch (error) {
         setMessage(error instanceof Error ? error.message : "تعذر تحميل المنتج.")
       } finally {
@@ -145,7 +145,7 @@ export default function ProductPage() {
               <div className="rounded-2xl bg-slate-50 p-5">
                 <div className="text-sm text-slate-500">رصيدك الحالي</div>
                 <div className="mt-1 text-2xl font-black">
-                  {balance.toLocaleString()} SDG
+                  {balance.toLocaleString()} USD
                 </div>
               </div>
             </div>

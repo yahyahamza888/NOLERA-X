@@ -33,7 +33,7 @@ import {
   Filter,
 } from "lucide-react";
 
-import { getWallets } from "@/lib/nolera-finance";
+import { getWallets, supabase } from "@/lib/nolera-finance";
 
 
 type Category =
@@ -200,8 +200,8 @@ export default function LogisticsPage() {
   async function refreshWallet() {
     try {
       const wallets = await getWallets();
+
       const wallet =
-        wallets.find((w: any) => w.currency === "SDG") ||
         wallets.find((w: any) => w.currency === "USD") ||
         wallets[0];
 
@@ -217,47 +217,56 @@ export default function LogisticsPage() {
     setShowPayment(true);
   }
 
-  function confirmPayment() {
+  async function confirmPayment() {
     if (!selectedService) return;
 
-    const [service, rawPrice] = selectedService.split("|");
-    const price = Number(rawPrice);
+    const [service] = selectedService.split("|");
+
+    const provider =
+      selected?.name || "NOLERA Global Services";
+
+    const location =
+      [country, city, area].filter(Boolean).join(", ") || "Global";
 
     try {
-      throw new Error(
-        "دفع خدمات Logistics يحتاج إلى Backend Payment API آمن. لم يتم خصم أي رصيد."
+      const { data, error } = await supabase.rpc(
+        "nolera_logistics_payment",
+        {
+          p_service: service,
+          p_provider: provider,
+          p_location: location,
+        }
       );
 
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (!data?.success) {
+        throw new Error("تعذر إتمام دفع خدمة Logistics.");
+      }
+
       const newRequest: RequestItem = {
-        id: `REQ-${Date.now()}`,
+        id: String(data.order_id),
         service,
-        provider:
-          selected?.name || "NOLERA Global Services",
-        location:
-          [country, city, area].filter(Boolean).join(", ") ||
-          "Global",
-        amount: price,
+        provider,
+        location,
+        amount: Number(data.amount),
         status: "Paid",
         date: new Date().toLocaleString(),
       };
 
-      const old = JSON.parse(
-        localStorage.getItem("nolera_logistics_requests") || "[]"
-      );
-
-      const updated = [newRequest, ...old];
-
-      localStorage.setItem(
-        "nolera_logistics_requests",
-        JSON.stringify(updated)
-      );
-
-      setRequests(updated);
+      setRequests((current) => [newRequest, ...current]);
       setShowPayment(false);
       setSelectedService(null);
-      refreshWallet();
 
-      alert("تم الدفع وتسجيل طلب الخدمة بنجاح.");
+      await refreshWallet();
+
+      window.dispatchEvent(new Event("nolera-data-updated"));
+
+      alert(
+        `تم الدفع وتسجيل طلب الخدمة بنجاح.\\nالمرجع: ${data.reference}`
+      );
     } catch (error) {
       alert(
         error instanceof Error
@@ -267,13 +276,79 @@ export default function LogisticsPage() {
     }
   }
 
-  function loadRequests() {
-    const saved = JSON.parse(
-      localStorage.getItem("nolera_logistics_requests") || "[]"
-    );
+  async function loadRequests() {
+    try {
+      const { data, error } = await supabase
+        .from("orders")
+        .select(
+          "id,total,currency,status,reference,created_at,order_items(product_name)"
+        )
+        .eq("payment_method", "balance")
+        .eq("currency", "USD")
+        .order("created_at", { ascending: false });
 
-    setRequests(saved);
-    setShowRequests(true);
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      const loaded: RequestItem[] = (data || [])
+        .filter((order: any) =>
+          (order.order_items || []).some((item: any) =>
+            String(item.product_name || "").startsWith(
+              "NOLERA Logistics"
+            )
+          )
+        )
+        .map((order: any) => {
+          const item = (order.order_items || []).find(
+            (row: any) =>
+              String(row.product_name || "").startsWith(
+                "NOLERA Logistics"
+              )
+          );
+
+          const productName = String(item?.product_name || "");
+
+          const service =
+            productName
+              .replace(/^NOLERA Logistics — /, "")
+              .split(" | Provider:")[0] || "Logistics Service";
+
+          const providerMatch =
+            productName.match(/\\| Provider: (.*?) \\| Location:/);
+
+          const locationMatch =
+            productName.match(/\\| Location: (.*)$/);
+
+          return {
+            id: String(order.id),
+            service,
+            provider:
+              providerMatch?.[1] ||
+              "NOLERA Global Services",
+            location:
+              locationMatch?.[1] ||
+              "Global",
+            amount: Number(order.total || 0),
+            status:
+              order.status === "completed"
+                ? "Paid"
+                : order.status === "cancelled"
+                  ? "Pending"
+                  : "Pending",
+            date: new Date(order.created_at).toLocaleString(),
+          };
+        });
+
+      setRequests(loaded);
+      setShowRequests(true);
+    } catch (error) {
+      alert(
+        error instanceof Error
+          ? error.message
+          : "تعذر تحميل طلبات Logistics."
+      );
+    }
   }
 
   return (
@@ -303,7 +378,7 @@ export default function LogisticsPage() {
               className="flex items-center gap-2 rounded-xl bg-purple-50 px-3 py-2 text-sm font-bold text-purple-700"
             >
               <WalletCards size={17} />
-              {balance.toLocaleString()} SDG
+              {balance.toLocaleString()} USD
             </button>
 
             <button
@@ -441,7 +516,7 @@ export default function LogisticsPage() {
               </p>
 
               <p className="mt-1 font-black text-purple-700">
-                {service.price.toLocaleString()} SDG
+                {service.price.toLocaleString()} USD
               </p>
             </button>
           ))}
@@ -572,7 +647,7 @@ export default function LogisticsPage() {
                     <span>Price</span>
 
                     <strong className="text-xl">
-                      {amount.toLocaleString()} SDG
+                      {amount.toLocaleString()} USD
                     </strong>
                   </div>
 
@@ -580,7 +655,7 @@ export default function LogisticsPage() {
                     <span>Your Balance</span>
 
                     <strong className="text-purple-700">
-                      {current.toLocaleString()} SDG
+                      {current.toLocaleString()} USD
                     </strong>
                   </div>
                 </div>
@@ -713,7 +788,7 @@ export default function LogisticsPage() {
                     <span>{request.date}</span>
 
                     <strong>
-                      {request.amount.toLocaleString()} SDG
+                      {request.amount.toLocaleString()} USD
                     </strong>
                   </div>
                 </div>

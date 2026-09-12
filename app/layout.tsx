@@ -4,6 +4,7 @@ import "./globals.css";
 import GlobalLoginHandler from "@/components/global-login-handler";
 
 import ProtectedActionHandler from "../components/protected-action-handler"
+import GlobalBottomNav from "@/components/GlobalBottomNav"
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
@@ -25,7 +26,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
+      <body className="min-h-full flex flex-col pb-20">
         <GlobalLoginHandler />
       <ProtectedActionHandler />{children}</body>
     </html>

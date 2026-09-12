@@ -35,7 +35,7 @@ export default function BillsPage() {const [selected, setSelected] = useState(""
     <main dir="rtl" className="min-h-screen bg-slate-50 p-6">
       <div className="mx-auto max-w-4xl">
         <h1 className="text-3xl font-bold text-slate-900">دفع الفواتير</h1>
-        <p className="mt-2 text-slate-500">الرصيد الحالي: {0 .toLocaleString()} SDG</p>
+        <p className="mt-2 text-slate-500">الرصيد الحالي: {0 .toLocaleString()} USD</p>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-2">
           {bills.map((bill) => (

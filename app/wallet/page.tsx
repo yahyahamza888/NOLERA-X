@@ -11,7 +11,7 @@ type Wallet = {
   balance: number
 }
 
-const currencies = ["SDG", "USD", "Pi", "BTC", "ETH", "USDT"]
+const currencies = ["USD", "EUR", "GBP", "SAR", "AED"]
 
 export default function WalletPage() {
   const supabase = getSupabaseClient()

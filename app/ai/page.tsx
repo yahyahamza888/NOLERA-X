@@ -185,7 +185,7 @@ export default function AIPage() {
       .then((wallets) => {
         if (!mounted) return;
         const wallet =
-          wallets.find((w: any) => w.currency === "SDG") ||
+          wallets.find((w: any) => w.currency === "USD") ||
           wallets.find((w: any) => w.currency === "USD") ||
           wallets[0];
 
@@ -214,7 +214,7 @@ export default function AIPage() {
     try {
       const wallets = await getWallets();
       const wallet =
-        wallets.find((w: any) => w.currency === "SDG") ||
+        wallets.find((w: any) => w.currency === "USD") ||
         wallets.find((w: any) => w.currency === "USD") ||
         wallets[0];
 
@@ -299,7 +299,7 @@ ${productName} هو منتج رقمي عملي يساعد المستخدم عل�
         name: product.name,
         description: product.description,
         price: product.price,
-        currency: "SDG",
+        currency: "USD",
         category: "رقمي",
         icon: "📦",
       })
@@ -428,7 +428,7 @@ ${productName} هو منتج رقمي عملي يساعد المستخدم عل�
               <div>
                 <div className="text-xs text-gray-400">رصيد NOLERA</div>
                 <div className="font-black text-green-400">
-                  {balance.toLocaleString()} SDG
+                  {balance.toLocaleString()} USD
                 </div>
               </div>
             </div>
@@ -522,7 +522,7 @@ ${productName} هو منتج رقمي عملي يساعد المستخدم عل�
                   <span className="text-xs text-orange-300">
                     {tool.price === 0
                       ? "مجاني"
-                      : `${tool.price.toLocaleString()} SDG`}
+                      : `${tool.price.toLocaleString()} USD`}
                   </span>
                   <span className="text-xs text-purple-300">فتح الأداة ←</span>
                 </div>
@@ -552,7 +552,7 @@ ${productName} هو منتج رقمي عملي يساعد المستخدم عل�
                   <div>
                     <div className="font-bold">{tool.name}</div>
                     <div className="text-xs text-gray-500">
-                      {tool.type} · {tool.price.toLocaleString()} SDG
+                      {tool.type} · {tool.price.toLocaleString()} USD
                     </div>
                   </div>
 
@@ -624,7 +624,7 @@ ${productName} هو منتج رقمي عملي يساعد المستخدم عل�
                     value={productPrice}
                     onChange={(e) => setProductPrice(e.target.value)}
                     type="number"
-                    placeholder="سعر المنتج SDG"
+                    placeholder="Product price USD"
                     className="w-full rounded-2xl bg-black/30 p-4 outline-none"
                   />
 
@@ -759,7 +759,7 @@ ${productName} هو منتج رقمي عملي يساعد المستخدم عل�
                           {product.description}
                         </div>
                         <div className="mt-2 text-xs text-orange-300">
-                          {product.price.toLocaleString()} SDG
+                          {product.price.toLocaleString()} USD
                         </div>
                       </div>
 

@@ -66,11 +66,11 @@ export default function StorePage() {
 
       setProducts(items)
 
-      const sdg = wallets.find(
-        (wallet: any) => String(wallet.currency).toUpperCase() === "SDG",
+      const usd = wallets.find(
+        (wallet: any) => String(wallet.currency).toUpperCase() === "USD",
       )
 
-      setBalance(Number(sdg?.balance || 0))
+      setBalance(Number(usd?.balance || 0))
     } catch (err: any) {
       setError(err?.message || "تعذر تحميل المتجر.")
     } finally {
@@ -218,7 +218,7 @@ export default function StorePage() {
 
     if (cartTotal > balance) {
       setError(
-        `الرصيد غير كافٍ. تحتاج ${cartTotal.toLocaleString()} SDG والمتاح ${balance.toLocaleString()} SDG.`,
+        `الرصيد غير كافٍ. تحتاج ${cartTotal.toLocaleString()} USD والمتاح ${balance.toLocaleString()} USD.`,
       )
       return
     }
@@ -422,7 +422,7 @@ export default function StorePage() {
                   </p>
 
                   <div className="mt-3 text-sm font-black text-purple-700">
-                    {Number(product.price || 0).toLocaleString()} SDG
+                    {Number(product.price || 0).toLocaleString()} USD
                   </div>
                 </div>
               </Link>
@@ -454,7 +454,7 @@ export default function StorePage() {
           <div className="rounded-2xl bg-white px-4 py-2 text-xs font-bold text-slate-500 shadow-sm">
             الرصيد:{" "}
             <span className="text-slate-900">
-              {balance.toLocaleString()} SDG
+              {balance.toLocaleString()} USD
             </span>
           </div>
         </div>
@@ -656,19 +656,19 @@ export default function StorePage() {
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-slate-500">سعر المنتجات</span>
                       <span className="font-bold">
-                        {cartTotal.toLocaleString()} SDG
+                        {cartTotal.toLocaleString()} USD
                       </span>
                     </div>
                     <div className="flex items-center justify-between">
                       <span className="text-sm text-slate-500">رسوم متجر NOLERA (10%)</span>
                       <span className="font-bold text-purple-600">
-                        {(cartTotal * 0.10).toLocaleString()} SDG
+                        {(cartTotal * 0.10).toLocaleString()} USD
                       </span>
                     </div>
                     <div className="flex items-center justify-between border-t border-slate-200 pt-3">
                       <span className="text-base font-black">الإجمالي</span>
                       <span className="text-2xl font-black">
-                        {(cartTotal * 1.10).toLocaleString()} SDG
+                        {(cartTotal * 1.10).toLocaleString()} USD
                       </span>
                     </div>
                   </div>

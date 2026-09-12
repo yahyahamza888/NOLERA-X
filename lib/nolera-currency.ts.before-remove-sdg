@@ -1,0 +1,71 @@
+export type NoleraCurrency =
+  | "USD"
+  | "SDG"
+  | "EUR"
+  | "GBP"
+  | "SAR"
+  | "AED"
+
+export const DEFAULT_CURRENCY: NoleraCurrency = "USD"
+
+export const NOLERA_CURRENCIES: {
+  code: NoleraCurrency
+  name: string
+  symbol: string
+}[] = [
+  { code: "USD", name: "US Dollar", symbol: "$" },
+  { code: "SDG", name: "Sudanese Pound", symbol: "SDG" },
+  { code: "EUR", name: "Euro", symbol: "€" },
+  { code: "GBP", name: "British Pound", symbol: "£" },
+  { code: "SAR", name: "Saudi Riyal", symbol: "SAR" },
+  { code: "AED", name: "UAE Dirham", symbol: "AED" },
+]
+
+const CURRENCY_KEY = "nolera_x_currency"
+
+export function getNoleraCurrency(): NoleraCurrency {
+  if (typeof window === "undefined") {
+    return DEFAULT_CURRENCY
+  }
+
+  const saved = window.localStorage.getItem(CURRENCY_KEY)
+
+  const valid = NOLERA_CURRENCIES.some(
+    (currency) => currency.code === saved
+  )
+
+  return valid
+    ? (saved as NoleraCurrency)
+    : DEFAULT_CURRENCY
+}
+
+export function setNoleraCurrency(currency: NoleraCurrency) {
+  if (typeof window === "undefined") return
+
+  window.localStorage.setItem(CURRENCY_KEY, currency)
+
+  window.dispatchEvent(
+    new CustomEvent("nolera-currency-change", {
+      detail: currency,
+    })
+  )
+}
+
+export function getCurrencySymbol(currency: NoleraCurrency) {
+  return (
+    NOLERA_CURRENCIES.find(
+      (item) => item.code === currency
+    )?.symbol ?? "$"
+  )
+}
+
+export function formatNoleraAmount(
+  amount: number,
+  currency: NoleraCurrency = DEFAULT_CURRENCY
+) {
+  return new Intl.NumberFormat("en-US", {
+    style: "currency",
+    currency,
+    maximumFractionDigits: 2,
+  }).format(amount)
+}

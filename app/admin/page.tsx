@@ -75,7 +75,7 @@ export default function AdminPage() {
   const [user, setUser] = useState<any>(null)
   const [role, setRole] = useState("user")
   const [from, setFrom] = useState("USD")
-  const [to, setTo] = useState("SDG")
+  const [to, setTo] = useState("USD")
   const [rate, setRate] = useState("")
   const [message, setMessage] = useState("")
   const [shareMessage, setShareMessage] = useState("")
@@ -1202,7 +1202,7 @@ export default function AdminPage() {
               onChange={(e) => setFrom(e.target.value)}
               className="rounded-2xl bg-slate-100 p-4"
             >
-              {["SDG", "USD", "Pi", "BTC", "ETH", "USDT"].map(
+              {["USD", "EUR", "GBP", "SAR", "AED"].map(
                 (item) => (
                   <option key={item}>{item}</option>
                 ),
@@ -1214,7 +1214,7 @@ export default function AdminPage() {
               onChange={(e) => setTo(e.target.value)}
               className="rounded-2xl bg-slate-100 p-4"
             >
-              {["SDG", "USD", "Pi", "BTC", "ETH", "USDT"].map(
+              {["USD", "EUR", "GBP", "SAR", "AED"].map(
                 (item) => (
                   <option key={item}>{item}</option>
                 ),

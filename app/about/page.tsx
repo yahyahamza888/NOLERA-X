@@ -37,7 +37,7 @@ export default function AboutPage() {
             <div className="rounded-2xl bg-slate-800 p-5">
               <h2 className="font-bold">🌐 المستقبل</h2>
               <p className="mt-2 text-sm text-slate-400">
-                ربط قاعدة البيانات والخدمات الخارجية وPi Network.
+                ربط قاعدة البيانات والخدمات الخارجية.
               </p>
             </div>
           </div>

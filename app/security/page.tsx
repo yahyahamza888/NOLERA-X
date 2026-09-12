@@ -1,79 +1,92 @@
 "use client"
 
-import { useState } from "react"
 import Link from "next/link"
-import { changePassword } from "../../lib/nolera-auth"
-import { useNoleraAuth } from "../../lib/use-nolera-auth"
+import NoleraBrand from "../../components/NoleraBrand"
 
 export default function SecurityPage() {
-  const { user } = useNoleraAuth()
-  const [oldPassword, setOldPassword] = useState("")
-  const [newPassword, setNewPassword] = useState("")
-  const [message, setMessage] = useState("")
-
-  if (!user) {
-    return (
-      <main dir="rtl" className="p-6 text-center">
-        <Link href="/login">سجل الدخول أولًا</Link>
-      </main>
-    )
-  }
-
-  function savePassword() {
-    try {
-      changePassword(oldPassword, newPassword)
-      setOldPassword("")
-      setNewPassword("")
-      setMessage("تم تغيير كلمة المرور بنجاح.")
-    } catch (error) {
-      setMessage(error instanceof Error ? error.message : "حدث خطأ.")
-    }
-  }
-
   return (
-    <main dir="rtl" className="min-h-screen bg-slate-100 p-5">
-      <div className="mx-auto max-w-xl rounded-[28px] bg-white p-7 shadow">
-        <Link href="/account" className="text-sm font-bold text-slate-500">
-          ← الحساب
-        </Link>
+    <main
+      dir="ltr"
+      className="min-h-screen bg-[#12091d] px-5 py-6 text-white"
+    >
+      <div className="mx-auto max-w-2xl">
+        <div className="mb-8 flex items-center justify-between">
+          <NoleraBrand compact />
 
-        <h1 className="mt-5 text-3xl font-black">أمان الحساب 🛡️</h1>
-
-        <div className="mt-6 rounded-2xl bg-green-50 p-5">
-          <p className="font-black text-green-700">الحساب نشط</p>
-          <p className="mt-1 text-sm text-green-600">
-            يمكنك تغيير كلمة المرور من هنا.
-          </p>
+          <Link
+            href="/"
+            className="rounded-xl border border-white/15 px-4 py-2 text-sm"
+          >
+            Home
+          </Link>
         </div>
 
-        <input
-          className="mt-6 w-full rounded-2xl bg-slate-100 p-4 outline-none"
-          type="password"
-          placeholder="كلمة المرور الحالية"
-          value={oldPassword}
-          onChange={(e) => setOldPassword(e.target.value)}
-        />
+        <section className="rounded-3xl border border-white/10 bg-white/5 p-6">
+          <div className="mb-6">
+            <div className="mb-2 text-3xl">🔐</div>
 
-        <input
-          className="mt-3 w-full rounded-2xl bg-slate-100 p-4 outline-none"
-          type="password"
-          placeholder="كلمة المرور الجديدة"
-          value={newPassword}
-          onChange={(e) => setNewPassword(e.target.value)}
-        />
+            <h1 className="text-2xl font-black">
+              Security Center
+            </h1>
 
-        <button
-          onClick={savePassword}
-          className="mt-5 w-full rounded-2xl bg-slate-950 py-4 font-black text-white"
-        >
-          تغيير كلمة المرور
-        </button>
+            <p className="mt-2 text-sm text-white/60">
+              Protect your NOLERA X account and financial activity.
+            </p>
+          </div>
 
-        {message && (
-          <p className="mt-4 text-center text-sm font-bold text-green-600">
-            {message}
-          </p>
-        )}
+          <div className="space-y-3">
+            <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
+              <div className="font-bold">
+                Account Password
+              </div>
+
+              <div className="mt-1 text-sm text-white/60">
+                Use a strong password and never share it with anyone.
+              </div>
+            </div>
+
+            <Link
+              href="/verification"
+              className="block rounded-2xl border border-white/10 bg-black/10 p-4 transition hover:bg-white/10"
+            >
+              <div className="font-bold">
+                Identity Verification
+              </div>
+
+              <div className="mt-1 text-sm text-white/60">
+                Complete your NOLERA X verification to unlock protected
+                financial services.
+              </div>
+            </Link>
+
+            <div className="rounded-2xl border border-yellow-400/20 bg-yellow-400/5 p-4">
+              <div className="font-bold text-yellow-300">
+                Passkey / Device Biometrics
+              </div>
+
+              <div className="mt-1 text-sm text-white/60">
+                Passkeys can use your device fingerprint, Face ID, or
+                screen lock without NOLERA X receiving or storing your
+                biometric data.
+              </div>
+
+              <div className="mt-3 text-xs text-yellow-300/70">
+                Secure WebAuthn integration is prepared for a later step.
+              </div>
+            </div>
+
+            <div className="rounded-2xl border border-white/10 bg-black/10 p-4">
+              <div className="font-bold">
+                Sensitive Actions
+              </div>
+
+              <div className="mt-1 text-sm text-white/60">
+                Wallet, transfers, withdrawals, exchanges and verification
+                require an authenticated account.
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
     </main>
   )

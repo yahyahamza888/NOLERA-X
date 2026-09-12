@@ -4,11 +4,11 @@ import Link from "next/link"
 import { ArrowLeft, Repeat2 } from "lucide-react"
 import { useState } from "react"
 
-const assets = ["Pi", "BTC", "ETH", "USDT"]
+const assets = ["USD", "EUR", "GBP", "SAR", "AED"]
 
 export default function SwapPage() {
-  const [from, setFrom] = useState("Pi")
-  const [to, setTo] = useState("USDT")
+  const [from, setFrom] = useState("USD")
+  const [to, setTo] = useState("EUR")
   const [amount, setAmount] = useState("")
 
   function reverseAssets() {

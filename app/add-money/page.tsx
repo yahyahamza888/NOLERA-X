@@ -52,7 +52,7 @@ export default function AddMoneyPage() {
             onChange={(e) => setCurrency(e.target.value)}
             className="mb-4 w-full rounded-2xl bg-slate-900 p-4"
           >
-            {["SDG","USD","Pi","BTC","ETH","USDT"].map(c => (
+            {["USD","EUR","GBP","SAR","AED"].map(c => (
               <option key={c}>{c}</option>
             ))}
           </select>

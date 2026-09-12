@@ -17,7 +17,7 @@ const types = [
   { name: "خدمة رقمية", icon: "⚡", hint: "خدمات عبر الإنترنت" },
 ]
 
-const currencies = ["SDG", "USD"]
+const currencies = ["USD", "EUR", "GBP", "SAR", "AED"]
 
 export default function CreateProductPage() {
   const [idea, setIdea] = useState("")
@@ -26,7 +26,7 @@ export default function CreateProductPage() {
   const [audience, setAudience] = useState("")
   const [benefits, setBenefits] = useState("")
   const [price, setPrice] = useState("")
-  const [currency, setCurrency] = useState("SDG")
+  const [currency, setCurrency] = useState("USD")
   const [type, setType] = useState(types[0].name)
   const [icon, setIcon] = useState(types[0].icon)
   const [productMedia, setProductMedia] = useState<string | null>(null)

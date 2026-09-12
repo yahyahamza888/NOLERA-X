@@ -45,7 +45,7 @@ function validateAmount(amount: number) {
 
 export async function deposit(
   amount: number,
-  currency = "SDG"
+  currency = "USD"
 ) {
   validateAmount(amount);
 
@@ -57,7 +57,7 @@ export async function deposit(
 
 export async function withdraw(
   amount: number,
-  currency = "SDG"
+  currency = "USD"
 ) {
   validateAmount(amount);
 
@@ -70,7 +70,7 @@ export async function withdraw(
 export async function transfer(
   amount: number,
   recipientId: string,
-  currency = "SDG"
+  currency = "USD"
 ) {
   validateAmount(amount);
 

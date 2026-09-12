@@ -5,12 +5,12 @@ import { ArrowDownUp, ArrowLeft, ShieldCheck } from "lucide-react"
 import { useState } from "react"
 import { getSupabaseClient } from "../../lib/nolera-auth"
 
-const currencies = ["SDG", "USD", "Pi", "BTC", "ETH", "USDT"]
+const currencies = ["USD", "EUR", "GBP", "SAR", "AED"]
 
 export default function ExchangePage() {
   const supabase = getSupabaseClient()
   const [from, setFrom] = useState("USD")
-  const [to, setTo] = useState("SDG")
+  const [to, setTo] = useState("USD")
   const [amount, setAmount] = useState("")
   const [rate, setRate] = useState("")
   const [loading, setLoading] = useState(false)

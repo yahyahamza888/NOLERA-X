@@ -235,16 +235,15 @@ export default function SellerPage() {
       .slice(0, 5)
   }, [sales, products])
 
-  const sdgBalance =
-    wallets.find((wallet) => wallet.currency.toUpperCase() === "SDG")
-      ?.balance || 0
-
   const usdBalance =
     wallets.find((wallet) => wallet.currency.toUpperCase() === "USD")
       ?.balance || 0
 
-  function formatMoney(value: number, currency = "SDG") {
-    return `${Number(value || 0).toLocaleString("ar-SD")} ${currency}`
+    wallets.find((wallet) => wallet.currency.toUpperCase() === "USD")
+      ?.balance || 0
+
+  function formatMoney(value: number, currency = "USD") {
+    return `${Number(value || 0).toLocaleString("en-US")} ${currency}`
   }
 
   return (
@@ -318,12 +317,12 @@ export default function SellerPage() {
 
             <div className="rounded-[24px] bg-white/10 p-5 backdrop-blur">
               <p className="text-xs font-bold text-white/70">
-                رصيد SDG
+                رصيد USD
               </p>
               <p className="mt-1 text-3xl font-black">
-                {sdgBalance.toLocaleString("ar-SD")}
+                {usdBalance.toLocaleString("en-US")}
               </p>
-              <p className="text-xs font-bold text-white/70">SDG</p>
+              <p className="text-xs font-bold text-white/70">USD</p>
             </div>
           </div>
         </div>
@@ -364,13 +363,13 @@ export default function SellerPage() {
               icon={<ShoppingBag size={21} />}
               label="متوسط البيع"
               value={formatMoney(averageSale)}
-              description={`${sales.length.toLocaleString("ar-SD")} عملية بيع`}
+              description={`${sales.length.toLocaleString("en-US")} عملية بيع`}
             />
 
             <StatCard
               icon={<Box size={21} />}
               label="منتجاتي"
-              value={products.length.toLocaleString("ar-SD")}
+              value={products.length.toLocaleString("en-US")}
               description={`${publishedProducts} منتج منشور`}
             />
           </div>
@@ -436,7 +435,7 @@ export default function SellerPage() {
 
                       <div className="shrink-0 text-left">
                         <p className="font-black text-emerald-600">
-                          +{amount.toLocaleString("ar-SD")}
+                          +{amount.toLocaleString("en-US")}
                         </p>
                         <p className="text-[11px] text-slate-400">
                           {order.currency}
@@ -455,7 +454,7 @@ export default function SellerPage() {
 
                       <span>
                         {new Date(order.created_at).toLocaleString(
-                          "ar-SD"
+                          "en-US"
                         )}
                       </span>
                     </div>
@@ -499,12 +498,12 @@ export default function SellerPage() {
                       {product.name}
                     </p>
                     <p className="mt-1 text-xs text-slate-400">
-                      {product.units.toLocaleString("ar-SD")} وحدة
+                      {product.units.toLocaleString("en-US")} وحدة
                     </p>
                   </div>
 
                   <strong className="text-sm">
-                    {product.sales.toLocaleString("ar-SD")}
+                    {product.sales.toLocaleString("en-US")}
                   </strong>
                 </div>
               ))}
@@ -590,7 +589,7 @@ export default function SellerPage() {
 
                     <strong>
                       {Number(product.price).toLocaleString(
-                        "ar-SD"
+                        "en-US"
                       )}{" "}
                       {product.currency}
                     </strong>
@@ -634,7 +633,7 @@ export default function SellerPage() {
             <div>
               <p className="text-lg font-black">المحافظ</p>
               <p className="mt-1 text-xs text-purple-700/70">
-                {usdBalance.toLocaleString("ar-SD")} USD
+                {usdBalance.toLocaleString("en-US")} USD
               </p>
             </div>
             <Wallet size={22} className="text-purple-700" />

@@ -34,15 +34,15 @@ export default function AccountPage() {
   const router = useRouter()
   const { user, loading: authLoading } = useNoleraAuth()
 
-  const [sdgBalance, setSdgBalance] = useState(0)
+  const [usdBalance, setSdgBalance] = useState(0)
   const [showBalance, setShowBalance] = useState(true)
   const [accountRole, setAccountRole] = useState("user")
 
   async function refreshBalance() {
     try {
       const wallets = await getWallets()
-      const sdg = wallets.find((wallet) => wallet.currency === "SDG")
-      setSdgBalance(Number(sdg?.balance || 0))
+      const usd = wallets.find((wallet) => wallet.currency === "USD")
+      setSdgBalance(Number(usd?.balance || 0))
     } catch {
       setSdgBalance(0)
     }
@@ -233,7 +233,7 @@ export default function AccountPage() {
                 <div className="mt-2 flex items-center gap-3">
                   <div className="text-3xl font-black tracking-tight sm:text-5xl">
                     {showBalance
-                      ? `${sdgBalance.toLocaleString()} SDG`
+                      ? `${usdBalance.toLocaleString()} USD`
                       : "••••••••"}
                   </div>
 
