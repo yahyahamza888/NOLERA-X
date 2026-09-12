@@ -2,11 +2,9 @@
 
 import { useState } from "react"
 import Link from "next/link"
-import { useRouter } from "next/navigation"
 import { loginUser } from "../../lib/nolera-auth"
 
 export default function LoginPage() {
-  const router = useRouter()
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [message, setMessage] = useState("")
@@ -17,8 +15,7 @@ export default function LoginPage() {
     setLoading(true)
 
     try {
-      const result = await loginUser(email, password)
-      alert("نجح تسجيل الدخول! المستخدم: " + JSON.stringify(result))
+      await loginUser(email, password)
 
       const next =
         typeof window !== "undefined"
@@ -26,15 +23,12 @@ export default function LoginPage() {
           : null
 
       if (next && next.startsWith("/")) {
-        router.push(next)
+        window.location.href = next
       } else {
-        router.push("/")
+        window.location.href = "/"
       }
-      router.refresh()
     } catch (error) {
-      alert("فشل تسجيل الدخول: " + (error instanceof Error ? error.message : String(error)))
       setMessage(error instanceof Error ? error.message : "حدث خطأ.")
-    } finally {
       setLoading(false)
     }
   }
