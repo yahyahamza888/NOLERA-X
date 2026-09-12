@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
+import { useNoleraAuth } from "@/lib/use-nolera-auth";
 import { Home, Wallet, ArrowLeftRight, LayoutGrid, UserRound } from "lucide-react";
 
 const items = [
@@ -14,14 +15,18 @@ const items = [
 export default function GlobalBottomNav() {
   const pathname = usePathname();
   const router = useRouter();
+  const { isLoggedIn, loading } = useNoleraAuth();
 
   // لا يظهر في شاشات الدخول والترحيب
   if (
-    pathname === "/" ||
     pathname === "/login" ||
     pathname === "/register" ||
     pathname === "/guest"
   ) {
+    return null;
+  }
+
+  if (pathname === "/" && (loading || !isLoggedIn)) {
     return null;
   }
 

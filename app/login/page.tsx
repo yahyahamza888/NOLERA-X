@@ -26,7 +26,7 @@ export default function LoginPage() {
       if (next && next.startsWith("/")) {
         router.push(next)
       } else {
-        router.push("/account")
+        router.push("/")
       }
       router.refresh()
     } catch (error) {
