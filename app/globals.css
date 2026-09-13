@@ -144,3 +144,114 @@ html[data-nolera-platform="ready"] [data-nolera-sidebar="true"] {
 html[data-nolera-platform="ready"] [data-nolera-bottom-nav="true"] {
   background-color: var(--nolera-theme-bottom-nav);
 }
+
+/* =========================================================
+   NOLERA X — C5 Live Theme Integration
+   Connect common existing Tailwind colors to Platform Builder
+   ========================================================= */
+
+html[data-nolera-platform="ready"] {
+
+  /* Primary backgrounds */
+  .bg-purple-500,
+  .bg-purple-600,
+  .bg-purple-700,
+  .bg-violet-500,
+  .bg-violet-600,
+  .bg-violet-700 {
+    background-color: var(--nolera-theme-primary) !important;
+  }
+
+  /* Light primary backgrounds */
+  .bg-purple-50,
+  .bg-purple-100,
+  .bg-violet-50,
+  .bg-violet-100 {
+    background-color: color-mix(
+      in srgb,
+      var(--nolera-theme-primary) 12%,
+      var(--nolera-theme-surface)
+    ) !important;
+  }
+
+  /* Primary text */
+  .text-purple-500,
+  .text-purple-600,
+  .text-purple-700,
+  .text-purple-800,
+  .text-violet-500,
+  .text-violet-600,
+  .text-violet-700 {
+    color: var(--nolera-theme-primary) !important;
+  }
+
+  /* Primary borders */
+  .border-purple-200,
+  .border-purple-300,
+  .border-purple-400,
+  .border-purple-500,
+  .border-purple-600,
+  .border-violet-200,
+  .border-violet-300,
+  .border-violet-500 {
+    border-color: var(--nolera-theme-primary) !important;
+  }
+
+  /* Buttons using common purple hover states */
+  .hover\:bg-purple-600:hover,
+  .hover\:bg-purple-700:hover,
+  .hover\:bg-violet-600:hover,
+  .hover\:bg-violet-700:hover {
+    background-color: var(--nolera-theme-secondary) !important;
+  }
+
+  /* Common white cards */
+  .bg-white {
+    background-color: var(--nolera-theme-card);
+  }
+
+  /* Main text */
+  .text-slate-900,
+  .text-gray-900 {
+    color: var(--nolera-theme-text);
+  }
+
+  /* Secondary text */
+  .text-slate-500,
+  .text-slate-600,
+  .text-gray-500,
+  .text-gray-600 {
+    color: var(--nolera-theme-muted);
+  }
+
+  /* Common borders */
+  .border-slate-200,
+  .border-slate-300,
+  .border-gray-200,
+  .border-gray-300 {
+    border-color: var(--nolera-theme-border);
+  }
+}
+
+/* Live bottom navigation theme */
+html[data-nolera-platform="ready"] nav[aria-label="NOLERA X navigation"] {
+  background-color: var(--nolera-theme-bottom-nav) !important;
+  border-color: var(--nolera-theme-border) !important;
+}
+
+html[data-nolera-platform="ready"]
+nav[aria-label="NOLERA X navigation"]
+button {
+  color: var(--nolera-theme-muted);
+}
+
+html[data-nolera-platform="ready"]
+nav[aria-label="NOLERA X navigation"]
+button.bg-purple-100 {
+  background-color: color-mix(
+    in srgb,
+    var(--nolera-theme-primary) 12%,
+    var(--nolera-theme-bottom-nav)
+  ) !important;
+  color: var(--nolera-theme-primary) !important;
+}
