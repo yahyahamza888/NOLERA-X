@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase-browser";
+import { getSupabaseClient } from "../../../lib/nolera-auth";
 
 type Profile = {
   id: string;
@@ -21,7 +21,7 @@ type Permission = {
 };
 
 export default function AdminEmployeesPage() {
-  const supabase = createClient();
+  const supabase = getSupabaseClient();
 
   const [employees, setEmployees] = useState<Profile[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
