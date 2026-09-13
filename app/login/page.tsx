@@ -22,11 +22,15 @@ export default function LoginPage() {
           ? new URLSearchParams(window.location.search).get("next")
           : null
 
-      if (next && next.startsWith("/")) {
-        window.location.href = next
-      } else {
-        window.location.href = "/"
-      }
+      const safeNext =
+        next &&
+        next.startsWith("/") &&
+        next !== "/login" &&
+        !next.startsWith("/login?")
+          ? next
+          : "/"
+
+      window.location.replace(safeNext)
     } catch (error) {
       setMessage(error instanceof Error ? error.message : "حدث خطأ.")
       setLoading(false)
