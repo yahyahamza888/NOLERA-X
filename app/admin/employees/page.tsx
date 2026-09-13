@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getSupabaseClient } from "@/lib/supabase-browser";
+import { createClient } from "@/lib/supabase-browser";
 
 type Profile = {
   id: string;
@@ -21,7 +21,7 @@ type Permission = {
 };
 
 export default function AdminEmployeesPage() {
-  const supabase = getSupabaseClient();
+  const supabase = createClient();
 
   const [employees, setEmployees] = useState<Profile[]>([]);
   const [permissions, setPermissions] = useState<Permission[]>([]);
@@ -73,7 +73,7 @@ export default function AdminEmployeesPage() {
       .select("permission")
       .eq("user_id", employee.id);
 
-    setGranted((data || []).map((x) => x.permission));
+    setGranted((data || []).map((x: { permission: string }) => x.permission));
   }
 
   async function togglePermission(permission: string, enabled: boolean) {
