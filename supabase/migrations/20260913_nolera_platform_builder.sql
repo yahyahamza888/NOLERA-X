@@ -122,13 +122,3 @@ grant select, insert, update, delete
 on public.nolera_platform_settings
 to authenticated;
 
-git add supabase/migrations/20260913_nolera_platform_builder.sql
-git commit -m "Add secure NOLERA platform builder settings"
-
-echo ""
-echo "=========================================="
-echo "C1 COMPLETED"
-echo "Platform Builder database foundation added"
-echo "Commit:"
-git rev-parse --short HEAD
-echo "=========================================="
