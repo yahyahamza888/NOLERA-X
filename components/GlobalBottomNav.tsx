@@ -30,6 +30,13 @@ export default function GlobalBottomNav() {
     return null;
   }
 
+  if (
+    typeof document !== "undefined" &&
+    document.documentElement.dataset.noleraBottomNav === "hidden"
+  ) {
+    return null;
+  }
+
   return (
     <nav
       aria-label="NOLERA X navigation"

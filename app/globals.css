@@ -24,3 +24,27 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+:root {
+  --nolera-primary: #512d68;
+  --nolera-secondary: #3c2549;
+  --nolera-background: #f8fafc;
+  --nolera-surface: #ffffff;
+  --nolera-card: #ffffff;
+  --nolera-text: #111827;
+  --nolera-muted-text: #64748b;
+  --nolera-border: #e2e8f0;
+  --nolera-button: #512d68;
+  --nolera-button-text: #ffffff;
+  --nolera-success: #16a34a;
+  --nolera-warning: #f59e0b;
+  --nolera-error: #dc2626;
+  --nolera-link: #512d68;
+  --nolera-sidebar: #ffffff;
+  --nolera-navbar: #ffffff;
+  --nolera-bottom-nav: #ffffff;
+}
+
+html[data-nolera-platform="ready"] {
+  --nolera-active-primary: var(--nolera-primary);
+}
