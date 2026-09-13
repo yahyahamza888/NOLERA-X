@@ -1241,31 +1241,45 @@ export default function AdminPage() {
         </section>
 
         {/* ADMIN LINKS */}
-        <section className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <section className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+
+          {isAdmin && (
+            <Link
+              href="/admin/employees"
+              className="rounded-3xl bg-gradient-to-br from-[#512d68] to-[#e86f32] p-6 font-black text-white shadow-sm transition hover:-translate-y-1"
+            >
+              <div className="text-3xl">👥</div>
+              <div className="mt-3">الموظفون والصلاحيات</div>
+              <p className="mt-2 text-xs font-normal text-white/75">
+                إدارة الموظفين ومنح الصلاحيات التشغيلية
+              </p>
+            </Link>
+          )}
+
           <Link
             href="/store"
-            className="rounded-3xl bg-white p-6 font-black shadow-sm"
+            className="rounded-3xl bg-white p-6 font-black shadow-sm transition hover:-translate-y-1"
           >
             🛍️ المتجر
           </Link>
 
           <Link
             href="/orders"
-            className="rounded-3xl bg-white p-6 font-black shadow-sm"
+            className="rounded-3xl bg-white p-6 font-black shadow-sm transition hover:-translate-y-1"
           >
             📦 الطلبات
           </Link>
 
           <Link
             href="/notifications"
-            className="rounded-3xl bg-white p-6 font-black shadow-sm"
+            className="rounded-3xl bg-white p-6 font-black shadow-sm transition hover:-translate-y-1"
           >
             🔔 الإشعارات
           </Link>
 
           <Link
             href="/verification"
-            className="rounded-3xl bg-white p-6 font-black shadow-sm"
+            className="rounded-3xl bg-white p-6 font-black shadow-sm transition hover:-translate-y-1"
           >
             🪪 التحقق
           </Link>
