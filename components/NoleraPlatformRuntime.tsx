@@ -83,6 +83,12 @@ export default function NoleraPlatformRuntime() {
       root.dataset.noleraBottomNav =
         navigation.bottomNav === false ? "hidden" : "visible";
 
+      // Expose section availability to the live navigation/UI.
+      Object.entries(sections).forEach(([key, enabled]) => {
+        root.dataset[`noleraSection${key}`] =
+          enabled === false ? "hidden" : "visible";
+      });
+
       // Apply the selected theme to the real interface.
       if (theme.background) {
         document.body.style.backgroundColor = theme.background;
