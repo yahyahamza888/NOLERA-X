@@ -48,3 +48,99 @@ body {
 html[data-nolera-platform="ready"] {
   --nolera-active-primary: var(--nolera-primary);
 }
+
+/* =========================================================
+   NOLERA X — C4 Platform Builder Runtime Theme
+   ========================================================= */
+
+:root {
+  --nolera-theme-primary: var(--nolera-primary);
+  --nolera-theme-secondary: var(--nolera-secondary);
+  --nolera-theme-background: var(--nolera-background);
+  --nolera-theme-surface: var(--nolera-surface);
+  --nolera-theme-card: var(--nolera-card);
+  --nolera-theme-text: var(--nolera-text);
+  --nolera-theme-muted: var(--nolera-muted-text);
+  --nolera-theme-border: var(--nolera-border);
+  --nolera-theme-button: var(--nolera-button);
+  --nolera-theme-button-text: var(--nolera-button-text);
+  --nolera-theme-success: var(--nolera-success);
+  --nolera-theme-warning: var(--nolera-warning);
+  --nolera-theme-error: var(--nolera-error);
+  --nolera-theme-link: var(--nolera-link);
+  --nolera-theme-sidebar: var(--nolera-sidebar);
+  --nolera-theme-navbar: var(--nolera-navbar);
+  --nolera-theme-bottom-nav: var(--nolera-bottom-nav);
+}
+
+html[data-nolera-platform="ready"] body {
+  background-color: var(--nolera-theme-background);
+  color: var(--nolera-theme-text);
+}
+
+html[data-nolera-platform="ready"] a {
+  color: var(--nolera-theme-link);
+}
+
+html[data-nolera-platform="ready"] input,
+html[data-nolera-platform="ready"] textarea,
+html[data-nolera-platform="ready"] select {
+  border-color: var(--nolera-theme-border);
+  background-color: var(--nolera-theme-surface);
+  color: var(--nolera-theme-text);
+}
+
+html[data-nolera-platform="ready"] button {
+  border-color: var(--nolera-theme-border);
+}
+
+html[data-nolera-platform="ready"] nav {
+  border-color: var(--nolera-theme-border);
+}
+
+html[data-nolera-platform="ready"] [data-nolera-card="true"] {
+  background-color: var(--nolera-theme-card);
+  border-color: var(--nolera-theme-border);
+  color: var(--nolera-theme-text);
+}
+
+html[data-nolera-platform="ready"] [data-nolera-primary="true"] {
+  background-color: var(--nolera-theme-primary);
+  color: var(--nolera-theme-button-text);
+}
+
+html[data-nolera-platform="ready"] [data-nolera-secondary="true"] {
+  background-color: var(--nolera-theme-secondary);
+  color: var(--nolera-theme-button-text);
+}
+
+html[data-nolera-platform="ready"] [data-nolera-success="true"] {
+  background-color: var(--nolera-theme-success);
+  color: #ffffff;
+}
+
+html[data-nolera-platform="ready"] [data-nolera-warning="true"] {
+  background-color: var(--nolera-theme-warning);
+  color: #ffffff;
+}
+
+html[data-nolera-platform="ready"] [data-nolera-error="true"] {
+  background-color: var(--nolera-theme-error);
+  color: #ffffff;
+}
+
+html[data-nolera-platform="ready"] [data-nolera-muted="true"] {
+  color: var(--nolera-theme-muted);
+}
+
+html[data-nolera-platform="ready"] [data-nolera-navbar="true"] {
+  background-color: var(--nolera-theme-navbar);
+}
+
+html[data-nolera-platform="ready"] [data-nolera-sidebar="true"] {
+  background-color: var(--nolera-theme-sidebar);
+}
+
+html[data-nolera-platform="ready"] [data-nolera-bottom-nav="true"] {
+  background-color: var(--nolera-theme-bottom-nav);
+}

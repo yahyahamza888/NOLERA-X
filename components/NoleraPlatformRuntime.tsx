@@ -83,6 +83,100 @@ export default function NoleraPlatformRuntime() {
       root.dataset.noleraBottomNav =
         navigation.bottomNav === false ? "hidden" : "visible";
 
+      // Apply the selected theme to the real interface.
+      if (theme.background) {
+        document.body.style.backgroundColor = theme.background;
+      }
+
+      if (theme.text) {
+        document.body.style.color = theme.text;
+      }
+
+      root.style.setProperty(
+        "--nolera-theme-primary",
+        theme.primary || "#512d68"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-secondary",
+        theme.secondary || "#3c2549"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-background",
+        theme.background || "#f8fafc"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-surface",
+        theme.surface || "#ffffff"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-card",
+        theme.card || "#ffffff"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-text",
+        theme.text || "#111827"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-muted",
+        theme.mutedText || "#64748b"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-border",
+        theme.border || "#e2e8f0"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-button",
+        theme.button || theme.primary || "#512d68"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-button-text",
+        theme.buttonText || "#ffffff"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-success",
+        theme.success || "#16a34a"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-warning",
+        theme.warning || "#f59e0b"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-error",
+        theme.error || "#dc2626"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-link",
+        theme.link || theme.primary || "#512d68"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-sidebar",
+        theme.sidebar || theme.surface || "#ffffff"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-navbar",
+        theme.navbar || theme.surface || "#ffffff"
+      );
+
+      root.style.setProperty(
+        "--nolera-theme-bottom-nav",
+        theme.bottomNav || theme.surface || "#ffffff"
+      );
+
       const section = routeSectionMap[pathname];
 
       if (
