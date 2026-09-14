@@ -164,7 +164,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => router.push("/account")}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-purple-50 text-purple-700"
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"
               aria-label="الحساب"
             >
               <span className="text-sm font-black">
@@ -173,12 +173,22 @@ export default function HomePage() {
             </button>
 
             <div className="min-w-0 flex-1">
-              <p className="text-[11px] font-bold text-slate-400">
-                {ar ? "مرحباً بك" : "Welcome"}
-              </p>
-              <p className="truncate text-sm font-black">
-                {user?.name || (ar ? "زائر NOLERA" : "NOLERA Guest")}
-              </p>
+              <div className="flex items-baseline gap-0.5">
+                <span className="text-3xl font-black tracking-tight text-slate-950">
+                  NOLERA
+                </span>
+                <span className="text-4xl font-black italic text-yellow-400">
+                  X
+                </span>
+              </div>
+              <div className="mt-0.5 flex items-center gap-1.5">
+                <span className="text-[10px] font-black tracking-[0.25em] text-emerald-600">
+                  NR
+                </span>
+                <span className="text-[10px] font-bold text-slate-400">
+                  {ar ? "منصة NOLERA العالمية" : "NOLERA Global Platform"}
+                </span>
+              </div>
             </div>
 
             <button
@@ -207,6 +217,36 @@ export default function HomePage() {
               }
               className="w-full rounded-2xl border border-slate-200 bg-slate-100 py-4 pl-12 pr-4 text-sm font-bold outline-none transition focus:border-purple-400 focus:bg-white rtl:pl-4 rtl:pr-12"
             />
+          </div>
+
+          <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
+            {[
+              ["/wallet", ar ? "المحفظة" : "Wallet"],
+              ["/transfers", ar ? "تحويل" : "Transfers"],
+              ["/services", ar ? "الخدمات" : "Services"],
+              ["/store", ar ? "المتجر" : "Store"],
+              ["/ads", "NOLERA ADS"],
+              ["/paradise", "NOLERA PARADISE"],
+              ["/logistics", "Logistics"],
+              ["/ai", "NOLERA AI"],
+              ["/markets", ar ? "الأسواق" : "Markets"],
+              ["/bills", ar ? "الفواتير" : "Bills"],
+              ["/cards", ar ? "البطاقات" : "Cards"],
+              ["/exchange", ar ? "الصرف" : "Exchange"],
+              ["/orders", ar ? "الطلبات" : "Orders"],
+              ["/support", ar ? "الدعم" : "Support"],
+              ["/notifications", ar ? "الإشعارات" : "Notifications"],
+              ["/verification", ar ? "التحقق" : "Verification"],
+            ].map(([href, label]) => (
+              <button
+                key={href}
+                type="button"
+                onClick={() => router.push(href)}
+                className="shrink-0 rounded-full border border-slate-200 bg-white px-4 py-2.5 text-xs font-black text-slate-700 shadow-sm transition hover:border-emerald-300 hover:text-emerald-700"
+              >
+                {label}
+              </button>
+            ))}
           </div>
         </div>
       </header>
@@ -268,7 +308,7 @@ export default function HomePage() {
             onClick={() => router.push("/logistics")}
             className="group rounded-3xl bg-white p-5 text-left shadow-sm ring-1 ring-slate-200 transition hover:-translate-y-0.5"
           >
-            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-orange-50 text-orange-600">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-600">
               <Truck className="h-6 w-6" />
             </div>
 
@@ -282,7 +322,7 @@ export default function HomePage() {
                 : "Property, logistics and global services"}
             </p>
 
-            <div className="mt-4 flex items-center gap-1 text-xs font-black text-orange-600">
+            <div className="mt-4 flex items-center gap-1 text-xs font-black text-emerald-600">
               {ar ? "اكتشف" : "Explore"}
               <ArrowRight className="h-3.5 w-3.5" />
             </div>
