@@ -25,6 +25,20 @@ type Theme = {
 
 type Sections = Record<string, boolean>;
 
+const defaultSectionOrder = [
+  "home",
+  "wallet",
+  "transfers",
+  "services",
+  "store",
+  "ads",
+  "paradise",
+  "directory",
+  "logistics",
+  "ai",
+  "markets",
+];
+
 type Navigation = {
   bottomNav: boolean;
   sidebar: boolean;
@@ -115,6 +129,9 @@ export default function PlatformBuilderPage() {
 
   const [theme, setTheme] = useState<Theme>(defaultTheme);
   const [sections, setSections] = useState<Sections>(defaultSections);
+  const [sectionOrder, setSectionOrder] =
+    useState<string[]>(defaultSectionOrder);
+  const [draggedSection, setDraggedSection] = useState<string | null>(null);
   const [navigation, setNavigation] =
     useState<Navigation>(defaultNavigation);
 
@@ -183,6 +200,21 @@ export default function PlatformBuilderPage() {
           ...(item.setting_value ?? {}),
         });
       }
+
+      if (item.setting_key === "section_order") {
+        const saved = Array.isArray(item.setting_value)
+          ? item.setting_value.filter(
+              (key): key is string => typeof key === "string"
+            )
+          : [];
+
+        const merged = [
+          ...saved,
+          ...defaultSectionOrder.filter((key) => !saved.includes(key)),
+        ];
+
+        setSectionOrder(merged);
+      }
     }
 
     setLoading(false);
@@ -244,8 +276,9 @@ export default function PlatformBuilderPage() {
   async function resetAll() {
     setTheme(defaultTheme);
     setSections(defaultSections);
+    setSectionOrder(defaultSectionOrder);
     setNavigation(defaultNavigation);
-    setMessage("تمت إعادة الإعدادات للقيم الافتراضية. اضغط حفظ لتطبيقها.");
+    setMessage("تمت إعادة الإعدادات والترتيب للقيم الافتراضية. اضغط حفظ لتطبيقها.");
   }
 
   if (loading) {
@@ -419,6 +452,80 @@ export default function PlatformBuilderPage() {
                   className="h-5 w-5"
                 />
               </label>
+            ))}
+          </div>
+        </section>
+
+        <section
+          className="rounded-3xl border p-5 shadow-sm"
+          style={{
+            background: theme.surface,
+            borderColor: theme.border,
+          }}
+        >
+          <div className="mb-5">
+            <h2 className="text-2xl font-black">↕️ ترتيب الأقسام</h2>
+            <p
+              className="mt-1 text-sm"
+              style={{ color: theme.mutedText }}
+            >
+              اسحب الأقسام لترتيب ظهورها في المنصة.
+            </p>
+          </div>
+
+          <div className="space-y-3">
+            {sectionOrder.map((key, index) => (
+              <div
+                key={key}
+                draggable
+                onDragStart={() => setDraggedSection(key)}
+                onDragOver={(e) => e.preventDefault()}
+                onDrop={() => {
+                  if (!draggedSection || draggedSection === key) return;
+
+                  const next = [...sectionOrder];
+                  const from = next.indexOf(draggedSection);
+                  const to = next.indexOf(key);
+
+                  if (from === -1 || to === -1) return;
+
+                  next.splice(from, 1);
+                  next.splice(to, 0, draggedSection);
+
+                  setSectionOrder(next);
+                  setDraggedSection(null);
+                }}
+                onDragEnd={() => setDraggedSection(null)}
+                className={`flex cursor-grab items-center gap-3 rounded-2xl border p-4 transition ${
+                  draggedSection === key ? "opacity-50" : ""
+                }`}
+                style={{
+                  borderColor: theme.border,
+                  background: theme.card,
+                }}
+              >
+                <span
+                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-xl font-black"
+                  style={{
+                    background: theme.primary,
+                    color: theme.buttonText,
+                  }}
+                >
+                  {index + 1}
+                </span>
+
+                <span className="flex-1 font-black">
+                  {sectionLabels[key] ?? key}
+                </span>
+
+                <span
+                  className="text-xl"
+                  style={{ color: theme.mutedText }}
+                  aria-hidden="true"
+                >
+                  ⋮⋮
+                </span>
+              </div>
             ))}
           </div>
         </section>
