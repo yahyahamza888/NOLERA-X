@@ -246,12 +246,35 @@ export default function AIPage() {
     setAnswer("")
   }
 
-  function askAssistant() {
-    if (!answer.trim()) return
+  async function askAssistant() {
+    const message = answer.trim()
+    if (!message) return
 
-    setAnswer(
-      "تم استقبال طلبك داخل NOLERA AI. هذه طبقة تشغيل محلية حالياً. عند ربط مزود AI حقيقي من لوحة الإدارة سيتم إرسال الطلب إلى محرك الذكاء الاصطناعي الفعلي."
-    )
+    setAnswer("جاري الاتصال بـ Claude...")
+
+    try {
+      const response = await fetch("/api/anthropic", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ message }),
+      })
+
+      const data = await response.json()
+
+      if (!response.ok) {
+        throw new Error(data?.error || "Anthropic API request failed")
+      }
+
+      setAnswer(data.text || "لم يتم استلام رد من Claude.")
+    } catch (error) {
+      setAnswer(
+        error instanceof Error
+          ? `تعذر الاتصال بـ Claude: ${error.message}`
+          : "تعذر الاتصال بمحرك الذكاء الاصطناعي."
+      )
+    }
   }
 
   async function createDigitalProduct() {
