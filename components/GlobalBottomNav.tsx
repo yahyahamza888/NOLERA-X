@@ -70,15 +70,38 @@ export default function GlobalBottomNav() {
   const visibleItems =
     typeof document === "undefined"
       ? items
-      : items.filter(({ section }) => {
-          if (!section) return true;
+      : items
+          .filter(({ section }) => {
+            if (!section) return true;
 
-          return (
-            document.documentElement.dataset[
-              `noleraSection${section}`
-            ] !== "hidden"
-          );
-        });
+            return (
+              document.documentElement.dataset[
+                `noleraSection${section}`
+              ] !== "hidden"
+            );
+          })
+          .sort((a, b) => {
+            const raw =
+              document.documentElement.dataset.noleraSectionOrder;
+
+            if (!raw) return 0;
+
+            try {
+              const order = JSON.parse(raw) as string[];
+
+              const aIndex = a.section
+                ? order.indexOf(a.section)
+                : Number.MAX_SAFE_INTEGER;
+
+              const bIndex = b.section
+                ? order.indexOf(b.section)
+                : Number.MAX_SAFE_INTEGER;
+
+              return aIndex - bIndex;
+            } catch {
+              return 0;
+            }
+          });
 
   return (
     <nav

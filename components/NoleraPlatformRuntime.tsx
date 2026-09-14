@@ -51,6 +51,33 @@ export default function NoleraPlatformRuntime() {
       const sections: Sections = settings.sections ?? {};
       const navigation: Navigation = settings.navigation ?? {};
 
+      const defaultSectionOrder = [
+        "home",
+        "wallet",
+        "transfers",
+        "services",
+        "store",
+        "ads",
+        "paradise",
+        "directory",
+        "logistics",
+        "ai",
+        "markets",
+      ];
+
+      const savedSectionOrder = Array.isArray(settings.section_order)
+        ? settings.section_order.filter(
+            (key: unknown): key is string => typeof key === "string"
+          )
+        : [];
+
+      const sectionOrder = [
+        ...savedSectionOrder,
+        ...defaultSectionOrder.filter(
+          (key) => !savedSectionOrder.includes(key)
+        ),
+      ];
+
       const root = document.documentElement;
 
       const cssMap: Record<string, string> = {
@@ -88,6 +115,8 @@ export default function NoleraPlatformRuntime() {
         root.dataset[`noleraSection${key}`] =
           enabled === false ? "hidden" : "visible";
       });
+
+      root.dataset.noleraSectionOrder = JSON.stringify(sectionOrder);
 
       // Apply the selected theme to the real interface.
       if (theme.background) {
