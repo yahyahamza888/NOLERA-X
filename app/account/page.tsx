@@ -204,7 +204,7 @@ export default function AccountPage() {
                 NOLERA X
               </p>
               <h1 className="text-lg font-black">
-                {user.name || "حسابي"}
+                {accountRole === "super_admin" ? "Super Admin" : (user.name || "حسابي")}
               </h1>
             </div>
           </Link>
@@ -352,20 +352,38 @@ export default function AccountPage() {
 
             {(accountRole === "admin" ||
               accountRole === "super_admin") && (
-              <Link
-                href="/admin"
-                className="rounded-2xl border border-purple-200 bg-gradient-to-br from-purple-50 to-white p-3 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md sm:p-4"
-              >
-                <div className="mx-auto flex h-11 w-11 items-center justify-center rounded-2xl bg-purple-100 text-purple-700">
-                  <ShieldCheck size={20} />
-                </div>
+              <div className="col-span-3 rounded-[26px] border border-purple-200 bg-gradient-to-br from-purple-50 via-white to-white p-4 shadow-sm sm:col-span-4 lg:col-span-6">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                  <Link
+                    href="/admin"
+                    className="flex items-center gap-3 rounded-2xl bg-white p-3 transition hover:bg-purple-50"
+                  >
+                    <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-purple-100 text-purple-700">
+                      <ShieldCheck size={22} />
+                    </div>
 
-                <div className="mt-2 text-center text-[11px] font-bold leading-4 text-slate-700 sm:text-xs">
-                  {accountRole === "super_admin"
-                    ? "لوحة تحكم المالك"
-                    : "لوحة تحكم الإدارة"}
+                    <div>
+                      <p className="text-[10px] font-black text-purple-500">
+                        {accountRole === "super_admin" ? "SUPER ADMIN" : "ADMIN"}
+                      </p>
+                      <p className="text-sm font-black text-slate-900">
+                        {accountRole === "super_admin"
+                          ? "لوحة القيادة"
+                          : "لوحة تحكم الإدارة"}
+                      </p>
+                    </div>
+                  </Link>
+
+                  {accountRole === "super_admin" && (
+                    <Link
+                      href="/admin/employees"
+                      className="flex items-center justify-center gap-2 rounded-2xl bg-purple-700 px-4 py-3 text-xs font-black text-white transition hover:bg-purple-800"
+                    >
+                      👥 الموظفون والصلاحيات
+                    </Link>
+                  )}
                 </div>
-              </Link>
+              </div>
             )}
 
             {accountServices.map((item) => {

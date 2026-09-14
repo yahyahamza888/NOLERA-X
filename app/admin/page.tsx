@@ -94,9 +94,89 @@ export default function AdminPage() {
   const [kycRequests, setKycRequests] = useState<any[]>([])
   const [kycLoading, setKycLoading] = useState(false)
   const [ads, setAds] = useState<NoleraAd[]>([])
+  const [adminEditMode, setAdminEditMode] = useState(false)
+  const [adminMenuOpen, setAdminMenuOpen] = useState(false)
+  const [adminAccent, setAdminAccent] = useState("#512d68")
+  const [draggedAdminItem, setDraggedAdminItem] = useState<string | null>(null)
+
+  const defaultAdminSections = [
+    { id: "dashboard", label: "لوحة القيادة", icon: "🎛️", href: "/admin", description: "الموظفون والصلاحيات والبلاغات وضبط المنصة" },
+    { id: "ai", label: "إدارة منتجات الذكاء الاصطناعي", icon: "✨", href: "/create-product", description: "إدارة المنتجات الرقمية وصناعتها" },
+    { id: "logistics", label: "إدارة Logistics", icon: "🚚", href: "/logistics", description: "الخدمات والطلبات والشركات اللوجستية" },
+    { id: "paradise", label: "إدارة Paradise", icon: "🌴", href: "/paradise", description: "المجتمع والمحتوى والمنتجات" },
+    { id: "ads", label: "إدارة ADS", icon: "📣", href: "/ads", description: "الحملات والإعلانات والمراجعات" },
+    { id: "sales", label: "إدارة المبيعات والمتجر", icon: "🛍️", href: "/store", description: "المنتجات والمبيعات والمتجر" },
+    { id: "partnerships", label: "الشركات والشراكات", icon: "🤝", href: "/directory", description: "دليل الشركات والشراكات والخدمات" },
+    { id: "kyc", label: "التحقق والهوية", icon: "🪪", href: "/verification", description: "مراجعة طلبات التحقق والهوية" },
+    { id: "employees", label: "الموظفون والصلاحيات", icon: "👥", href: "/admin/employees", description: "إدارة الموظفين والأدوار والصلاحيات" },
+    { id: "orders", label: "الطلبات والبلاغات", icon: "📦", href: "/orders", description: "الطلبات والإشعارات والمتابعة" },
+    { id: "settings", label: "الإعدادات والخصوصية", icon: "⚙️", href: "/settings", description: "إعدادات المنصة والخصوصية والأمان" },
+  ]
+
+  const [adminSections, setAdminSections] = useState(defaultAdminSections)
 
   const isSuperAdmin = role === "super_admin"
   const isAdmin = role === "admin" || isSuperAdmin
+
+  useEffect(() => {
+    try {
+      const savedOrder = localStorage.getItem("nolera-admin-sections-v1")
+      const savedAccent = localStorage.getItem("nolera-admin-accent-v1")
+
+      if (savedOrder) {
+        const ids = JSON.parse(savedOrder) as string[]
+        const ordered = ids
+          .map((id) => defaultAdminSections.find((item) => item.id === id))
+          .filter(Boolean) as typeof defaultAdminSections
+
+        const missing = defaultAdminSections.filter((item) => !ids.includes(item.id))
+        setAdminSections([...ordered, ...missing])
+      }
+
+      if (savedAccent) {
+        setAdminAccent(savedAccent)
+      }
+    } catch {
+      setAdminSections(defaultAdminSections)
+    }
+  }, [])
+
+  function saveAdminOrder(next: typeof defaultAdminSections) {
+    setAdminSections(next)
+    localStorage.setItem(
+      "nolera-admin-sections-v1",
+      JSON.stringify(next.map((item) => item.id)),
+    )
+  }
+
+  function moveAdminItem(targetId: string) {
+    if (!draggedAdminItem || draggedAdminItem === targetId) return
+
+    const next = [...adminSections]
+    const fromIndex = next.findIndex((item) => item.id === draggedAdminItem)
+    const toIndex = next.findIndex((item) => item.id === targetId)
+
+    if (fromIndex < 0 || toIndex < 0) return
+
+    const [moved] = next.splice(fromIndex, 1)
+    next.splice(toIndex, 0, moved)
+
+    saveAdminOrder(next)
+    setDraggedAdminItem(null)
+  }
+
+  function resetAdminSections() {
+    setAdminSections(defaultAdminSections)
+    localStorage.setItem(
+      "nolera-admin-sections-v1",
+      JSON.stringify(defaultAdminSections.map((item) => item.id)),
+    )
+  }
+
+  function changeAdminAccent(value: string) {
+    setAdminAccent(value)
+    localStorage.setItem("nolera-admin-accent-v1", value)
+  }
 
   async function loadCommands() {
     const { data, error } = await supabase
@@ -705,6 +785,136 @@ export default function AdminPage() {
             </div>
           </div>
         </header>
+
+        {isSuperAdmin && (
+          <section
+            className="mt-5 rounded-[30px] border border-purple-100 bg-white p-5 shadow-sm sm:p-7"
+            style={{ borderTopColor: adminAccent, borderTopWidth: 4 }}
+          >
+            <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-xs font-black text-purple-500">SUPER ADMIN CONTROL</p>
+                <h2 className="mt-1 text-2xl font-black text-slate-900">
+                  لوحة القيادة
+                </h2>
+                <p className="mt-1 text-sm font-bold text-slate-500">
+                  إدارة المنصة والموظفين والصلاحيات والأقسام من حساب المالك.
+                </p>
+              </div>
+
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setAdminMenuOpen((v) => !v)}
+                  className="flex items-center gap-2 rounded-2xl border border-purple-100 bg-purple-50 px-4 py-3 text-sm font-black text-purple-700"
+                >
+                  ⚙️ أدوات اللوحة
+                </button>
+
+                {adminMenuOpen && (
+                  <div className="absolute right-0 z-30 mt-2 w-64 rounded-2xl border border-purple-100 bg-white p-3 shadow-2xl">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setAdminEditMode((v) => !v)
+                        setAdminMenuOpen(false)
+                      }}
+                      className="w-full rounded-xl px-3 py-3 text-right text-sm font-black hover:bg-purple-50"
+                    >
+                      ✏️ {adminEditMode ? "إنهاء ترتيب الأقسام" : "تعديل ترتيب الأقسام"}
+                    </button>
+
+                    <label className="mt-1 flex cursor-pointer items-center justify-between rounded-xl px-3 py-3 text-sm font-black hover:bg-purple-50">
+                      <span>🎨 لون اللوحة</span>
+                      <input
+                        type="color"
+                        value={adminAccent}
+                        onChange={(e) => changeAdminAccent(e.target.value)}
+                        className="h-8 w-12 cursor-pointer rounded-lg border-0 bg-transparent p-0"
+                      />
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={resetAdminSections}
+                      className="w-full rounded-xl px-3 py-3 text-right text-sm font-black text-red-600 hover:bg-red-50"
+                    >
+                      ↩️ إعادة الترتيب الافتراضي
+                    </button>
+
+                    <Link
+                      href="/privacy"
+                      onClick={() => setAdminMenuOpen(false)}
+                      className="block rounded-xl px-3 py-3 text-right text-sm font-black hover:bg-purple-50"
+                    >
+                      🔒 الخصوصية والسياسات
+                    </Link>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mb-5 rounded-2xl bg-purple-50 px-4 py-3">
+              <div className="flex items-center gap-3">
+                <div
+                  className="flex h-11 w-11 items-center justify-center rounded-2xl text-xl text-white"
+                  style={{ backgroundColor: adminAccent }}
+                >
+                  🛡️
+                </div>
+                <div>
+                  <p className="font-black text-slate-900">Super Admin</p>
+                  <p className="text-xs font-bold text-slate-500">
+                    المالك الوحيد للمنصة · ADMIN CONTROL
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+              {adminSections.map((item) => (
+                <div
+                  key={item.id}
+                  draggable={adminEditMode}
+                  onDragStart={() => setDraggedAdminItem(item.id)}
+                  onDragOver={(e) => {
+                    if (adminEditMode) e.preventDefault()
+                  }}
+                  onDrop={(e) => {
+                    e.preventDefault()
+                    if (adminEditMode) moveAdminItem(item.id)
+                  }}
+                  className="relative"
+                >
+                  <Link
+                    href={item.href}
+                    className="block rounded-2xl border border-slate-100 bg-slate-50 p-4 text-center transition hover:-translate-y-0.5 hover:border-purple-200 hover:bg-purple-50"
+                  >
+                    <div className="text-3xl">{item.icon}</div>
+                    <p className="mt-2 text-sm font-black text-slate-900">
+                      {item.label}
+                    </p>
+                    <p className="mt-1 text-[10px] font-bold leading-4 text-slate-400">
+                      {item.description}
+                    </p>
+                  </Link>
+
+                  {adminEditMode && (
+                    <div className="pointer-events-none absolute left-2 top-2 rounded-lg bg-purple-700 px-2 py-1 text-[9px] font-black text-white">
+                      اسحب ↕
+                    </div>
+                  )}
+                </div>
+              ))}
+            </div>
+
+            {adminEditMode && (
+              <p className="mt-4 text-center text-xs font-bold text-purple-600">
+                اسحب أي قسم وضعه فوق القسم المطلوب، وسيتم حفظ الترتيب تلقائياً.
+              </p>
+            )}
+          </section>
+        )}
 
         {/* WEBSITE SHARE */}
         <section className="mt-5 rounded-[30px] bg-white p-5 shadow-sm sm:p-7">
