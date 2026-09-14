@@ -161,7 +161,6 @@ export default function LogisticsPage() {
 
   const [showPayment, setShowPayment] = useState(false);
   const [showRequests, setShowRequests] = useState(false);
-  const [showAddBusiness, setShowAddBusiness] = useState(false);
 
   const [requests, setRequests] = useState<RequestItem[]>([]);
 
@@ -388,13 +387,7 @@ export default function LogisticsPage() {
               My Requests
             </button>
 
-            <button
-              onClick={() => setShowAddBusiness(true)}
-              className="hidden items-center gap-2 rounded-xl bg-purple-600 px-4 py-2 text-sm font-bold text-white md:flex"
-            >
-              <Plus size={17} />
-              Add Business
-            </button>
+
           </div>
         </div>
       </header>
@@ -798,69 +791,7 @@ export default function LogisticsPage() {
         </Modal>
       )}
 
-      {/* ADD BUSINESS */}
-      {showAddBusiness && (
-        <Modal onClose={() => setShowAddBusiness(false)}>
-          <div className="flex items-center justify-between">
-            <div>
-              <h2 className="text-2xl font-black">
-                Add Business
-              </h2>
 
-              <p className="mt-1 text-sm text-slate-500">
-                Provider onboarding will connect to the NOLERA
-                verification system later.
-              </p>
-            </div>
-
-            <button onClick={() => setShowAddBusiness(false)}>
-              <X />
-            </button>
-          </div>
-
-          <form
-            className="mt-6 space-y-3"
-            onSubmit={(e) => {
-              e.preventDefault();
-              setShowAddBusiness(false);
-              alert("تم تسجيل طلب إضافة الشركة للمراجعة.");
-            }}
-          >
-            <input
-              required
-              placeholder="Company / Office name"
-              className="w-full rounded-xl border p-3 outline-none"
-            />
-
-            <input
-              required
-              placeholder="Country"
-              className="w-full rounded-xl border p-3 outline-none"
-            />
-
-            <input
-              required
-              placeholder="City"
-              className="w-full rounded-xl border p-3 outline-none"
-            />
-
-            <input
-              placeholder="Area"
-              className="w-full rounded-xl border p-3 outline-none"
-            />
-
-            <input
-              placeholder="Website"
-              className="w-full rounded-xl border p-3 outline-none"
-            />
-
-            <button className="flex w-full items-center justify-center gap-2 rounded-xl bg-purple-600 p-3 font-black text-white">
-              <Send size={17} />
-              Submit for Verification
-            </button>
-          </form>
-        </Modal>
-      )}
     </main>
   );
 }
