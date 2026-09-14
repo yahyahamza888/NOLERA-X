@@ -7,6 +7,7 @@ export type NoleraUser = {
   name: string
   email: string
   phone: string
+  role?: string
   createdAt: string
 }
 
@@ -24,6 +25,7 @@ function mapUser(user: any, profile?: any): NoleraUser | null {
       "مستخدم NOLERA X",
     email: user.email || "",
     phone: profile?.phone || user.user_metadata?.phone || "",
+    role: profile?.role || user.user_metadata?.role || undefined,
     createdAt: profile?.created_at || user.created_at || new Date().toISOString(),
   }
 }

@@ -168,7 +168,7 @@ export default function HomePage() {
               aria-label="الحساب"
             >
               <span className="text-sm font-black">
-                {(user?.name || "N").slice(0, 1).toUpperCase()}
+                {user?.role === "super_admin" ? "SA" : "U"}
               </span>
             </button>
 
@@ -181,13 +181,15 @@ export default function HomePage() {
                   X
                 </span>
               </div>
-              <div className="mt-0.5 flex items-center gap-1.5">
-                <span className="text-[10px] font-black tracking-[0.25em] text-emerald-600">
-                  NR
-                </span>
-                <span className="text-[10px] font-bold text-slate-400">
-                  {ar ? "منصة NOLERA العالمية" : "NOLERA Global Platform"}
-                </span>
+              <div className="mt-1">
+                <p className="text-sm font-black text-slate-900">
+                  {user?.role === "super_admin"
+                    ? (ar ? "مرحباً بك، Super Admin" : "Welcome, Super Admin")
+                    : (ar ? "مرحباً بك" : "Welcome")}
+                </p>
+                <p className="mt-0.5 text-[11px] font-bold text-slate-400">
+                  {ar ? "في منصتك التجارية العالمية" : "In your global commerce platform"}
+                </p>
               </div>
             </div>
 
