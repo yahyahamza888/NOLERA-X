@@ -1,28 +1,43 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { useEffect } from "react"
 import { getNoleraLanguage, setNoleraLanguage } from "../lib/nolera-language"
-import NoleraBrand from "../components/NoleraBrand"
-import CurrencySelector from "../components/CurrencySelector"
+import { useNoleraAuth } from "../lib/use-nolera-auth"
 
 export default function HomePage() {
   const router = useRouter()
+  const { user, loading } = useNoleraAuth()
   const [language, setLanguage] = useState<"en" | "ar">("en")
 
   useEffect(() => {
     setLanguage(getNoleraLanguage())
   }, [])
 
+  useEffect(() => {
+    if (!loading && user) {
+      router.replace("/account")
+    }
+  }, [loading, user, router])
+
   const ar = language === "ar"
+
+  if (loading || user) {
+    return (
+      <main
+        dir={ar ? "rtl" : "ltr"}
+        className="flex min-h-screen items-center justify-center bg-[#12091d] text-white"
+      >
+        <div className="h-10 w-10 animate-spin rounded-full border-4 border-white/10 border-t-white/60" />
+      </main>
+    )
+  }
 
   return (
     <main
       dir={ar ? "rtl" : "ltr"}
       className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#12091d] px-5 text-white"
     >
-      {/* Large background X */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none text-[70vw] font-black leading-none text-yellow-400/[0.10]"
@@ -41,8 +56,6 @@ export default function HomePage() {
       />
 
       <div className="relative z-10 w-full max-w-md text-center">
-
-        {/* Language */}
         <div className="absolute -top-24 left-0 flex rounded-full border border-white/10 bg-white/5 p-1 text-xs font-black backdrop-blur-xl">
           <button
             onClick={() => {
@@ -69,7 +82,6 @@ export default function HomePage() {
           </button>
         </div>
 
-        {/* Brand */}
         <div className="mb-8">
           <div className="relative mx-auto flex h-44 w-44 items-center justify-center">
             <div className="absolute text-[10rem] font-black leading-none text-yellow-300/20">
@@ -92,7 +104,6 @@ export default function HomePage() {
           </p>
         </div>
 
-        {/* Actions */}
         <div className="space-y-3">
           <button
             onClick={() => router.push("/login")}
@@ -117,9 +128,7 @@ export default function HomePage() {
         </div>
 
         <p className="mt-8 text-xs text-white/35">
-          {ar
-            ? "NOLERA X • USD"
-            : "NOLERA X • USD"}
+          {ar ? "NOLERA X • USD" : "NOLERA X • USD"}
         </p>
       </div>
     </main>
