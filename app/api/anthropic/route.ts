@@ -36,8 +36,18 @@ export async function POST(req: Request) {
   } catch (error) {
     console.error("Anthropic API error:", error);
 
+    const status =
+      typeof error === "object" && error && "status" in error
+        ? Number((error as { status?: number }).status) || 500
+        : 500;
+
+    const message =
+      error instanceof Error
+        ? error.message
+        : "Anthropic API request failed";
+
     return NextResponse.json(
-      { error: "Anthropic API request failed" },
+      { error: message, status },
       { status: 500 }
     );
   }
