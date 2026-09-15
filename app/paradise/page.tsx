@@ -1,4 +1,6 @@
-"use client";
+"use client"
+
+import { useNoleraLanguage } from "@/components/NoleraLanguageProvider";
 
 import { useEffect, useMemo, useState } from "react";
 import { getCurrentUser } from "@/lib/nolera-auth";
@@ -62,10 +64,13 @@ const storeProducts = [
 ];
 
 export default function ParadisePage() {
+  const { language } = useNoleraLanguage()
+  const ar = language === "ar"
+
   const [posts, setPosts] = useState<ParadisePost[]>([]);
   const [stories, setStories] = useState<ParadiseStory[]>([]);
   const [composer, setComposer] = useState("");
-  const [activeTab, setActiveTab] = useState("Home");
+  const [activeTab, setActiveTab] = useState("home");
   const [following, setFollowing] = useState<string[]>([]);
   const [currentUserId, setCurrentUserId] = useState(EMPTY_USER_ID);
   const [currentUserName, setCurrentUserName] = useState("NOLERA User");
@@ -163,7 +168,7 @@ export default function ParadisePage() {
   }
 
   const visiblePosts = useMemo(() => {
-    if (activeTab === "Following") {
+    if (activeTab === "following") {
       return posts.filter(
         (post) =>
           post.authorId === currentUserId ||
@@ -203,38 +208,38 @@ export default function ParadisePage() {
         <aside className="hidden lg:block">
           <div className="sticky top-24 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm">
             <NavButton
-              active={activeTab === "Home"}
-              label="Home"
+              active={activeTab === "home"}
+              label={ar ? "الرئيسية" : "Home"}
               icon={<Sparkles size={18} />}
-              onClick={() => setActiveTab("Home")}
+              onClick={() => setActiveTab("home")}
             />
 
             <NavButton
-              active={activeTab === "Following"}
-              label="Following"
+              active={activeTab === "following"}
+              label={ar ? "المتابَعون" : "Following"}
               icon={<Users size={18} />}
-              onClick={() => setActiveTab("Following")}
+              onClick={() => setActiveTab(ar ? "المتابَعون" : "Following")}
             />
 
             <NavButton
-              active={activeTab === "Messages"}
-              label="Messages"
+              active={activeTab === "messages"}
+              label={ar ? "الرسائل" : "Messages"}
               icon={<MessageCircle size={18} />}
-              onClick={() => setActiveTab("Messages")}
+              onClick={() => setActiveTab(ar ? "الرسائل" : "Messages")}
             />
 
             <NavButton
-              active={activeTab === "Market"}
-              label="Market"
+              active={activeTab === "market"}
+              label={ar ? "السوق" : "Market"}
               icon={<Store size={18} />}
-              onClick={() => setActiveTab("Market")}
+              onClick={() => setActiveTab(ar ? "السوق" : "Market")}
             />
 
             <NavButton
-              active={activeTab === "Profile"}
-              label="Profile"
+              active={activeTab === "profile"}
+              label={ar ? "الملف الشخصي" : "Profile"}
               icon={<Users size={18} />}
-              onClick={() => setActiveTab("Profile")}
+              onClick={() => setActiveTab(ar ? "الملف الشخصي" : "Profile")}
             />
 
             <Link
@@ -248,7 +253,7 @@ export default function ParadisePage() {
         </aside>
 
         <section className="min-w-0">
-          {activeTab === "Market" ? (
+          {activeTab === "market" ? (
             <MarketSection />
           ) : (
             <>
@@ -297,7 +302,7 @@ export default function ParadisePage() {
                   <textarea
                     value={composer}
                     onChange={(e) => setComposer(e.target.value)}
-                    placeholder="What's happening in Paradise?"
+                    placeholder={ar ? "ماذا يحدث في PARADISE؟" : "What's happening in Paradise?"}
                     className="min-h-[90px] flex-1 resize-none rounded-2xl bg-slate-50 p-3 outline-none focus:ring-2 focus:ring-purple-200"
                   />
                 </div>
@@ -453,7 +458,7 @@ export default function ParadisePage() {
               <div className="space-y-4">
                 <DiscoverItem name="NOLERA Community" />
                 <DiscoverItem name="Digital Creators" />
-                <DiscoverItem name="Marketplace" />
+                <DiscoverItem name={ar ? "السوق" : "Marketplace"} />
               </div>
             </div>
           </div>
@@ -532,6 +537,8 @@ function PostCard({
   onCommentAdded: () => void;
   isFollowing: boolean;
 }) {
+  const { language } = useNoleraLanguage()
+  const ar = language === "ar"
   const liked = post.liked;
   const [showComments, setShowComments] = useState(false);
   const [comments, setComments] = useState<ParadiseComment[]>([]);
@@ -547,6 +554,9 @@ function PostCard({
   }
 
   async function submitComment() {
+
+  const { language } = useNoleraLanguage()
+  const ar = language === "ar"
     const text = commentText.trim();
     if (!text) return;
 
@@ -579,7 +589,7 @@ function PostCard({
                   onClick={onFollow}
                   className="text-xs font-semibold text-purple-600"
                 >
-                  {isFollowing ? "Following" : "Follow"}
+                  {isFollowing ? ar ? "المتابَعون" : "Following" : ar ? "متابعة" : "Follow"}
                 </button>
               )}
             </div>
@@ -656,7 +666,7 @@ function PostCard({
               value={commentText}
               onChange={(e) => setCommentText(e.target.value)}
               onKeyDown={(e) => e.key === "Enter" && submitComment()}
-              placeholder="اكتب تعليقًا..."
+              placeholder={ar ? "اكتب تعليقًا..." : "Write a comment..."}
               className="flex-1 rounded-xl bg-slate-50 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-purple-200"
             />
             <button

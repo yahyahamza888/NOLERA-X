@@ -17,7 +17,7 @@ import {
   Store,
 } from "lucide-react"
 
-import { getNoleraLanguage, setNoleraLanguage } from "../lib/nolera-language"
+import { useNoleraLanguage } from "@/components/NoleraLanguageProvider"
 import { useNoleraAuth } from "../lib/use-nolera-auth"
 import { getWallets } from "../lib/nolera-finance"
 import { getStoreProducts, type StoreProduct } from "../lib/nolera-store"
@@ -25,8 +25,8 @@ import { getStoreProducts, type StoreProduct } from "../lib/nolera-store"
 export default function HomePage() {
   const router = useRouter()
   const { user, loading } = useNoleraAuth()
+  const { language, setLanguage } = useNoleraLanguage()
 
-  const [language, setLanguage] = useState<"en" | "ar">("en")
   const [search, setSearch] = useState("")
   const [menuOpen, setMenuOpen] = useState(false)
   const [products, setProducts] = useState<StoreProduct[]>([])
@@ -34,10 +34,6 @@ export default function HomePage() {
   const [currency, setCurrency] = useState("USD")
   const [loadingData, setLoadingData] = useState(true)
   const [error, setError] = useState("")
-
-  useEffect(() => {
-    setLanguage(getNoleraLanguage())
-  }, [])
 
   useEffect(() => {
     if (!user) {
@@ -208,9 +204,7 @@ export default function HomePage() {
             <button
               type="button"
               onClick={() => {
-                const next = language === "ar" ? "en" : "ar"
-                setLanguage(next)
-                setNoleraLanguage(next)
+                setLanguage(language === "ar" ? "en" : "ar")
               }}
               className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-black"
             >

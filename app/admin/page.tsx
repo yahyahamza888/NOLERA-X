@@ -1,5 +1,7 @@
 "use client"
 
+import { useNoleraLanguage } from "@/components/NoleraLanguageProvider"
+
 import Link from "next/link"
 import { useEffect, useState } from "react"
 import { getSupabaseClient } from "../../lib/nolera-auth"
@@ -72,6 +74,9 @@ function statusName(status: string) {
 }
 
 export default function AdminPage() {
+  const { language } = useNoleraLanguage()
+  const ar = language === "ar"
+
   const [user, setUser] = useState<any>(null)
   const [role, setRole] = useState("user")
   const [from, setFrom] = useState("USD")
@@ -693,7 +698,7 @@ export default function AdminPage() {
   if (!user) {
     return (
       <main
-        dir="rtl"
+        dir={ar ? "rtl" : "ltr"}
         className="min-h-screen bg-slate-950 p-8 text-white"
       >
         <div className="mx-auto max-w-lg rounded-3xl bg-white/10 p-8 text-center">
@@ -715,7 +720,7 @@ export default function AdminPage() {
   if (!isAdmin) {
     return (
       <main
-        dir="rtl"
+        dir={ar ? "rtl" : "ltr"}
         className="min-h-screen bg-slate-950 p-8 text-white"
       >
         <div className="mx-auto max-w-lg rounded-3xl bg-white/10 p-8 text-center">
@@ -742,7 +747,7 @@ export default function AdminPage() {
 
   return (
     <main
-      dir="rtl"
+      dir={ar ? "rtl" : "ltr"}
       className="min-h-screen bg-[#f5f7fb] p-4 sm:p-6"
     >
       <div className="mx-auto max-w-6xl">

@@ -1,5 +1,7 @@
 "use client"
 
+import { useNoleraLanguage } from "@/components/NoleraLanguageProvider"
+
 import NoleraBrand from "../../components/NoleraBrand"
 
 import Link from "next/link"
@@ -15,27 +17,30 @@ import {
 } from "lucide-react"
 
 export default function GuestPage() {
+  const { language } = useNoleraLanguage()
+  const ar = language === "ar"
+
   const services = [
     {
-      title: "Wallet",
+      title: ar ? "المحفظة" : "Wallet",
       text: "Explore the NOLERA wallet",
       icon: Wallet,
       href: "/wallet",
     },
     {
-      title: "Transfers",
+      title: ar ? "التحويلات" : "Transfers",
       text: "Send and receive money",
       icon: Send,
       href: "/transfers",
     },
     {
-      title: "Cards",
+      title: ar ? "البطاقات" : "Cards",
       text: "Explore NOLERA cards",
       icon: CreditCard,
       href: "/cards",
     },
     {
-      title: "Store",
+      title: ar ? "المتجر" : "Store",
       text: "Explore digital products",
       icon: Store,
       href: "/store",
@@ -49,7 +54,7 @@ export default function GuestPage() {
       </div>
 
       <main
-      dir="ltr"
+      dir={ar ? "rtl" : "ltr"}
       className="min-h-screen bg-[#12091d] px-4 py-6 text-white"
     >
       <div className="mx-auto max-w-5xl">

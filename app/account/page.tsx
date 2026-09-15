@@ -1,5 +1,7 @@
 "use client"
 
+import { useNoleraLanguage } from "@/components/NoleraLanguageProvider"
+
 import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
@@ -31,6 +33,9 @@ import { useNoleraAuth } from "../../lib/use-nolera-auth"
 import { getWallets } from "../../lib/nolera-finance"
 
 export default function AccountPage() {
+  const { language } = useNoleraLanguage()
+  const ar = language === "ar"
+
   const router = useRouter()
   const { user, loading: authLoading } = useNoleraAuth()
 
@@ -78,7 +83,7 @@ export default function AccountPage() {
   if (authLoading) {
     return (
       <main
-        dir="rtl"
+        dir={ar ? "rtl" : "ltr"}
         className="flex min-h-screen items-center justify-center bg-[#fbf8ff] p-6 text-[#24152f]"
       >
         <div className="rounded-3xl border border-purple-100 bg-white px-8 py-6 text-center shadow-lg">
@@ -92,7 +97,7 @@ export default function AccountPage() {
   if (!user) {
     return (
       <main
-        dir="rtl"
+        dir={ar ? "rtl" : "ltr"}
         className="min-h-screen bg-[#fbf8ff] p-5 text-[#24152f]"
       >
         <div className="mx-auto mt-20 max-w-md rounded-[28px] border border-purple-100 bg-white p-8 text-center shadow-xl shadow-purple-100">
@@ -116,35 +121,35 @@ export default function AccountPage() {
   }
 
   const quickActions = [
-    ["تحويل", "/transfers", ArrowLeftRight],
-    ["استلام", "/transfers", ArrowDownToLine],
-    ["إضافة", "/add-money", Plus],
-    ["سحب", "/withdraw", ArrowUpFromLine],
+    [ar ? "تحويل" : "Transfer", "/transfers", ArrowLeftRight],
+    [ar ? "استلام" : "Receive", "/transfers", ArrowDownToLine],
+    [ar ? "إضافة" : "Add Money", "/add-money", Plus],
+    [ar ? "سحب" : "Withdraw", "/withdraw", ArrowUpFromLine],
   ]
 
   const activity = [
     {
       href: "/transactions",
-      title: "المعاملات",
-      description: "حركات أموالك",
+      title: ar ? "المعاملات" : "Transactions",
+      description: ar ? "حركات أموالك" : "Your money activity",
       icon: ReceiptText,
     },
     {
       href: "/orders",
-      title: "طلباتي",
-      description: "المشتريات والطلبات",
+      title: ar ? "طلباتي" : "My Orders",
+      description: ar ? "المشتريات والطلبات" : "Purchases and orders",
       icon: ShoppingBag,
     },
     {
       href: "/create-product",
-      title: "منتجاتي",
-      description: "المنتجات التي أنشأتها",
+      title: ar ? "منتجاتي" : "My Products",
+      description: ar ? "المنتجات التي أنشأتها" : "Products you created",
       icon: Package,
     },
     {
       href: "/seller",
-      title: "مبيعاتي",
-      description: "المبيعات والأرباح",
+      title: ar ? "مبيعاتي" : "My Sales",
+      description: ar ? "المبيعات والأرباح" : "Sales and earnings",
       icon: BarChart3,
     },
   ]
@@ -152,39 +157,39 @@ export default function AccountPage() {
   const accountServices = [
     {
       href: "/cards",
-      title: "البطاقات",
+      title: ar ? "البطاقات" : "Cards",
       icon: CreditCard,
     },
     {
       href: "/notifications",
-      title: "الإشعارات",
+      title: ar ? "الإشعارات" : "Notifications",
       icon: Bell,
     },
     {
       href: "/verification",
-      title: "التحقق والهوية",
+      title: ar ? "التحقق والهوية" : "Verification & Identity",
       icon: ShieldCheck,
     },
     {
       href: "/security",
-      title: "أمان الحساب",
+      title: ar ? "أمان الحساب" : "Account Security",
       icon: LockKeyhole,
     },
     {
       href: "/profile",
-      title: "الملف الشخصي",
+      title: ar ? "الملف الشخصي" : "Profile",
       icon: UserRound,
     },
     {
       href: "/settings",
-      title: "الإعدادات",
+      title: ar ? "الإعدادات" : "Settings",
       icon: Settings,
     },
   ]
 
   return (
     <main
-      dir="rtl"
+      dir={ar ? "rtl" : "ltr"}
       className="min-h-screen bg-[#fbf8ff] pb-10 text-[#24152f]"
     >
       <div className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-6 sm:py-6">
@@ -204,7 +209,7 @@ export default function AccountPage() {
                 NOLERA X
               </p>
               <h1 className="text-lg font-black">
-                {accountRole === "super_admin" ? "Super Admin" : (user.name || "حسابي")}
+                {accountRole === "super_admin" ? ar ? "المشرف الأعلى" : "Super Admin" : (user.name || (ar ? "حسابي" : "My Account"))}
               </h1>
             </div>
           </Link>
@@ -240,7 +245,7 @@ export default function AccountPage() {
                   <button
                     onClick={() => setShowBalance(!showBalance)}
                     className="rounded-xl bg-white/10 p-2 transition hover:bg-white/20"
-                    aria-label="إظهار أو إخفاء الرصيد"
+                    aria-label={ar ? "إظهار أو إخفاء الرصيد" : "Show or hide balance"}
                   >
                     {showBalance ? (
                       <EyeOff size={18} />
@@ -368,8 +373,8 @@ export default function AccountPage() {
                       </p>
                       <p className="text-sm font-black text-slate-900">
                         {accountRole === "super_admin"
-                          ? "لوحة القيادة"
-                          : "لوحة تحكم الإدارة"}
+                          ? ar ? "لوحة القيادة" : "Dashboard"
+                          : ar ? "لوحة تحكم الإدارة" : "Admin Dashboard"}
                       </p>
                     </div>
                   </Link>

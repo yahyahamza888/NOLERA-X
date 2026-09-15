@@ -1,4 +1,6 @@
-"use client";
+"use client"
+
+import { useNoleraLanguage } from "@/components/NoleraLanguageProvider";
 
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -29,19 +31,19 @@ import {
 
 const supabase = createSupabaseBrowserClient();
 
-const MODULES = [
+const getModules = (ar: boolean) => [
   { id: "ai", label: "NOLERA AI" },
-  { id: "store", label: "Store" },
+  { id: "store", label: ar ? "المتجر" : "Store" },
   { id: "ads", label: "NOLERA ADS" },
   { id: "paradise", label: "NOLERA PARADISE" },
-  { id: "logistics", label: "Logistics" },
-  { id: "directory", label: "Company Directory" },
-  { id: "content", label: "Content / Creation" },
-  { id: "create-product", label: "Digital Products" },
-  { id: "business", label: "Business Intelligence" },
-  { id: "automation", label: "Automation" },
-  { id: "research", label: "Research" },
-  { id: "security", label: "Security" },
+  { id: "logistics", label: ar ? "الخدمات اللوجستية" : "Logistics" },
+  { id: "directory", label: ar ? "دليل الشركات" : "Company Directory" },
+  { id: "content", label: ar ? "المحتوى / الإنشاء" : "Content / Creation" },
+  { id: "create-product", label: ar ? "المنتجات الرقمية" : "Digital Products" },
+  { id: "business", label: ar ? "ذكاء الأعمال" : "Business Intelligence" },
+  { id: "automation", label: ar ? "الأتمتة" : "Automation" },
+  { id: "research", label: ar ? "البحث" : "Research" },
+  { id: "security", label: ar ? "الأمان" : "Security" },
 ];
 
 const CATEGORIES = [
@@ -77,6 +79,10 @@ function emptyAgent(): Partial<NoleraAIAgent> {
 }
 
 export default function AIWorkforcePage() {
+  const { language } = useNoleraLanguage()
+  const ar = language === "ar"
+  const MODULES = getModules(ar)
+
   const [agents, setAgents] = useState<NoleraAIAgent[]>([]);
   const [selected, setSelected] = useState<NoleraAIAgent | null>(null);
   const [draft, setDraft] = useState<Partial<NoleraAIAgent>>(emptyAgent());

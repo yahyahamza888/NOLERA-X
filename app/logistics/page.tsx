@@ -1,4 +1,6 @@
-"use client";
+"use client"
+
+import { useNoleraLanguage } from "@/components/NoleraLanguageProvider";
 
 import { useMemo, useState } from "react";
 import {
@@ -124,31 +126,36 @@ const providers: Provider[] = [
   },
 ];
 
-const categories = [
+const getCategories = (ar: boolean) => [
   ["all", "All Services", <Globe2 size={18} />],
-  ["real-estate", "Real Estate", <Building2 size={18} />],
+  ["real-estate", ar ? "العقارات" : "Real Estate", <Building2 size={18} />],
   ["property", "Properties", <Home size={18} />],
-  ["logistics", "Logistics", <Truck size={18} />],
-  ["moving", "Moving", <Package size={18} />],
-  ["construction", "Construction", <Wrench size={18} />],
-  ["maintenance", "Maintenance", <Wrench size={18} />],
-  ["cleaning", "Cleaning", <Sparkles size={18} />],
-  ["security", "Security", <ShieldCheck size={18} />],
-  ["business", "Business", <BriefcaseBusiness size={18} />],
+  ["logistics", ar ? "الخدمات اللوجستية" : "Logistics", <Truck size={18} />],
+  ["moving", ar ? "النقل والترحيل" : "Moving", <Package size={18} />],
+  ["construction", ar ? "الإنشاءات" : "Construction", <Wrench size={18} />],
+  ["maintenance", ar ? "الصيانة" : "Maintenance", <Wrench size={18} />],
+  ["cleaning", ar ? "التنظيف" : "Cleaning", <Sparkles size={18} />],
+  ["security", ar ? "الأمن" : "Security", <ShieldCheck size={18} />],
+  ["business", ar ? "الأعمال" : "Business", <BriefcaseBusiness size={18} />],
 ] as const;
 
-const services = [
-  { name: "Consultation", price: 5000, icon: <MessageCircle /> },
-  { name: "Appointment", price: 3000, icon: <CalendarDays /> },
-  { name: "Property Search", price: 7500, icon: <Home /> },
-  { name: "Office Search", price: 5000, icon: <Building2 /> },
+const getServices = (ar: boolean) => [
+  { name: ar ? "استشارة" : "Consultation", price: 5000, icon: <MessageCircle /> },
+  { name: ar ? "موعد" : "Appointment", price: 3000, icon: <CalendarDays /> },
+  { name: ar ? "البحث عن عقار" : "Property Search", price: 7500, icon: <Home /> },
+  { name: ar ? "البحث عن مكتب" : "Office Search", price: 5000, icon: <Building2 /> },
   { name: "Moving Service", price: 25000, icon: <Package /> },
-  { name: "Logistics Request", price: 15000, icon: <Truck /> },
-  { name: "Business Consultation", price: 10000, icon: <BriefcaseBusiness /> },
+  { name: ar ? "طلب لوجستي" : "Logistics Request", price: 15000, icon: <Truck /> },
+  { name: ar ? "استشارة أعمال" : "Business Consultation", price: 10000, icon: <BriefcaseBusiness /> },
   { name: "Maintenance Request", price: 12000, icon: <Wrench /> },
 ];
 
 export default function LogisticsPage() {
+  const { language } = useNoleraLanguage()
+  const ar = language === "ar"
+  const categories = getCategories(ar)
+  const services = getServices(ar)
+
   const [category, setCategory] = useState("all");
   const [search, setSearch] = useState("");
   const [country, setCountry] = useState("");
@@ -421,7 +428,7 @@ export default function LogisticsPage() {
                 <input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Search company or service..."
+                  placeholder={ar ? "ابحث عن شركة أو خدمة..." : "Search company or service..."}
                   className="w-full rounded-xl border bg-slate-50 py-3 pl-10 pr-3 outline-none"
                 />
               </div>
@@ -573,7 +580,7 @@ export default function LogisticsPage() {
                   <Star size={16} />
                   {provider.rating
                     ? `${provider.rating} (${provider.reviews})`
-                    : "No reviews yet"}
+                    : ar ? "لا توجد تقييمات بعد" : "No reviews yet"}
                 </div>
               </div>
 
@@ -588,7 +595,7 @@ export default function LogisticsPage() {
                 <button
                   onClick={() => {
                     setSelected(provider);
-                    openPaidService("Consultation", 5000);
+                    openPaidService(ar ? "استشارة" : "Consultation", 5000);
                   }}
                   className="rounded-xl bg-purple-600 py-3 text-sm font-bold text-white"
                 >
@@ -717,14 +724,14 @@ export default function LogisticsPage() {
 
           <div className="mt-6 grid grid-cols-2 gap-2">
             <button
-              onClick={() => openPaidService("Consultation", 5000)}
+              onClick={() => openPaidService(ar ? "استشارة" : "Consultation", 5000)}
               className="rounded-xl bg-purple-600 p-3 font-bold text-white"
             >
               Consultation
             </button>
 
             <button
-              onClick={() => openPaidService("Appointment", 3000)}
+              onClick={() => openPaidService(ar ? "موعد" : "Appointment", 3000)}
               className="rounded-xl border p-3 font-bold"
             >
               Appointment

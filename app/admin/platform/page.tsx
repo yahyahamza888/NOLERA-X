@@ -1,4 +1,6 @@
-"use client";
+"use client"
+
+import { useNoleraLanguage } from "@/components/NoleraLanguageProvider";
 
 import { useEffect, useState } from "react";
 import { getSupabaseClient } from "../../../lib/nolera-auth";
@@ -106,22 +108,26 @@ const colorLabels: Record<keyof Theme, string> = {
   bottomNav: "الشريط السفلي",
 };
 
-const sectionLabels: Record<string, string> = {
-  home: "الرئيسية",
+const getSectionLabels = (ar: boolean): Record<string, string> => ({
+  home: ar ? "الرئيسية" : "Home",
   wallet: "المحفظة",
   transfers: "التحويلات",
   services: "الخدمات",
   store: "المتجر",
   ads: "NOLERA ADS",
   paradise: "NOLERA PARADISE",
-  directory: "دليل الشركات",
-  logistics: "الخدمات اللوجستية",
+  directory: ar ? "دليل الشركات" : "Company Directory",
+  logistics: ar ? "الخدمات اللوجستية" : "Logistics",
   ai: "NOLERA AI",
   markets: "الأسواق",
     design: "NOLERA DESIGN",
-};
+})
 
 export default function PlatformBuilderPage() {
+  const { language } = useNoleraLanguage()
+  const ar = language === "ar"
+  const sectionLabels = getSectionLabels(ar)
+
   const supabase = getSupabaseClient();
 
   const [loading, setLoading] = useState(true);
@@ -310,7 +316,7 @@ export default function PlatformBuilderPage() {
     <main
       className="min-h-screen p-4 text-right sm:p-6"
       style={{ background: theme.background, color: theme.text }}
-      dir="rtl"
+      dir={ar ? "rtl" : "ltr"}
     >
       <div className="mx-auto max-w-6xl space-y-6">
         <header
