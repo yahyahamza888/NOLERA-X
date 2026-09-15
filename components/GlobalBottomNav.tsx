@@ -8,7 +8,7 @@ import {
   Wallet,
   ArrowLeftRight,
   LayoutGrid,
-  UserRound,
+  Palette,
 } from "lucide-react";
 
 const items = [
@@ -39,7 +39,7 @@ const items = [
   {
     label: "ديزاين",
     href: "/design",
-    icon: UserRound,
+    icon: Palette,
     section: "design",
   },
 ];

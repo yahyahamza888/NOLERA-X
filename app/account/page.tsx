@@ -195,31 +195,28 @@ export default function AccountPage() {
       <div className="mx-auto w-full max-w-6xl px-3 py-4 sm:px-6 sm:py-6">
 
         {/* Account Header */}
-        <header className="mb-5 flex items-center justify-between rounded-[26px] border border-purple-100 bg-white px-4 py-3 shadow-sm">
-          <Link
-            href="/"
-            className="flex items-center gap-2 rounded-2xl px-2 py-1"
-          >
+        <header className="mb-5 flex items-center rounded-[26px] border border-purple-100 bg-white px-4 py-3 shadow-sm">
+          <div className="flex items-center gap-2 rounded-2xl px-2 py-1">
             <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-purple-50 text-purple-700">
               <UserRound size={21} />
             </div>
-
             <div>
               <p className="text-[10px] font-bold text-[#00bcd4]">
                 NOLERA X
               </p>
               <h1 className="text-lg font-black">
-                {accountRole === "super_admin" ? ar ? "المشرف الأعلى" : "Super Admin" : (user.name || (ar ? "حسابي" : "My Account"))}
+                {accountRole === "super_admin"
+                  ? ar
+                    ? "المشرف الأعلى"
+                    : "Super Admin"
+                  : (user.name || (ar ? "المستخدم" : "User"))
+                      .trim()
+                      .split(/\s+/)
+                      .slice(0, 2)
+                      .join(" ")}
               </h1>
             </div>
-          </Link>
-
-          <Link
-            href="/"
-            className="rounded-xl bg-purple-50 px-4 py-2 text-sm font-black text-purple-700"
-          >
-            الرئيسية
-          </Link>
+          </div>
         </header>
 
         {/* Wallet / Balance */}
