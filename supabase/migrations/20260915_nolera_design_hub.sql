@@ -197,7 +197,6 @@ begin
     amount,
     currency,
     status,
-    description,
     created_at
   )
   values (
@@ -207,7 +206,6 @@ begin
     v_tool.price,
     'USD',
     'completed',
-    'NOLERA DESIGN: ' || v_tool.name,
     now()
   )
   returning id into v_transaction_id;

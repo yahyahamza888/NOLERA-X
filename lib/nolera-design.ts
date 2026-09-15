@@ -1,4 +1,4 @@
-import { supabase } from "@/lib/supabase-browser";
+import { createSupabaseBrowserClient } from "@/lib/supabase-browser";
 
 export type DesignTool = {
   id: string;
@@ -13,6 +13,7 @@ export type DesignTool = {
 };
 
 export async function getDesignTools(): Promise<DesignTool[]> {
+  const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase
     .from("nolera_design_tools")
     .select("*")
@@ -24,6 +25,7 @@ export async function getDesignTools(): Promise<DesignTool[]> {
 }
 
 export async function getMyDesignRentals() {
+  const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase.rpc(
     "nolera_get_my_design_rentals"
   );
@@ -36,6 +38,7 @@ export async function rentDesignTool(
   toolId: string,
   currency = "USD"
 ) {
+  const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase.rpc(
     "nolera_rent_design_tool",
     {
@@ -52,6 +55,7 @@ export async function applyDesignToProduct(
   productId: string,
   designConfig: Record<string, unknown>
 ) {
+  const supabase = createSupabaseBrowserClient();
   const { data, error } = await supabase.rpc(
     "nolera_apply_product_design",
     {
