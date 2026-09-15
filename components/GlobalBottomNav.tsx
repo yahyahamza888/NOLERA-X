@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useNoleraAuth } from "@/lib/use-nolera-auth";
 import {
@@ -47,6 +48,48 @@ export default function GlobalBottomNav() {
   const pathname = usePathname();
   const router = useRouter();
   const { isLoggedIn, loading } = useNoleraAuth();
+  const [scrollHidden, setScrollHidden] = useState(false);
+
+  useEffect(() => {
+    let lastScrollY = window.scrollY;
+    let ticking = false;
+
+    const updateNav = () => {
+      const currentScrollY = window.scrollY;
+      const difference = currentScrollY - lastScrollY;
+
+      if (Math.abs(difference) >= 8) {
+        if (currentScrollY <= 10) {
+          setScrollHidden(false);
+        } else if (difference > 0) {
+          // سحب الشاشة لأعلى: إخفاء الشريط
+          setScrollHidden(true);
+        } else {
+          // سحب الشاشة لأسفل: إظهار الشريط
+          setScrollHidden(false);
+        }
+
+        lastScrollY = currentScrollY;
+      }
+
+      ticking = false;
+    };
+
+    const handleScroll = () => {
+      if (!ticking) {
+        window.requestAnimationFrame(updateNav);
+        ticking = true;
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    });
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll);
+    };
+  }, []);
 
   if (
     pathname === "/login" ||
@@ -106,7 +149,9 @@ export default function GlobalBottomNav() {
   return (
     <nav
       aria-label="NOLERA X navigation"
-      className="fixed bottom-0 left-0 right-0 z-[9999] border-t border-purple-200/30 bg-white/95 px-2 py-2 shadow-[0_-5px_25px_rgba(0,0,0,0.10)] backdrop-blur-xl dark:bg-[#17101d]/95"
+      className={`fixed bottom-0 left-0 right-0 z-[9999] border-t border-purple-200/30 bg-white/95 px-2 py-2 shadow-[0_-5px_25px_rgba(0,0,0,0.10)] backdrop-blur-xl dark:bg-[#17101d]/95 transition-transform duration-300 ease-in-out ${
+        scrollHidden ? "translate-y-full" : "translate-y-0"
+      }`}
     >
       <div className="mx-auto flex w-full max-w-2xl items-center justify-around">
         {visibleItems.map(

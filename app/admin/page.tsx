@@ -96,7 +96,6 @@ export default function AdminPage() {
   const [ads, setAds] = useState<NoleraAd[]>([])
   const [adminEditMode, setAdminEditMode] = useState(false)
   const [adminMenuOpen, setAdminMenuOpen] = useState(false)
-  const [adminAccent, setAdminAccent] = useState("#512d68")
   const [draggedAdminItem, setDraggedAdminItem] = useState<string | null>(null)
 
   const defaultAdminSections = [
@@ -121,7 +120,6 @@ export default function AdminPage() {
   useEffect(() => {
     try {
       const savedOrder = localStorage.getItem("nolera-admin-sections-v1")
-      const savedAccent = localStorage.getItem("nolera-admin-accent-v1")
 
       if (savedOrder) {
         const ids = JSON.parse(savedOrder) as string[]
@@ -133,9 +131,6 @@ export default function AdminPage() {
         setAdminSections([...ordered, ...missing])
       }
 
-      if (savedAccent) {
-        setAdminAccent(savedAccent)
-      }
     } catch {
       setAdminSections(defaultAdminSections)
     }
@@ -173,10 +168,6 @@ export default function AdminPage() {
     )
   }
 
-  function changeAdminAccent(value: string) {
-    setAdminAccent(value)
-    localStorage.setItem("nolera-admin-accent-v1", value)
-  }
 
   async function loadCommands() {
     const { data, error } = await supabase
@@ -789,7 +780,7 @@ export default function AdminPage() {
         {isSuperAdmin && (
           <section
             className="mt-5 rounded-[30px] border border-purple-100 bg-white p-5 shadow-sm sm:p-7"
-            style={{ borderTopColor: adminAccent, borderTopWidth: 4 }}
+            style={{ borderTopWidth: 4, borderTopColor: "#512d68" }}
           >
             <div className="mb-5 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
               <div>
@@ -824,16 +815,6 @@ export default function AdminPage() {
                       ✏️ {adminEditMode ? "إنهاء ترتيب الأقسام" : "تعديل ترتيب الأقسام"}
                     </button>
 
-                    <label className="mt-1 flex cursor-pointer items-center justify-between rounded-xl px-3 py-3 text-sm font-black hover:bg-purple-50">
-                      <span>🎨 لون اللوحة</span>
-                      <input
-                        type="color"
-                        value={adminAccent}
-                        onChange={(e) => changeAdminAccent(e.target.value)}
-                        className="h-8 w-12 cursor-pointer rounded-lg border-0 bg-transparent p-0"
-                      />
-                    </label>
-
                     <button
                       type="button"
                       onClick={resetAdminSections}
@@ -858,7 +839,7 @@ export default function AdminPage() {
               <div className="flex items-center gap-3">
                 <div
                   className="flex h-11 w-11 items-center justify-center rounded-2xl text-xl text-white"
-                  style={{ backgroundColor: adminAccent }}
+                  style={{ backgroundColor: "#512d68" }}
                 >
                   🛡️
                 </div>
@@ -1394,60 +1375,6 @@ export default function AdminPage() {
               ))
             )}
           </div>
-        </section>
-
-        {/* EXCHANGE */}
-        <section className="mt-5 rounded-[28px] bg-white p-6 shadow-sm">
-          <h2 className="text-xl font-black">
-            أسعار Exchange 💱
-          </h2>
-
-          <p className="mt-2 text-sm text-slate-500">
-            السعر يحفظ في قاعدة البيانات ويستخدمه نظام Exchange.
-          </p>
-
-          <div className="mt-5 grid gap-3 sm:grid-cols-3">
-            <select
-              value={from}
-              onChange={(e) => setFrom(e.target.value)}
-              className="rounded-2xl bg-slate-100 p-4"
-            >
-              {["USD", "EUR", "GBP", "SAR", "AED"].map(
-                (item) => (
-                  <option key={item}>{item}</option>
-                ),
-              )}
-            </select>
-
-            <select
-              value={to}
-              onChange={(e) => setTo(e.target.value)}
-              className="rounded-2xl bg-slate-100 p-4"
-            >
-              {["USD", "EUR", "GBP", "SAR", "AED"].map(
-                (item) => (
-                  <option key={item}>{item}</option>
-                ),
-              )}
-            </select>
-
-            <input
-              type="number"
-              min="0"
-              step="any"
-              value={rate}
-              onChange={(e) => setRate(e.target.value)}
-              placeholder="السعر"
-              className="rounded-2xl bg-slate-100 p-4"
-            />
-          </div>
-
-          <button
-            onClick={saveRate}
-            className="mt-4 w-full rounded-2xl bg-slate-950 py-4 font-black text-white"
-          >
-            حفظ سعر الصرف
-          </button>
         </section>
 
         {/* ADMIN LINKS */}

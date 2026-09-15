@@ -32,9 +32,7 @@ export default function MarketsPage() {
                 <ArrowDownUp className="text-emerald-400"/>
               </div>
               <div className="mt-5 text-xs text-slate-500">{type}</div>
-              <Link href="/exchange" className="mt-4 block rounded-xl bg-white/10 p-3 text-center">
-                Exchange
-              </Link>
+
             </div>
           ))}
         </div>

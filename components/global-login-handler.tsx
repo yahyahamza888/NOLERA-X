@@ -1,46 +1,57 @@
-"use client";
+"use client"
 
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect } from "react"
+import { useRouter } from "next/navigation"
+import { getCurrentUser } from "@/lib/nolera-auth"
 
 export default function GlobalLoginHandler() {
-  const router = useRouter();
+  const router = useRouter()
 
   useEffect(() => {
-    const handleClick = (event: MouseEvent) => {
-      const target = event.target as HTMLElement | null;
-      if (!target) return;
+    let active = true
+
+    async function handleClick(event: MouseEvent) {
+      const target = event.target as HTMLElement | null
+      if (!target) return
 
       const clickable = target.closest(
         "a,button,[role='button'],[data-login]"
-      ) as HTMLElement | null;
+      ) as HTMLElement | null
 
-      if (!clickable) return;
+      if (!clickable) return
 
-      const text = (clickable.textContent || "").trim();
-
+      // زر تسجيل الدخول الحقيقي يذهب إلى صفحة الدخول.
+      // لا نعترض على بقية الأزرار لمجرد احتوائها على نص مشابه.
       const isLogin =
         clickable.hasAttribute("data-login") ||
-        text === "تسجيل الدخول" ||
-        text.includes("تسجيل الدخول") ||
-        text.includes("يجب تسجيل الدخول") ||
-        text.includes("سجل الدخول") ||
-        text.includes("سجّل الدخول");
+        clickable.getAttribute("href") === "/login"
 
-      if (!isLogin) return;
+      if (!isLogin) return
 
-      event.preventDefault();
-      event.stopPropagation();
+      // إذا كان المستخدم مسجلاً بالفعل، لا نعيده إلى صفحة الدخول.
+      const user = await getCurrentUser()
 
-      router.push("/login");
-    };
+      if (!active) return
 
-    document.addEventListener("click", handleClick, true);
+      if (user) {
+        event.preventDefault()
+        event.stopPropagation()
+        return
+      }
+
+      event.preventDefault()
+      event.stopPropagation()
+
+      router.push("/login")
+    }
+
+    document.addEventListener("click", handleClick, true)
 
     return () => {
-      document.removeEventListener("click", handleClick, true);
-    };
-  }, [router]);
+      active = false
+      document.removeEventListener("click", handleClick, true)
+    }
+  }, [router])
 
-  return null;
+  return null
 }

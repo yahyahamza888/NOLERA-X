@@ -161,8 +161,8 @@ export default function PlatformBuilderPage() {
 
     const role = String(profile?.role ?? "");
 
-    if (role !== "admin" && role !== "super_admin") {
-      setMessage("ليس لديك صلاحية الوصول إلى Platform Builder.");
+    if (role !== "super_admin") {
+      setMessage("Platform Builder وإعدادات المظهر متاحة لـ Super Admin فقط.");
       setLoading(false);
       return;
     }

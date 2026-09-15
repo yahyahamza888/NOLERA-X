@@ -138,12 +138,6 @@ export default function WalletPage() {
         )}
 
         <div className="mt-8 grid gap-3 sm:grid-cols-3">
-          <Link
-            href="/exchange"
-            className="rounded-2xl bg-emerald-500 p-4 text-center font-bold text-slate-950"
-          >
-            Exchange
-          </Link>
 
           <Link
             href="/transactions"

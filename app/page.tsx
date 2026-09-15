@@ -28,6 +28,7 @@ export default function HomePage() {
 
   const [language, setLanguage] = useState<"en" | "ar">("en")
   const [search, setSearch] = useState("")
+  const [menuOpen, setMenuOpen] = useState(false)
   const [products, setProducts] = useState<StoreProduct[]>([])
   const [balance, setBalance] = useState<number | null>(null)
   const [currency, setCurrency] = useState("USD")
@@ -163,6 +164,14 @@ export default function HomePage() {
           <div className="flex items-center justify-between gap-3">
             <button
               type="button"
+              onClick={() => setMenuOpen(true)}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl border border-slate-200 bg-white text-slate-800 shadow-sm"
+              aria-label={ar ? "فتح القائمة" : "Open menu"}
+            >
+              <span className="text-xl leading-none">☰</span>
+            </button>
+            <button
+              type="button"
               onClick={() => router.push("/account")}
               className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-emerald-50 text-emerald-700"
               aria-label="الحساب"
@@ -173,12 +182,15 @@ export default function HomePage() {
             </button>
 
             <div className="min-w-0 flex-1">
-              <div className="flex items-baseline gap-0.5">
-                <span className="text-3xl font-black tracking-tight text-slate-950">
-                  NOLERA
+              <div
+                className="flex items-center gap-0.5 select-none"
+                aria-label="NOLERA"
+              >
+                <span className="text-3xl font-black tracking-[-0.12em] text-emerald-600">
+                  N
                 </span>
-                <span className="text-4xl font-black italic text-yellow-400">
-                  X
+                <span className="text-3xl font-black tracking-[-0.12em] text-orange-500">
+                  R
                 </span>
               </div>
               <div className="mt-1">
@@ -234,7 +246,6 @@ export default function HomePage() {
               ["/markets", ar ? "الأسواق" : "Markets"],
               ["/bills", ar ? "الفواتير" : "Bills"],
               ["/cards", ar ? "البطاقات" : "Cards"],
-              ["/exchange", ar ? "الصرف" : "Exchange"],
               ["/orders", ar ? "الطلبات" : "Orders"],
               ["/support", ar ? "الدعم" : "Support"],
               ["/notifications", ar ? "الإشعارات" : "Notifications"],
@@ -252,6 +263,80 @@ export default function HomePage() {
           </div>
         </div>
       </header>
+
+      {menuOpen && (
+        <div className="fixed inset-0 z-[80]">
+          <button
+            type="button"
+            aria-label={ar ? "إغلاق القائمة" : "Close menu"}
+            onClick={() => setMenuOpen(false)}
+            className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
+          />
+          <aside
+            className={`absolute top-0 h-full w-[82%] max-w-sm bg-white p-5 shadow-2xl ${
+              ar ? "right-0" : "left-0"
+            }`}
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-xs font-black text-emerald-600">NOLERA X</p>
+                <h2 className="mt-1 text-xl font-black text-slate-950">
+                  {ar ? "القائمة الرئيسية" : "Main Menu"}
+                </h2>
+              </div>
+              <button
+                type="button"
+                onClick={() => setMenuOpen(false)}
+                className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-lg font-black"
+              >
+                ×
+              </button>
+            </div>
+
+            <nav className="mt-6 grid grid-cols-2 gap-2.5">
+              {[
+                ["/wallet", ar ? "المحفظة" : "Wallet"],
+                ["/transfers", ar ? "التحويلات" : "Transfers"],
+                ["/services", ar ? "الخدمات" : "Services"],
+                ["/store", ar ? "المتجر" : "Store"],
+                ["/ads", "NOLERA ADS"],
+                ["/paradise", "NOLERA PARADISE"],
+                ["/logistics", "Logistics"],
+                ["/ai", "NOLERA AI"],
+                ["/markets", ar ? "الأسواق" : "Markets"],
+                ["/orders", ar ? "الطلبات" : "Orders"],
+                ["/support", ar ? "الدعم" : "Support"],
+                ["/notifications", ar ? "الإشعارات" : "Notifications"],
+              ].map(([href, label]) => (
+                <button
+                  key={href}
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false)
+                    router.push(href)
+                  }}
+                  className="rounded-2xl border border-purple-100 bg-purple-50/60 px-3 py-3 text-center text-xs font-black text-slate-800 transition hover:bg-purple-100"
+                >
+                  {label}
+                </button>
+              ))}
+            </nav>
+
+            {user?.role === "super_admin" && (
+              <button
+                type="button"
+                onClick={() => {
+                  setMenuOpen(false)
+                  router.push("/admin")
+                }}
+                className="mt-4 w-full rounded-2xl bg-purple-800 px-4 py-3 text-sm font-black text-white"
+              >
+                Super Admin
+              </button>
+            )}
+          </aside>
+        </div>
+      )}
 
       <div className="mx-auto max-w-6xl space-y-5 px-4 py-5">
 
