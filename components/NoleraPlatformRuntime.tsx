@@ -13,6 +13,7 @@ type Navigation = {
 };
 
 const routeSectionMap: Record<string, string> = {
+  "/design": "design",
   "/wallet": "wallet",
   "/transfers": "transfers",
   "/services": "services",

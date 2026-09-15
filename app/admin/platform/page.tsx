@@ -37,6 +37,7 @@ const defaultSectionOrder = [
   "logistics",
   "ai",
   "markets",
+    "design",
 ];
 
 type Navigation = {
@@ -117,6 +118,7 @@ const sectionLabels: Record<string, string> = {
   logistics: "الخدمات اللوجستية",
   ai: "NOLERA AI",
   markets: "الأسواق",
+    design: "NOLERA DESIGN",
 };
 
 export default function PlatformBuilderPage() {

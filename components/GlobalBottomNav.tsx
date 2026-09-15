@@ -37,10 +37,10 @@ const items = [
     section: "services",
   },
   {
-    label: "حسابي",
-    href: "/account",
+    label: "ديزاين",
+    href: "/design",
     icon: UserRound,
-    section: null,
+    section: "design",
   },
 ];
 
