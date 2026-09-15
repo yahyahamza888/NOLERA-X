@@ -3,45 +3,6 @@
 import { useEffect } from "react"
 import { getCurrentUser } from "../lib/nolera-auth"
 
-const protectedPhrases = [
-  "إعجاب",
-  "أعجبني",
-  "تعليق",
-  "اكتب تعليق",
-  "متابعة",
-  "تابع",
-  "مشاركة",
-  "شارك",
-  "إنشاء منشور",
-  "منشور جديد",
-  "إنشاء قصة",
-  "إنشاء ستوري",
-  "إضافة قصة",
-  "إنشاء إعلان",
-  "إنشاء إعلان جديد",
-  "إضافة إعلان",
-  "تعديل الإعلان",
-  "حذف الإعلان",
-  "إدارة الإعلان",
-  "إنشاء منتج",
-  "إنشاء منتج رقمي",
-  "منتج رقمي جديد",
-  "إضافة منتج",
-  "تعديل المنتج",
-  "حذف المنتج",
-  "نشر المنتج",
-  "بيع المنتج",
-]
-
-function isProtectedText(text: string) {
-  const value = text.trim()
-
-  return (
-    protectedPhrases.some((phrase) => value.includes(phrase)) ||
-    value.includes("data-auth-required")
-  )
-}
-
 export default function ProtectedActionHandler() {
   useEffect(() => {
     let active = true
@@ -56,6 +17,13 @@ export default function ProtectedActionHandler() {
 
       if (!clickable) return
 
+      // الحماية تكون صريحة فقط عبر data-auth-required.
+      // لا نعتمد على نص الزر حتى لا نعطل أزرار الإدارة أو الأزرار العادية.
+      if (!clickable.hasAttribute("data-auth-required")) {
+        return
+      }
+
+      // أزرار تسجيل الدخول/إنشاء الحساب لها سلوكها الطبيعي.
       if (
         clickable.closest("[data-login]") ||
         clickable.textContent?.includes("تسجيل الدخول") ||
@@ -64,16 +32,9 @@ export default function ProtectedActionHandler() {
         return
       }
 
-      const text = clickable.textContent || ""
-
-      if (!isProtectedText(text) && !clickable.hasAttribute("data-auth-required")) {
-        return
-      }
-
       const user = await getCurrentUser()
 
       if (!active) return
-
       if (user) return
 
       event.preventDefault()
@@ -87,8 +48,6 @@ export default function ProtectedActionHandler() {
 
       window.location.href =
         `/login?next=${encodeURIComponent(current)}`
-
-      return false
     }
 
     document.addEventListener("click", handleClick, true)
